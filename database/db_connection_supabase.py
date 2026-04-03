@@ -43,7 +43,12 @@ def get_connection():
             '  SUPABASE_DB_URL = "postgresql://postgres.[ref]:[senha]@...supabase.com:6543/postgres"'
         )
 
-    conn = psycopg2.connect(db_url, sslmode="require")
+    # sslmode já pode estar embutido na URL; passar como kwarg separado
+    # causa conflito em algumas versões do psycopg2. Adicionamos à URL se ausente.
+    if "sslmode=" not in db_url:
+        sep = "&" if "?" in db_url else "?"
+        db_url = f"{db_url}{sep}sslmode=require"
+    conn = psycopg2.connect(db_url)
     conn.autocommit = False
     return conn
 
@@ -81,16 +86,24 @@ def _adapt_sql(sql: str) -> str:
 
 def fetchall(conn, sql: str, params: tuple = ()) -> list:
     """Executa SELECT e retorna lista de RealDictRow (acesso por row['col'])."""
-    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        cur.execute(_adapt_sql(sql), params)
-        return cur.fetchall()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(_adapt_sql(sql), params)
+            return cur.fetchall()
+    except Exception:
+        conn.rollback()
+        raise
 
 
 def fetchone(conn, sql: str, params: tuple = ()):
     """Executa SELECT e retorna um único RealDictRow ou None."""
-    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        cur.execute(_adapt_sql(sql), params)
-        return cur.fetchone()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute(_adapt_sql(sql), params)
+            return cur.fetchone()
+    except Exception:
+        conn.rollback()
+        raise
 
 
 def execute(conn, sql: str, params: tuple = ()) -> int:
