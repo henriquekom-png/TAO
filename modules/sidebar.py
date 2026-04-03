@@ -342,6 +342,7 @@ def _render_db_selector() -> None:
     current = st.session_state["db_mode"]
 
     st.markdown("##### 🗄️ Banco de dados")
+    st.markdown("<div style='margin-top:0.8rem'></div>", unsafe_allow_html=True)
 
     col_local, col_cloud = st.columns(2)
     with col_local:
@@ -354,7 +355,7 @@ def _render_db_selector() -> None:
         ):
             if current != "sqlite":
                 st.session_state["db_mode"] = "sqlite"
-                st.cache_resource.clear()   # força reconexão
+                st.cache_resource.clear()
                 st.rerun()
 
     with col_cloud:
@@ -367,8 +368,10 @@ def _render_db_selector() -> None:
         ):
             if current != "supabase":
                 st.session_state["db_mode"] = "supabase"
-                st.cache_resource.clear()   # força reconexão
+                st.cache_resource.clear()
                 st.rerun()
+
+    st.markdown("<div style='margin-top:0.8rem'></div>", unsafe_allow_html=True)
 
     # ── Aviso modo local ──────────────────────────────────────
     if current == "sqlite":
@@ -377,6 +380,7 @@ def _render_db_selector() -> None:
             "Alterações feitas aqui não sobem para a nuvem automaticamente.",
             icon=None,
         )
+        st.markdown("<div style='margin-top:0.8rem'></div>", unsafe_allow_html=True)
         if st.button("📤 Sincronizar Local → Nuvem", use_container_width=True,
                      key="btn_sync_up"):
             with st.spinner("Enviando dados para o Supabase…"):
@@ -394,6 +398,7 @@ def _render_db_selector() -> None:
     # ── Botão de backup (modo nuvem) ──────────────────────────
     else:
         st.success("🌐 **Modo Nuvem ativo.**", icon=None)
+        st.markdown("<div style='margin-top:0.8rem'></div>", unsafe_allow_html=True)
         if st.button("📥 Baixar Cópia de Segurança para o PC",
                      use_container_width=True, key="btn_backup_down"):
             with st.spinner("Baixando dados do Supabase…"):
@@ -555,6 +560,7 @@ def render_sidebar(conn) -> None:
             st.session_state.pop("backup_data", None)
             st.session_state.pop("backup_filename", None)
 
+        st.markdown("<div style='margin-bottom:-0.55rem'></div>", unsafe_allow_html=True)
         st.divider()
 
         raiz = fetchall(
