@@ -527,13 +527,9 @@ def render_sidebar(conn) -> None:
         st.divider()
 
         # ── Backup de Segurança ───────────────────────────────────
-        st.markdown(
-            "<div style='font-family:Inter,sans-serif;font-size:0.78rem;"
-            "color:#888;margin-bottom:4px;'>💾 Backup de Segurança</div>",
-            unsafe_allow_html=True,
-        )
-        if st.button("📥 Backup Completo (.db)",
-                     use_container_width=True, key="sb_backup_db"):
+        if st.button("💾 Backup Completo (.db)",
+                     use_container_width=True, key="sb_backup_db",
+                     help="Gera um snapshot completo do Supabase para download"):
             st.session_state["backup_requested"] = True
 
         if st.session_state.get("backup_requested"):
