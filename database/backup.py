@@ -10,7 +10,9 @@ Ambas usam transação atômica: se algo falhar no meio do processo,
 o banco de destino NÃO é corrompido (rollback automático).
 """
 
+import io
 import sqlite3
+from datetime import date
 from pathlib import Path
 
 import streamlit as st
@@ -19,7 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH  = BASE_DIR / "database" / "tao.db"
 
 # Tabelas sincronizadas (ordem respeita foreign keys)
-_TABLES = ["pastas", "documentos", "blocos", "anotacoes", "portais", "materiais"]
+_TABLES = ["pastas", "documentos", "blocos", "anotacoes", "portais", "materiais",
+           "questoes", "questao_itens", "quiz_resultados"]
 
 # Colunas que o PostgreSQL gera automaticamente (não inserir via SQL)
 _GENERATED = {"fts_vector"}
@@ -189,3 +192,80 @@ def sync_local_to_cloud() -> dict:
         lite.close()
 
     return counts
+
+
+# ── Snapshot: Supabase → arquivo .db para download ───────────────────────────
+
+def generate_backup_db() -> tuple[bytes, str]:
+    """
+    Lê todos os dados do Supabase e gera um arquivo SQLite (.db) em memória.
+    Retorna (bytes_do_arquivo, nome_do_arquivo).
+    """
+    pg      = _pg_conn()
+    pg_cur  = pg.cursor()
+
+    mem_conn = sqlite3.connect(":memory:", check_same_thread=False)
+    mem_conn.execute("PRAGMA foreign_keys=OFF")
+
+    schema_path = BASE_DIR / "database" / "schema.sql"
+    if schema_path.exists():
+        mem_conn.executescript(schema_path.read_text(encoding="utf-8"))
+
+    try:
+        mem_conn.execute("BEGIN")
+
+        for table in _TABLES:
+            pg_cur.execute(
+                "SELECT EXISTS(SELECT 1 FROM information_schema.tables "
+                "WHERE table_schema='public' AND table_name=%s)",
+                (table,),
+            )
+            if not pg_cur.fetchone()[0]:
+                continue
+
+            cols = _col_names(pg_cur, table)
+            mem_col_names = {
+                row[1] for row in
+                mem_conn.execute(f"PRAGMA table_info({table})").fetchall()
+            }
+            cols = [c for c in cols if c in mem_col_names]
+            if not cols:
+                continue
+
+            cols_sql     = ", ".join(cols)
+            placeholders = ", ".join(["?"] * len(cols))
+
+            pg_cur.execute(f"SELECT {cols_sql} FROM {table} ORDER BY id")
+            rows = pg_cur.fetchall()
+            if rows:
+                mem_conn.executemany(
+                    f"INSERT OR REPLACE INTO {table} ({cols_sql}) "
+                    f"VALUES ({placeholders})",
+                    rows,
+                )
+
+        mem_conn.execute("COMMIT")
+
+    except Exception as exc:
+        mem_conn.execute("ROLLBACK")
+        pg.close()
+        mem_conn.close()
+        raise RuntimeError(f"Erro ao gerar backup: {exc}")
+    finally:
+        pg.close()
+
+    # Serializa para bytes via arquivo temporário
+    tmp_path = BASE_DIR / "database" / "_backup_tmp.db"
+    try:
+        disk_conn = sqlite3.connect(str(tmp_path))
+        mem_conn.backup(disk_conn)
+        disk_conn.close()
+        data = tmp_path.read_bytes()
+    finally:
+        try:
+            tmp_path.unlink(missing_ok=True)
+        except Exception:
+            pass
+
+    mem_conn.close()
+    return data, f"TAO_backup_{date.today()}.db"

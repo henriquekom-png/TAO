@@ -12,6 +12,7 @@ import streamlit as st
 import streamlit.components.v1 as _st_comp
 from database.db_connection import get_connection, fetchall, execute, DB_MODE_DEFAULT
 from modules.material_upload import render_material_upload
+from database.backup import generate_backup_db
 
 _LOGO_PATH = Path(__file__).resolve().parent.parent / "tao.png"
 
@@ -523,6 +524,41 @@ def render_sidebar(conn) -> None:
 
         # ── Cronômetro de sessão ──────────────────────────────
         _render_timer()
+        st.divider()
+
+        # ── Backup de Segurança ───────────────────────────────────
+        st.markdown(
+            "<div style='font-family:Inter,sans-serif;font-size:0.78rem;"
+            "color:#888;margin-bottom:4px;'>💾 Backup de Segurança</div>",
+            unsafe_allow_html=True,
+        )
+        if st.button("📥 Backup Completo (.db)",
+                     use_container_width=True, key="sb_backup_db"):
+            st.session_state["backup_requested"] = True
+
+        if st.session_state.get("backup_requested"):
+            with st.spinner("Gerando backup…"):
+                try:
+                    data, filename = generate_backup_db()
+                    st.session_state["backup_data"]     = data
+                    st.session_state["backup_filename"] = filename
+                except Exception as exc:
+                    st.error(f"❌ Erro ao gerar backup: {exc}")
+                finally:
+                    st.session_state.pop("backup_requested", None)
+
+        if st.session_state.get("backup_data"):
+            st.download_button(
+                label="⬇️ Clique para baixar o arquivo",
+                data=st.session_state["backup_data"],
+                file_name=st.session_state.get("backup_filename", "TAO_backup.db"),
+                mime="application/octet-stream",
+                use_container_width=True,
+                key="sb_backup_download",
+            )
+            st.session_state.pop("backup_data", None)
+            st.session_state.pop("backup_filename", None)
+
         st.divider()
 
         raiz = fetchall(
