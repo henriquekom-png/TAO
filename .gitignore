@@ -1,0 +1,32 @@
+# ── Credenciais — NUNCA versionar ────────────────────────────
+.streamlit/secrets.toml
+
+# ── Banco de dados local ──────────────────────────────────────
+database/tao.db
+database/tao.db-shm
+database/tao.db-wal
+
+# ── Arquivos de material de apoio (binários) ──────────────────
+material_de_apoio/
+
+# ── Vetores ChromaDB ──────────────────────────────────────────
+vector_store/chroma_data/
+
+# ── Python ────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.py[cod]
+.env
+*.egg-info/
+dist/
+build/
+
+# ── Ambientes virtuais ────────────────────────────────────────
+venv/
+env/
+.venv/
+
+# ── Sistema operacional ───────────────────────────────────────
+.DS_Store
+Thumbs.db
