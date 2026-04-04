@@ -22,6 +22,7 @@ from modules.document_viewer import render_document_viewer
 from modules.annotation_panel import render_annotation_panel
 from modules.chatbot import render_chatbot
 from modules.pdf_export import render_export_buttons
+from modules.document_move import render_document_move_popover
 from modules.question_form import render_question_manager
 from modules.quiz_session import render_quiz
 from modules.telegram_bot import maybe_start_background as _maybe_start_telegram_bot
@@ -348,14 +349,16 @@ else:
 
     # ── Coluna esquerda: Documento Mestre ─────────────────────
     with col_left:
-        # Cabeçalho da coluna: título + botão de exportação
-        hdr_title, hdr_export = st.columns([5, 1])
+        # Cabeçalho da coluna: título + mover + exportação
+        hdr_title, hdr_move, hdr_export = st.columns([4.5, 0.75, 0.75])
         with hdr_title:
             st.markdown(
                 f"<p style='font-family:Inter,sans-serif;font-size:0.78rem;"
                 f"color:#888;margin:0 0 4px 0;'>📄 Documento</p>",
                 unsafe_allow_html=True,
             )
+        with hdr_move:
+            render_document_move_popover(conn, active_doc_id)
         with hdr_export:
             with st.popover("⋯", use_container_width=True, help="Exportar documento"):
                 st.caption("📤 Exportar documento")
