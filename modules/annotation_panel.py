@@ -405,8 +405,11 @@ def render_annotation_panel(conn, bloco_id, doc_titulo: str = "") -> None:
                     Selecione um bloco para visualizar suas anotações.
                 </div>
                 <div class="anot-empty-hint">
-                    Clique no ícone <strong>🔗</strong> ao lado de qualquer
-                    parágrafo para abrir ou criar anotações vinculadas.
+                    Clique no ícone <strong>🔗</strong> à direita do bloco no documento
+                    (não basta clicar no texto do parágrafo).<br><br>
+                    <strong>Telegram:</strong> mensagens do canal rápido ficam nas
+                    anotações do bloco <em>Capturas do Telegram</em> — abra
+                    <em>Entrada Rápida</em> e use o <strong>🔗</strong> desse bloco.
                 </div>
             </div>
             """,

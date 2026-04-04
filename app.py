@@ -24,6 +24,7 @@ from modules.chatbot import render_chatbot
 from modules.pdf_export import render_export_buttons
 from modules.question_form import render_question_manager
 from modules.quiz_session import render_quiz
+from modules.telegram_bot import maybe_start_background as _maybe_start_telegram_bot
 
 # ── CSS global (fonte Inter + estilos) ───────────────────────────────────────
 def _load_css() -> None:
@@ -35,6 +36,9 @@ def _load_css() -> None:
         )
 
 _load_css()
+
+# ── Telegram Fast Entry (thread em background; só se secrets configurados) ────
+_maybe_start_telegram_bot(st.secrets)
 
 # ── Menus de contexto: blocos (visualização) + formatação (edição) ────────────
 # height=1 garante execução do script no iframe.
@@ -307,12 +311,29 @@ if active_doc_id is None:
         )
 else:
     # ── Barra de ferramentas acima das colunas ────────────────
-    tb_left, tb_mid, tb_right = st.columns([3, 1, 1])
+    # Título da coluna direita ao lado do botão (mesmo peso visual nos dois modos).
+    tb_left, tb_title, tb_btn = st.columns([2.8, 2.4, 1.3])
 
-    with tb_mid:
-        show_chat = st.session_state.get("show_chatbot", False)
+    with tb_left:
+        pass
+
+    show_chat = st.session_state.get("show_chatbot", False)
+    panel_title = (
+        "🤖 Assistente de revisão" if show_chat else "🔗 Anotações de Link"
+    )
+    with tb_title:
+        st.markdown(
+            f"<p style='font-family:Inter,sans-serif;font-size:1rem;font-weight:600;"
+            f"color:#374151;margin:0;padding:6px 0 0 0;line-height:1.35;'>"
+            f"{panel_title}</p>",
+            unsafe_allow_html=True,
+        )
+    with tb_btn:
+        toggle_label = (
+            "🤖 Abrir assistente" if not show_chat else "📝 Voltar às anotações"
+        )
         if st.button(
-            "🤖 Assistente" if not show_chat else "📝 Anotações",
+            toggle_label,
             key="toggle_chatbot",
             use_container_width=True,
             help="Alternar entre Anotações de Link e Assistente de Revisão RAG",

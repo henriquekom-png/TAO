@@ -342,7 +342,10 @@ def _render_db_selector() -> None:
     current = st.session_state["db_mode"]
 
     st.markdown("##### 🗄️ Banco de dados")
-    st.markdown("<div style='margin-top:0.8rem'></div>", unsafe_allow_html=True)
+    st.markdown(
+        '<div class="tao-db-spacer" aria-hidden="true"></div>',
+        unsafe_allow_html=True,
+    )
 
     col_local, col_cloud = st.columns(2)
     with col_local:
@@ -371,7 +374,10 @@ def _render_db_selector() -> None:
                 st.cache_resource.clear()
                 st.rerun()
 
-    st.markdown("<div style='margin-top:0.8rem'></div>", unsafe_allow_html=True)
+    st.markdown(
+        '<div class="tao-db-spacer" aria-hidden="true"></div>',
+        unsafe_allow_html=True,
+    )
 
     # ── Aviso modo local ──────────────────────────────────────
     if current == "sqlite":
@@ -380,7 +386,10 @@ def _render_db_selector() -> None:
             "Alterações feitas aqui não sobem para a nuvem automaticamente.",
             icon=None,
         )
-        st.markdown("<div style='margin-top:0.8rem'></div>", unsafe_allow_html=True)
+        st.markdown(
+            '<div class="tao-db-spacer" aria-hidden="true"></div>',
+            unsafe_allow_html=True,
+        )
         if st.button("📤 Sincronizar Local → Nuvem", use_container_width=True,
                      key="btn_sync_up"):
             with st.spinner("Enviando dados para o Supabase…"):
@@ -398,16 +407,23 @@ def _render_db_selector() -> None:
     # ── Botão de backup (modo nuvem) ──────────────────────────
     else:
         st.success("🌐 **Modo Nuvem ativo.**", icon=None)
-        st.markdown("<div style='margin-top:0.8rem'></div>", unsafe_allow_html=True)
-        if st.button("📥 Baixar Cópia de Segurança para o PC",
-                     use_container_width=True, key="btn_backup_down"):
-            with st.spinner("Baixando dados do Supabase…"):
+        st.markdown(
+            '<div class="tao-db-spacer" aria-hidden="true"></div>',
+            unsafe_allow_html=True,
+        )
+        if st.button(
+            "📥 Atualizar base de dados local",
+            use_container_width=True,
+            key="btn_backup_down",
+            help="Substitui o conteúdo do tao.db pelos dados atuais do Supabase (útil antes de trabalhar em modo Local).",
+        ):
+            with st.spinner("A atualizar tao.db a partir do Supabase…"):
                 try:
                     from database.backup import download_cloud_to_local
                     counts = download_cloud_to_local()
                     total  = sum(counts.values())
                     st.success(
-                        f"✅ Backup local atualizado — {total} registros baixados.\n\n"
+                        f"✅ Base de dados local atualizada — {total} registros copiados.\n\n"
                         + "\n".join(f"  • {t}: {n}" for t, n in counts.items())
                     )
                 except Exception as exc:
@@ -560,8 +576,10 @@ def render_sidebar(conn) -> None:
             st.session_state.pop("backup_data", None)
             st.session_state.pop("backup_filename", None)
 
-        st.markdown("<div style='margin-bottom:-0.55rem'></div>", unsafe_allow_html=True)
-        st.divider()
+        st.markdown(
+            '<hr class="tao-sidebar-backup-hr" />',
+            unsafe_allow_html=True,
+        )
 
         raiz = fetchall(
             conn,

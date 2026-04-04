@@ -89,6 +89,25 @@ section[data-testid="stSidebar"] .stHorizontalBlock {
     margin-bottom: 1px !important;
 }
 
+/* Espaçadores da seção «Banco de dados» (margens em markdown são anuladas pelo gap/margin 0 acima) */
+section[data-testid="stSidebar"] .tao-db-spacer {
+    display: block !important;
+    height: 1.35rem !important;
+    min-height: 1.35rem !important;
+    line-height: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0;
+}
+
+/* Divisor após «Backup Completo (.db)» — menos espaço acima (~55% vs. st.divider padrão) */
+section[data-testid="stSidebar"] hr.tao-sidebar-backup-hr {
+    border: none;
+    border-top: 1px solid rgba(49, 51, 63, 0.2);
+    margin: 0.3rem 0 0.65rem 0 !important;
+}
+
 /* ── Botões gerais da sidebar ─────────────────────────────── */
 section[data-testid="stSidebar"] button {
     font-size: 0.8rem !important;
