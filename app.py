@@ -3,6 +3,7 @@ app.py — Orquestrador principal do TAO
 Ponto de entrada: streamlit run app.py
 """
 
+import hmac
 import streamlit as st
 import streamlit.components.v1 as _components
 from pathlib import Path
@@ -14,6 +15,59 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
+# ── Portão de acesso (antes de BD, Telegram e resto do app) ───────────────────
+_SESSION_GATE_OK = "_tao_gate_authenticated"
+
+
+def _read_app_gate_password() -> str:
+    try:
+        v = st.secrets["APP_GATE_PASSWORD"]
+    except (KeyError, TypeError):
+        try:
+            v = st.secrets.get("APP_GATE_PASSWORD", "")
+        except Exception:
+            v = ""
+    if v is None:
+        return ""
+    return str(v).strip()
+
+
+def _ensure_login_gate() -> None:
+    if st.session_state.get(_SESSION_GATE_OK):
+        return
+    expected = _read_app_gate_password()
+    if not expected:
+        st.error(
+            "Configure **APP_GATE_PASSWORD** em `.streamlit/secrets.toml` (projeto) "
+            "ou em **Streamlit Cloud → Settings → Secrets**."
+        )
+        st.stop()
+
+    _, col_mid, _ = st.columns([1, 1.15, 1])
+    with col_mid:
+        st.markdown("### TAO")
+        st.caption("Acesso restrito — introduza a senha.")
+        with st.form("tao_app_gate_form", clear_on_submit=True):
+            pwd = st.text_input(
+                "Senha",
+                type="password",
+                autocomplete="current-password",
+                label_visibility="visible",
+            )
+            submitted = st.form_submit_button("Entrar", type="primary", use_container_width=True)
+        if submitted:
+            if hmac.compare_digest(
+                pwd.encode("utf-8"),
+                expected.encode("utf-8"),
+            ):
+                st.session_state[_SESSION_GATE_OK] = True
+                st.rerun()
+            st.error("Senha incorreta.")
+    st.stop()
+
+
+_ensure_login_gate()
 
 # ── Importações internas (após set_page_config) ───────────────────────────────
 from database.db_connection import get_connection
@@ -37,9 +91,6 @@ def _load_css() -> None:
         )
 
 _load_css()
-
-# ── Telegram Fast Entry (thread em background; só se secrets configurados) ────
-_maybe_start_telegram_bot(st.secrets)
 
 # ── Menus de contexto: blocos (visualização) + formatação (edição) ────────────
 # height=1 garante execução do script no iframe.
@@ -266,6 +317,9 @@ _components.html(
     """,
     height=0,
 )
+
+# ── Telegram Fast Entry (só após login; usa Supabase na thread) ────────────────
+_maybe_start_telegram_bot(st.secrets)
 
 # ── Conexão com o banco de dados (modo ativo: sqlite ou supabase) ─────────────
 conn = get_connection()  # roteador em db_connection.py respeita st.session_state["db_mode"]
