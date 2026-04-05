@@ -77,7 +77,7 @@ def _salvar_resultado(conn, questao_id: int, acertou: bool) -> None:
     execute(
         conn,
         "INSERT INTO quiz_resultados (questao_id, acertou) VALUES (?, ?)",
-        (questao_id, 1 if acertou else 0),
+        (questao_id, bool(acertou)),
     )
 
 
@@ -97,7 +97,7 @@ def _atualizar_fsrs(conn, bloco_id: int, acertou: bool) -> None:
     execute(
         conn,
         """UPDATE blocos
-           SET revisado=1, last_review=?, next_review=?,
+           SET revisado=TRUE, last_review=?, next_review=?,
                stability=?, difficulty=?, fsrs_state=?, reps=reps+1
            WHERE id=?""",
         (result["last_review"], result["next_review"],
