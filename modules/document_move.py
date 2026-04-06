@@ -23,7 +23,7 @@ def _lista_destinos_com_caminho(conn) -> list[tuple[int, str]]:
         return []
 
     id_to = {r["id"]: r for r in rows}
-    root_ids = {r["id"] for r in rows if r.get("parent_id") is None}
+    root_ids = {r["id"] for r in rows if r["parent_id"] is None}
 
     def caminho(pid: int) -> str:
         partes: list[str] = []
