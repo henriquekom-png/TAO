@@ -54,6 +54,29 @@ _OPENAI_MODELS = [
 ]
 
 
+def get_chat_llm_config() -> tuple[str, str, str]:
+    """
+    (api_key, provider, model_name) para reutilização fora do painel do chat.
+    Ordem: session_state → secrets (como no expander do assistente).
+    """
+    api_key = (st.session_state.get("chat_api_key") or "").strip()
+    provider = st.session_state.get("chat_provider", "gemini")
+    default_model = _GEMINI_MODELS[0] if provider == "gemini" else _OPENAI_MODELS[0]
+    model_name = st.session_state.get("chat_model", default_model)
+    if not api_key:
+        try:
+            if provider == "gemini":
+                api_key = (
+                    st.secrets.get("GOOGLE_API_KEY", "")
+                    or st.secrets.get("GEMINI_API_KEY", "")
+                ).strip()
+            else:
+                api_key = (st.secrets.get("OPENAI_API_KEY", "") or "").strip()
+        except Exception:
+            pass
+    return api_key, provider, model_name
+
+
 # ── Verificação de dependências ───────────────────────────────────────────────
 
 def _deps() -> dict:

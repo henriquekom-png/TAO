@@ -22,6 +22,7 @@ import random
 import streamlit as st
 from database.db_connection import fetchall, execute
 from modules.fsrs_manager import schedule_review, RATING_LABELS
+from modules.quiz_ai_review import clear_quiz_ai_state, render_ai_setup_section
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -121,14 +122,15 @@ def _render_config(conn) -> None:
 
     st.divider()
 
-    # Verifica se há questões cadastradas
+    # Verifica se há questões cadastradas (revisão IA funciona mesmo com banco vazio)
     total = fetchall(conn, "SELECT COUNT(*) AS n FROM questoes", ())
     total_n = total[0]["n"] if total else 0
     if total_n == 0:
         st.warning(
-            "⚠️ Nenhuma questão cadastrada ainda.  \n"
-            "Vá em **❓ Banco de Questões** na sidebar para adicionar questões."
+            "⚠️ Nenhuma questão cadastrada no banco.  \n"
+            "Usa a **revisão rápida com IA** abaixo ou adiciona questões em **❓ Banco de Questões**."
         )
+        render_ai_setup_section()
         return
 
     st.markdown(f"**{total_n} questão(ões) disponíveis no banco.**")
@@ -182,6 +184,7 @@ def _render_config(conn) -> None:
         if not questoes:
             st.error("Nenhuma questão encontrada com esses filtros.")
             return
+        clear_quiz_ai_state()
         st.session_state["quiz_active"]     = True
         st.session_state["quiz_questions"]  = questoes
         st.session_state["quiz_idx"]        = 0
@@ -189,6 +192,8 @@ def _render_config(conn) -> None:
         st.session_state["quiz_answered"]   = False
         st.session_state["quiz_answer_sel"] = None
         st.rerun()
+
+    render_ai_setup_section()
 
 
 def _render_question(conn) -> None:
@@ -423,6 +428,12 @@ def render_quiz(conn) -> None:
     Entrada principal chamada pelo app.py quando app_mode == 'quiz'.
     Roteia entre: config → questão → resultado.
     """
+    if st.session_state.get("quiz_ai_session"):
+        from modules.quiz_ai_review import render_ai_review_session
+
+        render_ai_review_session()
+        return
+
     active    = st.session_state.get("quiz_active", False)
     questions = st.session_state.get("quiz_questions", [])
     idx       = st.session_state.get("quiz_idx", 0)
