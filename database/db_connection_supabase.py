@@ -24,6 +24,50 @@ import streamlit as st
 import psycopg2
 import psycopg2.extras
 
+# Tabelas com coluna id gerada por IDENTITY/SERIAL (ordem irrelevante aqui)
+_TAO_ID_TABLES = (
+    "pastas",
+    "documentos",
+    "blocos",
+    "anotacoes",
+    "portais",
+    "materiais",
+    "questoes",
+    "questao_itens",
+    "quiz_resultados",
+)
+
+
+def repair_identity_sequences(conn, *, do_commit: bool = False) -> None:
+    """
+    Alinha sequências PostgreSQL ao MAX(id) de cada tabela.
+
+    Necessário após INSERT com OVERRIDING SYSTEM VALUE (ex.: sync SQLite→nuvem):
+    esses INSERTs não avançam a sequência, e o próximo DEFAULT id colide (UniqueViolation).
+    """
+    try:
+        with conn.cursor() as cur:
+            for table in _TAO_ID_TABLES:
+                try:
+                    cur.execute(
+                        "SELECT pg_get_serial_sequence(%s, 'id')",
+                        (table,),
+                    )
+                    row = cur.fetchone()
+                    seq = row[0] if row else None
+                    if not seq:
+                        continue
+                    cur.execute(f"SELECT COALESCE(MAX(id), 0) FROM {table}")
+                    mx = cur.fetchone()[0]
+                    cur.execute("SELECT setval(%s, %s, true)", (seq, int(mx)))
+                except Exception:
+                    continue
+        if do_commit:
+            conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+
 
 # ── Conexão ───────────────────────────────────────────────────────────────────
 
@@ -50,6 +94,8 @@ def get_connection():
         db_url = f"{db_url}{sep}sslmode=require"
     conn = psycopg2.connect(db_url)
     conn.autocommit = False
+    repair_identity_sequences(conn, do_commit=False)
+    conn.commit()
     return conn
 
 

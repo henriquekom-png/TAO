@@ -17,6 +17,8 @@ from pathlib import Path
 
 import streamlit as st
 
+from database.db_connection_supabase import repair_identity_sequences
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_PATH  = BASE_DIR / "database" / "tao.db"
 
@@ -179,6 +181,8 @@ def sync_local_to_cloud() -> dict:
 
             counts[table] = len(rows)
 
+        # INSERT OVERRIDING SYSTEM VALUE não avança sequências IDENTITY — evita UniqueViolation
+        repair_identity_sequences(pg, do_commit=False)
         pg.commit()
 
     except Exception as exc:
