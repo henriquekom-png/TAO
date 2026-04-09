@@ -41,6 +41,14 @@ def get_connection() -> sqlite3.Connection:
 
     if is_new:
         _apply_schema(conn)
+    else:
+        row = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type='table' AND name='blocos' LIMIT 1"
+        ).fetchone()
+        if row is None:
+            # tao.db existe mas sem schema (ex.: ficheiro vazio na nuvem) — evita
+            # _run_migrations falhar com "no such table: blocos"
+            _apply_schema(conn)
 
     _run_migrations(conn)
     return conn
