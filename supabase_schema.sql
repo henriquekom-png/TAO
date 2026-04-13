@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS documentos (
     pasta_id      INTEGER NOT NULL REFERENCES pastas(id) ON DELETE CASCADE,
     titulo        TEXT    NOT NULL,
     descricao     TEXT,
+    ordem         INTEGER NOT NULL DEFAULT 0,
     criado_em     TIMESTAMPTZ DEFAULT NOW(),
     atualizado_em TIMESTAMPTZ DEFAULT NOW()
 );
@@ -240,3 +241,6 @@ ON CONFLICT DO NOTHING;
 
 -- Reseta a sequência para continuar após os IDs inseridos manualmente
 SELECT setval(pg_get_serial_sequence('pastas','id'), MAX(id)) FROM pastas;
+
+-- Bases já existentes: adiciona coluna de ordenação de documentos na sidebar
+ALTER TABLE documentos ADD COLUMN IF NOT EXISTS ordem INTEGER NOT NULL DEFAULT 0;

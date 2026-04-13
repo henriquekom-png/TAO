@@ -16,7 +16,7 @@ _PATH_SEP = " › "
 def _lista_destinos_com_caminho(conn) -> list[tuple[int, str]]:
     rows = fetchall(
         conn,
-        "SELECT id, parent_id, nome FROM pastas ORDER BY nivel, ordem, nome",
+        "SELECT id, parent_id, nome FROM pastas ORDER BY nivel, ordem, LOWER(nome)",
         (),
     )
     if not rows:

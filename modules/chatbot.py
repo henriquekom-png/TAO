@@ -35,15 +35,14 @@ Regras:
 """.strip()
 
 
-# Modelos Gemini (compatíveis com google.generativeai SDK)
+# Modelos Gemini (google.generativeai — IDs conforme AI Studio / documentação Google)
 _GEMINI_MODELS = [
     "gemini-2.5-flash",
-    "gemini-2.5-pro",
-    "gemini-2.0-flash",
-    "gemini-2.0-flash-lite",
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-flash-8b-latest",
-    "gemini-1.5-pro-latest",
+    "gemini-2.5-flash-lite",
+    "gemini-3-flash-preview",
+    "gemini-3.1-flash-lite-preview",
+    "gemma-3-12b",
+    "gemma-3-27b",
 ]
 
 # Modelos OpenAI disponíveis
@@ -319,12 +318,12 @@ def _get_answer(
                     answer = (
                         "🔑 **Cota zerada para este modelo.**\n\n"
                         "**Causas possíveis:**\n"
-                        "- A cota diária gratuita do `gemini-2.0-flash` foi esgotada "
+                        "- A cota diária gratuita do modelo atual foi esgotada "
                         "(renova à meia-noite, horário do Pacífico).\n"
                         "- O projeto vinculado à sua chave teve a cota redefinida para 0.\n\n"
                         "**O que testar agora:**\n"
                         "1. Na configuração acima, troque o modelo para "
-                        "`gemini-1.5-flash-8b-latest` — ele tem uma cota separada.\n"
+                        "`gemini-2.5-flash-lite` ou `gemini-3-flash-preview` — cotas por modelo.\n"
                         "2. Se continuar falhando, crie uma **nova API key em um projeto novo** "
                         "em https://aistudio.google.com/apikey\n"
                         "3. Se nenhum modelo funcionar, habilite faturamento no projeto em "
@@ -352,7 +351,7 @@ def _get_answer(
                     answer = (
                         "⚠️ **Limite de requisições atingido.**\n\n"
                         "- Aguarde 1 minuto e tente novamente.\n"
-                        "- Ou troque para `gemini-1.5-flash-latest` (cota separada).\n"
+                        "- Ou troque para outro modelo da lista (ex.: `gemini-2.5-flash-lite`).\n"
                         "- Monitore seu uso em: https://ai.dev/rate-limit"
                     )
                     return answer, []
@@ -397,7 +396,7 @@ def render_chatbot(conn) -> None:
             "Modelo:",
             options=model_options,
             key="chat_model",
-            help="Selecione o modelo. gemini-2.0-flash é o mais rápido e gratuito.",
+            help="Lista atualizada de modelos Gemini/Gemma (AI Studio). Padrão: gemini-2.5-flash.",
         )
 
         # Tenta carregar do secrets automaticamente

@@ -1,0 +1,134 @@
+[
+  {
+    "matéria": "Direito do Trabalho",
+    "concurso": "MPT – Procurador do Trabalho/2008",
+    "enunciado": "Assinale a alternativa INCORRETA:",
+    "tipo de questão": "Múltipla escolha (a-e)",
+    "afirmações": {
+      "I": null,
+      "II": null,
+      "III": null,
+      "IV": null,
+      "V": null
+    },
+    "alternativas": {
+      "a": "dentre os mais importantes princípios especiais do Direito Individual do Trabalho indicados pela doutrina, incluem-se o princípio da proteção, o princípio da irrenunciabilidade dos direitos trabalhistas e o princípio da norma mais favorável;",
+      "b": "o princípio da primazia da realidade sobre a forma autoriza a descaracterização de um contrato de prestação civil de serviços, desde que despontem, ao longo de sua execução, todos os elementos fático-jurídicos da relação de emprego;",
+      "c": "de acordo com a jurisprudência consolidada do Tribunal Superior do Trabalho, o ônus de provar o término do contrato de trabalho, quando negados a prestação de serviço e o despedimento, é do empregador, pois o princípio da continuidade da relação de emprego constitui presunção favorável ao empregado;",
+      "d": "o princípio da razoabilidade segundo o qual as condutas humanas devem ser avaliadas de acordo com um critério associativo de verossimilhança, sensatez e ponderação, não tem aplicação no Direito Coletivo do Trabalho;",
+      "e": "não respondida."
+    },
+    "gabarito": "d",
+    "gabarito comentado": "O princípio da razoabilidade é aplicável ao Direito Coletivo do Trabalho, assim como em qualquer ramo do direito. As demais alternativas estão corretas: a 'a' cita princípios basilares; a 'b' reflete a primazia da realidade; e a 'c' está de acordo com a Súmula 212 do TST."
+  },
+  {
+    "matéria": "Direito do Trabalho",
+    "concurso": "MPT – Procurador do Trabalho/2008",
+    "enunciado": "Em relação às Comissões de Conciliação Prévia, analise as assertivas abaixo: (...) De acordo com as assertivas acima, pode-se afirmar que:",
+    "tipo de questão": "Combinação de itens (I, II, III...)",
+    "afirmações": {
+      "I": "as empresas e os sindicatos podem constituir Comissões de Conciliação Prévia, de composição paritária, com representantes dos empregados e dos empregadores, com a atribuição de tentar conciliar os conflitos individuais do trabalho.",
+      "II": "as Comissões de Conciliação Prévia não poderão ser constituídas por grupos de empresas ou ter caráter intersindical.",
+      "III": "a Comissão instituída no âmbito da empresa será composta de, no mínimo, quatro, e, no máximo dez membros. A Comissão instituída no âmbito do sindicato terá sua constituição e normas de funcionamento definidas no seu estatuto social.",
+      "IV": "o termo de conciliação é título executivo extrajudicial e terá eficácia liberatória geral, exceto quanto às parcelas expressamente ressalvadas.",
+      "V": null
+    },
+    "alternativas": {
+      "a": "todas as assertivas estão corretas;",
+      "b": "apenas a assertiva I está correta;",
+      "c": "apenas as assertivas II e IV estão incorretas;",
+      "d": "apenas as assertivas II e III estão incorretas;",
+      "e": "não respondida."
+    },
+    "gabarito": "d",
+    "gabarito comentado": "O item II está incorreto pois o art. 625-A da CLT permite comissões intersindicais ou por grupos de empresas. O item III está incorreto pois o mínimo é de dois membros, não quatro (art. 625-B, CLT). Itens I e IV estão de acordo com a lei."
+  },
+  {
+    "matéria": "Direito do Trabalho",
+    "concurso": "MPT – Procurador do Trabalho – MPT/2022",
+    "enunciado": "Analise as assertivas a seguir: (...) Assinale a alternativa CORRETA:",
+    "tipo de questão": "Combinação de itens (I, II, III...)",
+    "afirmações": {
+      "I": "Nas empresas, com mais de duzentos empregados, é assegurada a eleição de uma comissão para representá-los, com a finalidade de promover-lhes o entendimento direto com os empregadores, que organizará sua atuação observando as diretrizes da entidade sindical representante da categoria.",
+      "II": "A eleição será convocada, com antecedência mínima de trinta dias, contados do término do mandato anterior, por meio de edital que deverá ser fixado na empresa, com ampla publicidade, para inscrição de candidatura.",
+      "III": "Desde o registro da candidatura até um ano após o fim do mandato, o membro da comissão de representantes dos empregados não poderá sofrer despedida arbitrária, entendendo-se como tal a que não se fundar em motivo disciplinar, técnico, econômico ou financeiro.",
+      "IV": "Na hipótese de procedência de ação anulatória de cláusula de convenção coletiva ou de acordo coletivo de trabalho, quando houver a cláusula compensatória, esta deverá ser igualmente anulada, garantindo-se a repetição do indébito.",
+      "V": null
+    },
+    "alternativas": {
+      "a": "Apenas as assertivas I, II e III estão corretas.",
+      "b": "Apenas as assertivas I e IV estão corretas.",
+      "c": "Apenas as assertivas II e III estão corretas.",
+      "d": "Todas as assertivas estão corretas.",
+      "e": "Não respondida."
+    },
+    "gabarito": "c",
+    "gabarito comentado": "O item I está incorreto pois a comissão deve atuar com independência, sem subordinação a diretrizes sindicais (art. 510-A, CLT). O item IV está incorreto pois o art. 611-A, § 4º da CLT veda a repetição do indébito. Itens II e III estão corretos conforme arts. 510-C e 510-D da CLT."
+  },
+  {
+    "matéria": "Direito do Trabalho",
+    "concurso": "MPT - Procurador do Trabalho – MPT/2017",
+    "enunciado": "Considerando a Constituição da República e a Convenção n. 135 da Organização Internacional do Trabalho (OIT), analise as proposições a seguir: (...) Assinale a alternativa CORRETA:",
+    "tipo de questão": "Combinação de itens (I, II, III...)",
+    "afirmações": {
+      "I": "Nas empresas de mais de 100 empregados, é assegurada a eleição de um representante destes com a finalidade exclusiva de promover-lhes o entendimento direto com os empregadores.",
+      "II": "A Convenção n. 135 da OIT, sobre a proteção de representantes de trabalhadores, foi ratificada pelo Brasil.",
+      "III": "Na Convenção n. 135 da OIT, o termo 'representantes dos trabalhadores' designa pessoas reconhecidas como tais pela legislação ou a prática nacionais, quer sejam representantes sindicais, a saber, representantes nomeados ou eleitos por sindicatos, ou representantes eleitos, a saber, representantes livremente eleitos pelos trabalhadores da empresa, conforme as disposições da legislação nacional ou de convenções coletivas, e cujas funções não se estendam a atividades que sejam reconhecidas, nos países interessados, como dependendo das prerrogativas exclusivas dos sindicatos.",
+      "IV": "Segundo a Convenção n. 135 da OIT, quando uma empresa contar ao mesmo tempo com representantes sindicais e representantes eleitos, medidas adequadas deverão ser tomadas, cada vez que for necessário, para garantir que a presença de representantes eleitos não venha a ser utilizada para o enfraquecimento da situação dos sindicatos interessados ou de seus representantes e para incentivar a cooperação, relativa a todas as questões pertinentes, entre os representantes eleitos, por uma Parte, e os sindicatos interessados e seus representantes, por outra Parte.",
+      "V": null
+    },
+    "alternativas": {
+      "a": "Todas as assertivas estão corretas.",
+      "b": "Apenas as assertivas II, III e IV estão corretas.",
+      "c": "Apenas as assertivas II e IV estão corretas.",
+      "d": "Apenas as assertivas II e III estão corretas.",
+      "e": "Não respondida."
+    },
+    "gabarito": "b",
+    "gabarito comentado": "O item I está incorreto porque o número correto de empregados é duzentos (Art. 11, CF/88). Os itens II, III e IV estão corretos de acordo com a Convenção 135 da OIT e o Decreto 131/1991."
+  },
+  {
+    "matéria": "Direito do Trabalho",
+    "concurso": "MPT - Procurador do Trabalho – MPT/2020",
+    "enunciado": "Assinale a alternativa INCORRETA:",
+    "tipo de questão": "Múltipla escolha (a-e)",
+    "afirmações": {
+      "I": null,
+      "II": null,
+      "III": null,
+      "IV": null,
+      "V": null
+    },
+    "alternativas": {
+      "a": "Segundo a Consolidação das Leis do Trabalho, os meios telemáticos e informatizados de comando, controle e supervisão se equiparam, para fins de subordinação jurídica, aos meios pessoais e diretos de comando, controle e supervisão do trabalho alheio.",
+      "b": "A reforma trabalhista, introduzida pela Lei nº 13.467/2017, objetivando flexibilizar a concepção de subordinação, importou, do direito italiano, o conceito de parassubordinação, introduzindo algumas formas específicas de contrato, como o trabalho por colaboração ocasional.",
+      "c": "A Lei Complementar nº 150/2015, que dispõe sobre o contrato de trabalho doméstico, prevê, em relação ao empregado responsável por acompanhar o empregador prestando serviços em viagem, que serão consideradas apenas as horas efetivamente trabalhadas no período, e que a remuneração-hora do serviço em viagem será, no mínimo, 25% superior ao valor do salário-hora normal.",
+      "d": "A ocupação de profissional do sexo está expressamente descrita na Classificação Brasileira de Ocupações - CBO.",
+      "e": "Não respondida."
+    },
+    "gabarito": "b",
+    "gabarito comentado": "A alternativa 'b' está incorreta porque a Reforma Trabalhista não alterou a estrutura dicotômica (subordinado x autônomo) do direito brasileiro para incluir formalmente a parassubordinação. As demais opções refletem corretamente a literalidade do art. 6º da CLT (item a), LC 150/2015 (item c) e a CBO (item d)."
+  },
+  {
+    "matéria": "Direito do Trabalho",
+    "concurso": "MPT - Procurador do Trabalho – MPT/2020",
+    "enunciado": "À luz da Recomendação nº 198 da Organização Internacional do Trabalho (OIT), sobre a relação de trabalho, assinale a alternativa INCORRETA:",
+    "tipo de questão": "Múltipla escolha (a-e)",
+    "afirmações": {
+      "I": null,
+      "II": null,
+      "III": null,
+      "IV": null,
+      "V": null
+    },
+    "alternativas": {
+      "a": "Considerando as dificuldades de estabelecer se existe ou não relação de trabalho em determinadas situações, a referida Recomendação dispõe acerca de indicadores específicos da existência de uma relação de trabalho.",
+      "b": "A determinação da existência de uma relação de trabalho deve se guiar primordialmente pelos fatos relacionados com o tipo de trabalho e a remuneração do trabalhador.",
+      "c": "Entre os indicadores específicos da existência de uma relação de trabalho podem ser incluídos: o fato de que o trabalho envolve a integração do trabalhador na organização da empresa; o pagamento periódico da remuneração e o fato de que tal remuneração constitui a única ou principal fonte de renda do trabalhador.",
+      "d": "Infere-se, da Recomendação mencionada, a inviabilidade de se adotar a dependência econômica como um dos critérios definidores do conceito de subordinação e caracterizador da relação de trabalho.",
+      "e": "Não respondida."
+    },
+    "gabarito": "d",
+    "gabarito comentado": "A alternativa 'd' é a incorreta porque a Recomendação 198 da OIT, em seu art. 12, afirma expressamente a possibilidade de se adotar a dependência econômica como critério para caracterizar a relação de trabalho. As outras alternativas descrevem corretamente o conteúdo da Recomendação."
+  }
+]

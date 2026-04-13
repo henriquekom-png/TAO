@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS documentos (
     pasta_id      INTEGER NOT NULL REFERENCES pastas(id) ON DELETE CASCADE,
     titulo        TEXT NOT NULL,
     descricao     TEXT,
+    ordem         INTEGER NOT NULL DEFAULT 0,
     criado_em     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

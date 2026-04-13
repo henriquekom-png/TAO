@@ -68,7 +68,6 @@ def repair_identity_sequences(conn, *, do_commit: bool = False) -> None:
         conn.rollback()
         raise
 
-
 # ── Conexão ───────────────────────────────────────────────────────────────────
 
 @st.cache_resource(show_spinner="Conectando ao Supabase…")
@@ -95,6 +94,9 @@ def get_connection():
     conn = psycopg2.connect(db_url)
     conn.autocommit = False
     repair_identity_sequences(conn, do_commit=False)
+    # Não correr ALTER em documentos aqui: em bases grandes ou com locks,
+    # ADD COLUMN pode exceder statement_timeout do pooler. Aplicar migração
+    # uma vez no SQL Editor do Supabase (ver fim de supabase_schema.sql).
     conn.commit()
     return conn
 

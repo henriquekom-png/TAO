@@ -103,8 +103,14 @@ def _save_capture(db_url: str, text: str) -> None:
                 doc_id = doc_row[0]
             else:
                 cur.execute(
-                    "INSERT INTO documentos (pasta_id, titulo) VALUES (%s, %s) RETURNING id",
-                    (pasta_id, DOC_TITULO),
+                    "SELECT COALESCE(MAX(ordem), 0) + 1 FROM documentos WHERE pasta_id = %s",
+                    (pasta_id,),
+                )
+                next_ord = cur.fetchone()[0]
+                cur.execute(
+                    "INSERT INTO documentos (pasta_id, titulo, ordem) "
+                    "VALUES (%s, %s, %s) RETURNING id",
+                    (pasta_id, DOC_TITULO, next_ord),
                 )
                 doc_id = cur.fetchone()[0]
 

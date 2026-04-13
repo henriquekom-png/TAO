@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as _st_comp
-from database.db_connection import get_connection, fetchall, execute, DB_MODE_DEFAULT
+from database.db_connection import get_connection, fetchall, fetchone, execute, DB_MODE_DEFAULT
 from modules.material_upload import render_material_upload
 from database.backup import generate_backup_db
 
@@ -35,15 +35,17 @@ DOC_INDENT_FACTOR = INDENT_FACTOR
 def _get_subpastas(conn, parent_id):
     return fetchall(
         conn,
-        "SELECT id, nome, nivel, ordem FROM pastas WHERE parent_id = ? ORDER BY ordem, nome",
-        (parent_id,)
+        "SELECT id, nome, nivel, ordem FROM pastas WHERE parent_id = ? "
+        "ORDER BY ordem, LOWER(nome)",
+        (parent_id,),
     )
 
 def _get_documentos(conn, pasta_id):
     return fetchall(
         conn,
-        "SELECT id, titulo FROM documentos WHERE pasta_id = ? ORDER BY titulo",
-        (pasta_id,)
+        "SELECT id, titulo, ordem FROM documentos WHERE pasta_id = ? "
+        "ORDER BY ordem, LOWER(titulo)",
+        (pasta_id,),
     )
 
 def _criar_pasta(conn, parent_id: int, nome: str, nivel: int) -> None:
@@ -65,10 +67,16 @@ def _renomear_pasta(conn, pasta_id: int, novo_nome: str) -> None:
     execute(conn, "UPDATE pastas SET nome = ? WHERE id = ?", (novo_nome.strip(), pasta_id))
 
 def _criar_documento(conn, pasta_id: int, titulo: str) -> int:
+    mx = fetchone(
+        conn,
+        "SELECT COALESCE(MAX(ordem), 0) AS m FROM documentos WHERE pasta_id = ?",
+        (pasta_id,),
+    )
+    next_o = (mx["m"] if mx else 0) + 1
     return execute(
         conn,
-        "INSERT INTO documentos (pasta_id, titulo) VALUES (?, ?)",
-        (pasta_id, titulo.strip())
+        "INSERT INTO documentos (pasta_id, titulo, ordem) VALUES (?, ?, ?)",
+        (pasta_id, titulo.strip(), next_o),
     )
 
 def _deletar_documento(conn, doc_id: int) -> None:
@@ -76,6 +84,75 @@ def _deletar_documento(conn, doc_id: int) -> None:
 
 def _renomear_documento(conn, doc_id: int, novo_titulo: str) -> None:
     execute(conn, "UPDATE documentos SET titulo = ? WHERE id = ?", (novo_titulo.strip(), doc_id))
+
+
+def _list_sibling_pastas(conn, parent_id: int | None) -> list:
+    if parent_id is None:
+        return fetchall(
+            conn,
+            "SELECT id, nome, nivel, ordem FROM pastas WHERE parent_id IS NULL "
+            "ORDER BY ordem, LOWER(nome)",
+            (),
+        )
+    return fetchall(
+        conn,
+        "SELECT id, nome, nivel, ordem FROM pastas WHERE parent_id = ? "
+        "ORDER BY ordem, LOWER(nome)",
+        (parent_id,),
+    )
+
+
+def _list_sibling_docs(conn, pasta_id: int) -> list:
+    return fetchall(
+        conn,
+        "SELECT id, titulo, ordem FROM documentos WHERE pasta_id = ? "
+        "ORDER BY ordem, LOWER(titulo)",
+        (pasta_id,),
+    )
+
+
+def _swap_pasta_ordem(conn, id_a: int, id_b: int) -> None:
+    ra = fetchone(conn, "SELECT ordem FROM pastas WHERE id = ?", (id_a,))
+    rb = fetchone(conn, "SELECT ordem FROM pastas WHERE id = ?", (id_b,))
+    if not ra or not rb:
+        return
+    oa, ob = ra["ordem"], rb["ordem"]
+    execute(conn, "UPDATE pastas SET ordem = ? WHERE id = ?", (ob, id_a))
+    execute(conn, "UPDATE pastas SET ordem = ? WHERE id = ?", (oa, id_b))
+
+
+def _normalize_docs_ordem_in_pasta(conn, pasta_id: int) -> None:
+    """
+    Se uma pasta tem 2+ documentos e todos com ordem=0 (legado), numera 1..n
+    por título. Evita UPDATE global na ligação Supabase (timeout).
+    """
+    agg = fetchone(
+        conn,
+        "SELECT COUNT(*) AS c, MIN(ordem) AS mn, MAX(ordem) AS mx "
+        "FROM documentos WHERE pasta_id = ?",
+        (pasta_id,),
+    )
+    if not agg or agg["c"] <= 1:
+        return
+    if agg["mn"] != 0 or agg["mx"] != 0:
+        return
+    docs = fetchall(
+        conn,
+        "SELECT id FROM documentos WHERE pasta_id = ? ORDER BY LOWER(titulo), id",
+        (pasta_id,),
+    )
+    for i, row in enumerate(docs, start=1):
+        execute(conn, "UPDATE documentos SET ordem = ? WHERE id = ?", (i, row["id"]))
+
+
+def _swap_documento_ordem(conn, id_a: int, id_b: int) -> None:
+    ra = fetchone(conn, "SELECT ordem FROM documentos WHERE id = ?", (id_a,))
+    rb = fetchone(conn, "SELECT ordem FROM documentos WHERE id = ?", (id_b,))
+    if not ra or not rb:
+        return
+    oa, ob = ra["ordem"], rb["ordem"]
+    execute(conn, "UPDATE documentos SET ordem = ? WHERE id = ?", (ob, id_a))
+    execute(conn, "UPDATE documentos SET ordem = ? WHERE id = ?", (oa, id_b))
 
 
 # ── Renderização da árvore ────────────────────────────────────────────────────
@@ -86,18 +163,21 @@ def _render_documentos(conn, pasta_id: int, nivel: int) -> None:
     'nivel' é o mesmo da pasta mãe. Somamos 0.65 (peso da col_chv) para que o
     ícone 📄 fique alinhado ao início do nome da pasta mãe — sem coluna invisível.
     """
+    _normalize_docs_ordem_in_pasta(conn, pasta_id)
     docs = _get_documentos(conn, pasta_id)
     # spacer = espaço da pasta mãe + largura da coluna chevron (0.65)
     indent_w = nivel * DOC_INDENT_FACTOR + 0.65
-    nome_w   = max(6.45 - indent_w * 0.3, 2.0)
+    nome_w   = max(6.45 - indent_w * 0.3 - 0.55, 1.6)
 
-    for doc in docs:
+    for i, doc in enumerate(docs):
         doc_key  = f"doc_{doc['id']}"
         edit_key = f"edit_doc_{doc['id']}"
+        can_up   = i > 0
+        can_down = i < len(docs) - 1
 
-        # Ícones menores (0.45) deixam mais espaço para o título;
-        # eles ficam ocultos por padrão e surgem no hover via CSS.
-        _, col_doc, col_edit, col_del = st.columns([indent_w, nome_w, 0.45, 0.45])
+        _, col_doc, col_u, col_d, col_edit, col_del = st.columns(
+            [indent_w, nome_w, 0.26, 0.26, 0.4, 0.4]
+        )
 
         with col_doc:
             is_active = st.session_state.get("active_document_id") == doc["id"]
@@ -112,6 +192,26 @@ def _render_documentos(conn, pasta_id: int, nivel: int) -> None:
                 st.session_state["active_document_titulo"] = doc["titulo"]
                 st.session_state["active_bloco_id"]       = None
                 st.session_state["editing_id"]            = None
+                st.rerun()
+
+        with col_u:
+            if st.button(
+                "↑",
+                key=f"doc_up_{doc['id']}",
+                disabled=not can_up,
+                help="Mover documento para cima",
+            ):
+                _swap_documento_ordem(conn, doc["id"], docs[i - 1]["id"])
+                st.rerun()
+
+        with col_d:
+            if st.button(
+                "↓",
+                key=f"doc_dn_{doc['id']}",
+                disabled=not can_down,
+                help="Mover documento para baixo",
+            ):
+                _swap_documento_ordem(conn, doc["id"], docs[i + 1]["id"])
                 st.rerun()
 
         with col_edit:
@@ -215,7 +315,7 @@ def _render_action_buttons(conn, pasta_id: int, nivel: int, expand_key: str) -> 
                 st.rerun()
 
 
-def _render_pasta(conn, pasta, nivel: int) -> None:
+def _render_pasta(conn, pasta, nivel: int, parent_id: int | None = None) -> None:
     """
     Renderiza recursivamente uma pasta e seus filhos.
     - Ícone de pasta como botão de toggle (hover mostra chevron via CSS)
@@ -224,6 +324,10 @@ def _render_pasta(conn, pasta, nivel: int) -> None:
     pasta_id   = pasta["id"]
     pasta_nome = pasta["nome"]
     subpastas  = _get_subpastas(conn, pasta_id)
+    siblings   = _list_sibling_pastas(conn, parent_id)
+    sidx       = next((j for j, s in enumerate(siblings) if s["id"] == pasta_id), 0)
+    can_p_up   = sidx > 0
+    can_p_dn   = sidx < len(siblings) - 1
 
     expand_key = f"expanded_{pasta_id}"
     if expand_key not in st.session_state:
@@ -244,11 +348,21 @@ def _render_pasta(conn, pasta, nivel: int) -> None:
 
     with st.container():
         if indent_w > 0:
-            _, col_chv, col_nome, col_edit, col_del = st.columns(
-                [indent_w, 0.65, max(5.8 - indent_w * 0.3, 2.2), 0.6, 0.6]
+            _, col_chv, col_nome, col_pu, col_pd, col_edit, col_del = st.columns(
+                [
+                    indent_w,
+                    0.65,
+                    max(5.0 - indent_w * 0.3, 1.7),
+                    0.24,
+                    0.24,
+                    0.45,
+                    0.45,
+                ]
             )
         else:
-            col_chv, col_nome, col_edit, col_del = st.columns([0.65, 5.8, 0.6, 0.6])
+            col_chv, col_nome, col_pu, col_pd, col_edit, col_del = st.columns(
+                [0.65, 5.0, 0.24, 0.24, 0.45, 0.45]
+            )
 
         with col_chv:
             if st.button(toggle_icon, key=chv_key, help="Expandir/recolher"):
@@ -271,6 +385,26 @@ def _render_pasta(conn, pasta, nivel: int) -> None:
                     f"<span class='folder-l2'>{pasta_nome}</span>",
                     unsafe_allow_html=True,
                 )
+
+        with col_pu:
+            if st.button(
+                "↑",
+                key=f"pasta_up_{pasta_id}",
+                disabled=not can_p_up,
+                help="Mover pasta para cima",
+            ):
+                _swap_pasta_ordem(conn, pasta_id, siblings[sidx - 1]["id"])
+                st.rerun()
+
+        with col_pd:
+            if st.button(
+                "↓",
+                key=f"pasta_dn_{pasta_id}",
+                disabled=not can_p_dn,
+                help="Mover pasta para baixo",
+            ):
+                _swap_pasta_ordem(conn, pasta_id, siblings[sidx + 1]["id"])
+                st.rerun()
 
         with col_edit:
             if nivel > 0:
@@ -314,7 +448,7 @@ def _render_pasta(conn, pasta, nivel: int) -> None:
     # ── Conteúdo expandido ────────────────────────────────────
     if is_expanded:
         for sub in subpastas:
-            _render_pasta(conn, sub, nivel + 1)
+            _render_pasta(conn, sub, nivel + 1, pasta_id)
 
         has_expanded_child = any(
             st.session_state.get(f"expanded_{sub['id']}", False)
@@ -583,7 +717,8 @@ def render_sidebar(conn) -> None:
 
         raiz = fetchall(
             conn,
-            "SELECT id, nome, nivel, ordem FROM pastas WHERE parent_id IS NULL ORDER BY ordem",
+            "SELECT id, nome, nivel, ordem FROM pastas WHERE parent_id IS NULL "
+            "ORDER BY ordem, LOWER(nome)",
             (),
         )
 
@@ -592,7 +727,7 @@ def render_sidebar(conn) -> None:
             return
 
         for pasta in raiz:
-            _render_pasta(conn, pasta, nivel=0)
+            _render_pasta(conn, pasta, nivel=0, parent_id=None)
 
         st.divider()
         with st.expander("⬆️ Material de Apoio", expanded=False):

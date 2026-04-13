@@ -86,6 +86,30 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
             conn.execute(sql)
             changed = True
 
+    # ── Ordem de documentos na sidebar (mesmo nível dentro da pasta) ──
+    existing_docs = {row[1] for row in conn.execute("PRAGMA table_info(documentos)")}
+    if "documentos" in {r[0] for r in conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'"
+    )}:
+        if "ordem" not in existing_docs:
+            conn.execute(
+                "ALTER TABLE documentos ADD COLUMN ordem INTEGER NOT NULL DEFAULT 0"
+            )
+            changed = True
+            for row in conn.execute(
+                "SELECT DISTINCT pasta_id FROM documentos"
+            ).fetchall():
+                pid = row[0]
+                docs = conn.execute(
+                    "SELECT id FROM documentos WHERE pasta_id=? "
+                    "ORDER BY titulo COLLATE NOCASE, id",
+                    (pid,),
+                ).fetchall()
+                for i, (did,) in enumerate(docs, start=1):
+                    conn.execute(
+                        "UPDATE documentos SET ordem=? WHERE id=?", (i, did)
+                    )
+
     # ── Sprint 6: tabela materiais ───────────────────────────────
     conn.execute("""
         CREATE TABLE IF NOT EXISTS materiais (

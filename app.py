@@ -318,11 +318,11 @@ _components.html(
     height=0,
 )
 
-# ── Telegram Fast Entry (só após login; usa Supabase na thread) ────────────────
-_maybe_start_telegram_bot(st.secrets)
-
-# ── Conexão com o banco de dados (modo ativo: sqlite ou supabase) ─────────────
+# ── Conexão primeiro (migrações Supabase, ex.: documentos.ordem) ───────────────
 conn = get_connection()  # roteador em db_connection.py respeita st.session_state["db_mode"]
+
+# ── Telegram Fast Entry (só após login; usa Supabase na thread) ───────────────
+_maybe_start_telegram_bot(st.secrets)
 
 # ── Sidebar hierárquica ───────────────────────────────────────────────────────
 render_sidebar(conn)
