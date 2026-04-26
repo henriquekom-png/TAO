@@ -13,6 +13,7 @@ import streamlit.components.v1 as _st_comp
 from database.db_connection import get_connection, fetchall, fetchone, execute, DB_MODE_DEFAULT
 from modules.material_upload import render_material_upload
 from database.backup import generate_backup_db
+from modules.search_fts import render_search_sidebar_block
 
 _LOGO_PATH = Path(__file__).resolve().parent.parent / "tao.png"
 
@@ -752,3 +753,5 @@ def render_sidebar(conn) -> None:
 
         st.divider()
         _render_db_selector()
+        st.divider()
+        render_search_sidebar_block(conn)

@@ -244,3 +244,12 @@ SELECT setval(pg_get_serial_sequence('pastas','id'), MAX(id)) FROM pastas;
 
 -- Bases já existentes: adiciona coluna de ordenação de documentos na sidebar
 ALTER TABLE documentos ADD COLUMN IF NOT EXISTS ordem INTEGER NOT NULL DEFAULT 0;
+
+-- Busca global (módulo search_fts): índices GIN opcionais em PostgreSQL, alinhados a
+-- to_tsvector('portuguese', conteúdo/título/nome). Se já criou no dashboard, ignore.
+-- CREATE INDEX IF NOT EXISTS idx_anotacoes_fts
+--   ON anotacoes USING GIN (to_tsvector('portuguese', conteudo));
+-- CREATE INDEX IF NOT EXISTS idx_documentos_fts
+--   ON documentos USING GIN (to_tsvector('portuguese', titulo));
+-- CREATE INDEX IF NOT EXISTS idx_pastas_fts
+--   ON pastas USING GIN (to_tsvector('portuguese', nome));

@@ -84,6 +84,15 @@ def _undo_last(conn) -> str:
                 (data["importancia_anterior"], data["id"]))
         return "↩ Importância desfeita"
 
+    elif action == "reorder_blocos":
+        for p in data.get("pares", []):
+            execute(
+                conn,
+                "UPDATE blocos SET ordem=? WHERE id=?",
+                (p["ordem_antes"], p["id"]),
+            )
+        return "↩ Ordem dos blocos desfeita"
+
     return ""
 
 # ── Regex para parser de texto jurídico ──────────────────────────────────────
@@ -203,13 +212,55 @@ def _inserir_blocos(conn, documento_id: int, blocos: list) -> None:
 def _get_blocos(conn, documento_id: int) -> list:
     return fetchall(
         conn,
-        """SELECT id, tipo, identificador, conteudo, importancia,
+        """SELECT id, documento_id, tipo, identificador, conteudo, ordem, importancia,
                   revisado, last_review, next_review, stability, difficulty, reps,
                   cor_fonte, alinhamento,
                   COALESCE(fsrs_state, 0) AS fsrs_state
-           FROM blocos WHERE documento_id=? ORDER BY ordem""",
+           FROM blocos WHERE documento_id=? ORDER BY ordem, id""",
         (documento_id,),
     )
+
+
+def _renumber_blocos_ordem_sequencial(conn, documento_id: int) -> None:
+    """Ordem 1..n por documento (desempate por id) — evita empates em swap."""
+    rows = fetchall(
+        conn,
+        "SELECT id FROM blocos WHERE documento_id=? ORDER BY ordem, id",
+        (documento_id,),
+    )
+    for i, r in enumerate(rows, 1):
+        execute(conn, "UPDATE blocos SET ordem=? WHERE id=?", (i, r["id"]))
+
+
+def _trocar_bloco_com_vizinho(
+    conn, documento_id: int, atual: dict, vizinho: dict
+) -> None:
+    """Troca ordem entre dois blocos do mesmo documento (ids inalterados)."""
+    oa = int(atual.get("ordem") or 0)
+    ob = int(vizinho.get("ordem") or 0)
+    if oa == ob:
+        _renumber_blocos_ordem_sequencial(conn, documento_id)
+        row_a = fetchone(
+            conn, "SELECT id, ordem FROM blocos WHERE id=?", (atual["id"],)
+        )
+        row_b = fetchone(
+            conn, "SELECT id, ordem FROM blocos WHERE id=?", (vizinho["id"],)
+        )
+        if not row_a or not row_b:
+            return
+        oa = int(row_a["ordem"])
+        ob = int(row_b["ordem"])
+    _push_undo(
+        "reorder_blocos",
+        {
+            "pares": [
+                {"id": atual["id"], "ordem_antes": oa},
+                {"id": vizinho["id"], "ordem_antes": ob},
+            ]
+        },
+    )
+    execute(conn, "UPDATE blocos SET ordem=? WHERE id=?", (ob, atual["id"]))
+    execute(conn, "UPDATE blocos SET ordem=? WHERE id=?", (oa, vizinho["id"]))
 
 
 def _salvar_estilo(conn, bloco_id: int, campo: str, valor: str) -> None:
@@ -322,7 +373,15 @@ def _heatmap_bar(conn, bloco_id: int, importancia: str) -> None:
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-def _render_bloco(conn, bloco: dict, modo_selecao: bool = False) -> None:
+def _render_bloco(
+    conn,
+    bloco: dict,
+    modo_selecao: bool = False,
+    *,
+    documento_id: int | None = None,
+    vizinho_cima: dict | None = None,
+    vizinho_baixo: dict | None = None,
+) -> None:
     """Renderiza um único bloco em modo visualização, edição ou seleção múltipla."""
     bid         = bloco["id"]
     importancia = bloco["importancia"] or "normal"
@@ -410,7 +469,9 @@ def _render_bloco(conn, bloco: dict, modo_selecao: bool = False) -> None:
     ]))
     conteudo_html = _md_to_html(bloco["conteudo"]) or "<em style='color:#aaa'>Bloco vazio</em>"
 
-    col_dot, col_txt, col_sel, col_edit, col_opts = st.columns([0.35, 7.9, 0.45, 0.45, 0.45])
+    col_dot, col_ord, col_txt, col_sel, col_edit, col_opts = st.columns(
+        [0.32, 0.5, 7.1, 0.42, 0.42, 0.42]
+    )
 
     with col_dot:
         # Ponto FSRS + checkbox de revisão
@@ -434,6 +495,36 @@ def _render_bloco(conn, bloco: dict, modo_selecao: bool = False) -> None:
             _desmarcar_revisao(conn, bid)
             st.session_state.pop(show_rate_key, None)
             st.rerun()
+
+    with col_ord:
+        if documento_id is not None:
+            c_up, c_dn = st.columns(2)
+            with c_up:
+                if st.button(
+                    "↑",
+                    key=f"ord_up_{bid}",
+                    help="Mover bloco para cima",
+                    use_container_width=True,
+                    disabled=vizinho_cima is None,
+                ):
+                    if vizinho_cima is not None:
+                        _trocar_bloco_com_vizinho(
+                            conn, documento_id, bloco, vizinho_cima
+                        )
+                        st.rerun()
+            with c_dn:
+                if st.button(
+                    "↓",
+                    key=f"ord_down_{bid}",
+                    help="Mover bloco para baixo",
+                    use_container_width=True,
+                    disabled=vizinho_baixo is None,
+                ):
+                    if vizinho_baixo is not None:
+                        _trocar_bloco_com_vizinho(
+                            conn, documento_id, bloco, vizinho_baixo
+                        )
+                        st.rerun()
 
     with col_txt:
         # data-bid permite ao JS do menu de contexto identificar o bloco
@@ -718,8 +809,17 @@ def render_document_viewer(conn, doc_id: int, doc_titulo: str) -> None:
                 if bloco_ativo:
                     _heatmap_bar(conn, active_bid, bloco_ativo["importancia"] or "normal")
 
-        for bloco in blocos:
-            _render_bloco(conn, bloco, modo_selecao=modo_sel)
+        for i, bloco in enumerate(blocos):
+            prev_b = blocos[i - 1] if i > 0 else None
+            next_b = blocos[i + 1] if i < len(blocos) - 1 else None
+            _render_bloco(
+                conn,
+                bloco,
+                modo_selecao=modo_sel,
+                documento_id=doc_id,
+                vizinho_cima=prev_b,
+                vizinho_baixo=next_b,
+            )
 
     st.divider()
     col_novo, col_sel_toggle = st.columns([6, 3])

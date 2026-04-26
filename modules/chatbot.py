@@ -4,7 +4,8 @@ Sprint 7 — Assistente de Revisão TAO (RAG).
 
 Pipeline:
   1. Recebe a pergunta do usuário.
-  2. Busca contexto: ChromaDB (material de apoio) + SQLite FTS (blocos).
+  2. Busca contexto: ChromaDB (material de apoio) + FTS (blocos) + anotações
+     ligadas aos blocos encontrados (texto/tabela/fluxograma).
   3. Monta prompt com contexto + histórico de conversa.
   4. Chama LLM (Google Gemini ou OpenAI).
   5. Exibe resposta com expandable de fontes.
@@ -29,6 +30,9 @@ concursos públicos do MPT (Ministério Público do Trabalho).
 Regras:
 - Responda SEMPRE em português do Brasil.
 - Baseie suas respostas no contexto fornecido pelo material indexado.
+- Trechos marcados como anotações do utilizador (§ Notas / § Fonte do utilizador)
+  refinam ou explicam os blocos; utilize-os quando forem pertinentes à pergunta,
+  distinguindo texto normativo das suas próprias sínteses quando necessário.
 - Se não encontrar a informação, diga: "Não encontrei essa informação no material indexado."
 - Ao citar artigos de lei, mencione número e dispositivo.
 - Seja conciso, preciso e use Markdown quando útil.
@@ -100,13 +104,43 @@ def _deps() -> dict:
 
 # ── RAG: busca de contexto ────────────────────────────────────────────────────
 
+def _fetch_anotacoes_por_blocos(conn, bloco_ids: list[int]) -> dict[int, list]:
+    """
+    Todas as anotações (texto/tabela/fluxograma) dos blocos indicados,
+    na ordem guardada na base. Portais são omitidos (conteúdo é referência).
+    """
+    if not bloco_ids:
+        return {}
+    placeholders = ",".join(["?"] * len(bloco_ids))
+    sql = f"""
+        SELECT a.id AS anotacao_id, a.conteudo, a.tipo, a.bloco_id,
+               b.identificador, b.conteudo AS bloco_conteudo,
+               d.titulo AS doc_titulo
+        FROM anotacoes a
+        JOIN blocos b ON a.bloco_id = b.id
+        JOIN documentos d ON b.documento_id = d.id
+        WHERE a.bloco_id IN ({placeholders})
+          AND a.tipo IN ('texto', 'tabela', 'fluxograma')
+          AND TRIM(COALESCE(a.conteudo, '')) <> ''
+        ORDER BY a.bloco_id, a.ordem
+    """
+    rows = fetchall(conn, sql, tuple(bloco_ids))
+    out: dict[int, list] = {}
+    for row in rows:
+        bid = row["bloco_id"]
+        out.setdefault(bid, []).append(row)
+    return out
+
+
 def _rag_search(conn, query: str) -> list[dict]:
     """
-    Busca contexto relevante em duas fontes:
-      1. ChromaDB — chunks de material de apoio indexado.
-      2. SQLite FTS5 — blocos atômicos dos documentos.
+    Busca contexto relevante em:
+      1. ChromaDB — material de apoio indexado.
+      2. FTS — blocos atômicos; em seguida injeta todas as notas desses blocos.
+      3. LIKE — anotações cujo texto coincide com termos da pergunta (complemento).
     """
     results: list[dict] = []
+    seen_anot_ids: set[int] = set()
 
     # ── 1. ChromaDB ──────────────────────────────────────────────
     try:
@@ -140,7 +174,7 @@ def _rag_search(conn, query: str) -> list[dict]:
         return f'"{q}" OR ' + " OR ".join(f'"{w}"' for w in words)
 
     fts_sql = """
-        SELECT b.conteudo, b.identificador, d.titulo AS doc_titulo
+        SELECT b.id AS bloco_id, b.conteudo, b.identificador, d.titulo AS doc_titulo
         FROM blocos_fts
         JOIN blocos     b ON blocos_fts.rowid = b.id
         JOIN documentos d ON b.documento_id   = d.id
@@ -149,7 +183,7 @@ def _rag_search(conn, query: str) -> list[dict]:
         LIMIT 5
     """
     like_sql = """
-        SELECT b.conteudo, b.identificador, d.titulo AS doc_titulo
+        SELECT b.id AS bloco_id, b.conteudo, b.identificador, d.titulo AS doc_titulo
         FROM blocos b
         JOIN documentos d ON b.documento_id = d.id
         WHERE b.conteudo LIKE ?
@@ -170,13 +204,46 @@ def _rag_search(conn, query: str) -> list[dict]:
         except Exception:
             pass
 
+    bloco_ids_ord: list[int] = []
+    _seen_bid: set[int] = set()
     for row in fts_rows:
+        bid = row["bloco_id"]
+        if bid not in _seen_bid:
+            _seen_bid.add(bid)
+            bloco_ids_ord.append(bid)
+    anot_por_bloco = _fetch_anotacoes_por_blocos(conn, bloco_ids_ord)
+
+    injetou_notas: set[int] = set()
+    for row in fts_rows:
+        bid = row["bloco_id"]
         results.append({
             "fonte":    f"📖 {row['doc_titulo']} — {row['identificador'] or ''}",
             "conteudo": row["conteudo"],
             "score":    0.75,
             "tipo":     "bloco",
         })
+        if bid in injetou_notas:
+            continue
+        injetou_notas.add(bid)
+        for ar in anot_por_bloco.get(bid, []):
+            aid = ar["anotacao_id"]
+            seen_anot_ids.add(aid)
+            tipo = ar["tipo"]
+            icon = "📊" if tipo == "tabela" else ("🔀" if tipo == "fluxograma" else "📝")
+            results.append({
+                "fonte": (
+                    f"{icon} § Notas — {ar['doc_titulo']} "
+                    f"({ar['identificador'] or 'bloco'})"
+                ),
+                "conteudo": (
+                    "[Referência do bloco — trecho]\n"
+                    f"{(ar['bloco_conteudo'] or '')[:360]}\n\n"
+                    "[Anotação do utilizador]\n"
+                    f"{ar['conteudo']}"
+                ),
+                "score":    0.78,
+                "tipo":     "anotacao",
+            })
 
     # ── 3. Anotações de Link ──────────────────────────────────────
     # Stop words PT-BR a ignorar na busca
@@ -199,30 +266,37 @@ def _rag_search(conn, query: str) -> list[dict]:
     # Monta SQL dinâmico com OR para cada palavra significativa
     placeholders = " OR ".join(["a.conteudo LIKE ?"] * len(palavras))
     anot_sql = f"""
-        SELECT a.conteudo, a.tipo,
+        SELECT a.id AS anotacao_id, a.conteudo, a.tipo,
                b.identificador, b.conteudo AS bloco_conteudo,
                d.titulo AS doc_titulo
         FROM anotacoes a
         JOIN blocos     b ON a.bloco_id     = b.id
         JOIN documentos d ON b.documento_id = d.id
         WHERE ({placeholders})
-          AND a.tipo IN ('texto', 'tabela')
-          AND a.conteudo != ''
-        LIMIT 5
+          AND a.tipo IN ('texto', 'tabela', 'fluxograma')
+          AND TRIM(COALESCE(a.conteudo, '')) <> ''
+        LIMIT 8
     """
     try:
         params = tuple(f"%{p}%" for p in palavras)
         anot_rows = fetchall(conn, anot_sql, params)
         for row in anot_rows:
-            tipo_icon = "📊" if row["tipo"] == "tabela" else "📝"
+            aid = row["anotacao_id"]
+            if aid in seen_anot_ids:
+                continue
+            seen_anot_ids.add(aid)
+            tipo = row["tipo"]
+            tipo_icon = "📊" if tipo == "tabela" else ("🔀" if tipo == "fluxograma" else "📝")
             results.append({
                 "fonte": (
-                    f"{tipo_icon} Anotação — {row['doc_titulo']} "
+                    f"{tipo_icon} § Notas (coincidência na pergunta) — {row['doc_titulo']} "
                     f"({row['identificador'] or 'bloco'})"
                 ),
                 "conteudo": (
-                    f"[Bloco de referência]: {row['bloco_conteudo'][:150]}\n"
-                    f"[Anotação]: {row['conteudo']}"
+                    "[Referência do bloco — trecho]\n"
+                    f"{(row['bloco_conteudo'] or '')[:360]}\n\n"
+                    "[Anotação do utilizador]\n"
+                    f"{row['conteudo']}"
                 ),
                 "score":    0.72,
                 "tipo":     "anotacao",
