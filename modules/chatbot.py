@@ -6,9 +6,12 @@ Pipeline:
   1. Recebe a pergunta do usuário.
   2. Busca contexto: ChromaDB (material de apoio) + FTS (blocos) + anotações
      ligadas aos blocos encontrados (texto/tabela/fluxograma).
-  3. Monta prompt com contexto + histórico de conversa.
-  4. Chama LLM (Google Gemini ou OpenAI).
-  5. Exibe resposta com expandable de fontes.
+  2B. FTS direto nas anotações (tsvector PostgreSQL) — encontra anotações
+      independente de o bloco pai ter sido localizado.
+  3. ILIKE nas anotações — complemento com coincidência por palavras.
+  4. Monta prompt com contexto + histórico de conversa.
+  5. Chama LLM (Google Gemini ou OpenAI).
+  6. Exibe resposta com expandable de fontes.
 
 Session state keys usados:
   - chat_history     : list[dict]  — mensagens {role, content, sources?}
@@ -137,7 +140,9 @@ def _rag_search(conn, query: str) -> list[dict]:
     Busca contexto relevante em:
       1. ChromaDB — material de apoio indexado.
       2. FTS — blocos atômicos; em seguida injeta todas as notas desses blocos.
-      3. LIKE — anotações cujo texto coincide com termos da pergunta (complemento).
+      2B. FTS direto nas anotações (tsvector) — encontra anotações
+          independente do bloco pai.
+      3. ILIKE — anotações cujo texto coincide com termos da pergunta (complemento).
     """
     results: list[dict] = []
     seen_anot_ids: set[int] = set()
@@ -245,7 +250,49 @@ def _rag_search(conn, query: str) -> list[dict]:
                 "tipo":     "anotacao",
             })
 
-    # ── 3. Anotações de Link ──────────────────────────────────────
+    # ── 2B. FTS direto nas anotações (tsvector PostgreSQL) ────────
+    # Busca diretamente no conteúdo das anotações, independente de
+    # o bloco pai ter sido encontrado na etapa 2.
+    anot_fts_sql = """
+        SELECT a.id AS anotacao_id, a.conteudo, a.tipo, a.bloco_id,
+               b.identificador, b.conteudo AS bloco_conteudo,
+               d.titulo AS doc_titulo
+        FROM anotacoes a
+        JOIN blocos      b ON a.bloco_id     = b.id
+        JOIN documentos  d ON b.documento_id = d.id
+        WHERE a.fts_vector @@ plainto_tsquery('portuguese', ?)
+          AND a.tipo IN ('texto', 'tabela', 'fluxograma')
+          AND TRIM(COALESCE(a.conteudo, '')) <> ''
+        ORDER BY ts_rank_cd(a.fts_vector, plainto_tsquery('portuguese', ?)) DESC
+        LIMIT 6
+    """
+    try:
+        anot_fts_rows = fetchall(conn, anot_fts_sql, (query, query))
+        for row in anot_fts_rows:
+            aid = row["anotacao_id"]
+            if aid in seen_anot_ids:
+                continue
+            seen_anot_ids.add(aid)
+            tipo = row["tipo"]
+            icon = "📊" if tipo == "tabela" else ("🔀" if tipo == "fluxograma" else "📝")
+            results.append({
+                "fonte": (
+                    f"{icon} § Notas (FTS) — {row['doc_titulo']} "
+                    f"({row['identificador'] or 'bloco'})"
+                ),
+                "conteudo": (
+                    "[Referência do bloco — trecho]\n"
+                    f"{(row['bloco_conteudo'] or '')[:360]}\n\n"
+                    "[Anotação do utilizador]\n"
+                    f"{row['conteudo']}"
+                ),
+                "score":    0.80,
+                "tipo":     "anotacao",
+            })
+    except Exception:
+        pass
+
+    # ── 3. Anotações de Link (ILIKE complementar) ─────────────────
     # Stop words PT-BR a ignorar na busca
     _STOP = {"o","a","os","as","um","uma","de","do","da","dos","das","em","no",
              "na","nos","nas","para","por","com","que","se","e","ou","ao","à",
@@ -264,7 +311,7 @@ def _rag_search(conn, query: str) -> list[dict]:
         palavras = [query[:40]]
 
     # Monta SQL dinâmico com OR para cada palavra significativa
-    placeholders = " OR ".join(["a.conteudo LIKE ?"] * len(palavras))
+    placeholders = " OR ".join(["a.conteudo ILIKE ?"] * len(palavras))
     anot_sql = f"""
         SELECT a.id AS anotacao_id, a.conteudo, a.tipo,
                b.identificador, b.conteudo AS bloco_conteudo,
@@ -275,7 +322,7 @@ def _rag_search(conn, query: str) -> list[dict]:
         WHERE ({placeholders})
           AND a.tipo IN ('texto', 'tabela', 'fluxograma')
           AND TRIM(COALESCE(a.conteudo, '')) <> ''
-        LIMIT 8
+        LIMIT 12
     """
     try:
         params = tuple(f"%{p}%" for p in palavras)

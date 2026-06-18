@@ -145,6 +145,16 @@ CREATE TRIGGER trig_anotacoes_updated
     BEFORE UPDATE ON anotacoes
     FOR EACH ROW EXECUTE FUNCTION _tao_set_atualizado_em();
 
+-- ── Full-Text Search nas anotações (busca direta pelo Assistente IA) ──
+-- Coluna gerada automaticamente com vetor de busca em português
+ALTER TABLE anotacoes
+    ADD COLUMN IF NOT EXISTS fts_vector tsvector
+    GENERATED ALWAYS AS (
+        to_tsvector('portuguese', coalesce(conteudo, ''))
+    ) STORED;
+
+CREATE INDEX IF NOT EXISTS idx_anotacoes_fts ON anotacoes USING GIN(fts_vector);
+
 -- -------------------------------------------------------------
 -- 5. PORTAIS — referências cruzadas entre blocos
 -- -------------------------------------------------------------
@@ -247,8 +257,7 @@ ALTER TABLE documentos ADD COLUMN IF NOT EXISTS ordem INTEGER NOT NULL DEFAULT 0
 
 -- Busca global (módulo search_fts): índices GIN opcionais em PostgreSQL, alinhados a
 -- to_tsvector('portuguese', conteúdo/título/nome). Se já criou no dashboard, ignore.
--- CREATE INDEX IF NOT EXISTS idx_anotacoes_fts
---   ON anotacoes USING GIN (to_tsvector('portuguese', conteudo));
+-- NOTA: idx_anotacoes_fts já é criado na seção 4 (coluna gerada fts_vector).
 -- CREATE INDEX IF NOT EXISTS idx_documentos_fts
 --   ON documentos USING GIN (to_tsvector('portuguese', titulo));
 -- CREATE INDEX IF NOT EXISTS idx_pastas_fts
