@@ -21,13 +21,15 @@ import {
 import { PortalInline, PortalTransclusion } from './PortalBlock';
 import mermaid from 'mermaid';
 import { useEditor, EditorContent } from '@tiptap/react';
-import { BubbleMenu } from '@tiptap/react/menus';
+import { EditorContextMenu } from './EditorContextMenu';
 import StarterKit from '@tiptap/starter-kit';
 import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { markdownToHtml, htmlToMarkdown } from '../../lib/markdownHtmlConverter';
+import { Color } from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';
 import { api } from '../../api/client';
 
 // Initialize mermaid
@@ -69,7 +71,7 @@ const AutoResizeTextarea: React.FC<AutoResizeTextareaProps> = ({ value, onChange
       value={value}
       onChange={onChange}
       className={cn(
-        "w-full h-auto min-h-[60px] p-3 text-[14px] text-zinc-800 bg-white resize-y overflow-auto outline-none transition-colors",
+        "w-full h-auto min-h-[60px] p-3 text-[14px] text-zinc-800 dark:text-zinc-100 bg-white dark:bg-zinc-900 resize-y overflow-auto outline-none transition-colors",
         className
       )}
       {...props}
@@ -107,12 +109,14 @@ const TipTapEditor: React.FC<TipTapEditorProps> = ({
       TableRow,
       TableHeader,
       TableCell,
+      TextStyle,
+      Color,
     ],
     content: markdownToHtml(value),
     editorProps: {
       attributes: {
         class: cn(
-          'w-full min-h-[60px] text-[14px] p-3 outline-none focus:outline-none bg-white text-zinc-800 prose prose-sm max-w-none',
+          'w-full min-h-[60px] text-[14px] p-3 outline-none focus:outline-none bg-white dark:bg-transparent text-zinc-800 dark:text-slate-300 prose dark:prose-invert prose-sm max-w-none transition-colors',
           className
         ),
         'data-placeholder': placeholder || '',
@@ -143,102 +147,7 @@ const TipTapEditor: React.FC<TipTapEditorProps> = ({
 
   return (
     <div className="relative w-full group/editor">
-      <BubbleMenu
-        editor={editor}
-        options={{ placement: 'top' }}
-        className="flex bg-zinc-950 text-white rounded-lg shadow-xl border border-zinc-800 p-1 gap-1 items-center z-50 select-none"
-      >
-        {editor.isActive('table') ? (
-          <>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().addRowAfter().run()}
-              className="px-2 py-0.5 text-[10px] bg-zinc-800 text-zinc-300 rounded hover:bg-zinc-700 hover:text-white"
-              title="Adicionar linha abaixo"
-            >
-              + Linha
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().addColumnAfter().run()}
-              className="px-2 py-0.5 text-[10px] bg-zinc-800 text-zinc-300 rounded hover:bg-zinc-700 hover:text-white"
-              title="Adicionar coluna após"
-            >
-              + Coluna
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().deleteRow().run()}
-              className="px-2 py-0.5 text-[10px] bg-zinc-800 text-red-400 rounded hover:bg-red-950 hover:text-red-300"
-              title="Excluir linha"
-            >
-              - Linha
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().deleteColumn().run()}
-              className="px-2 py-0.5 text-[10px] bg-zinc-800 text-red-400 rounded hover:bg-red-950 hover:text-red-300"
-              title="Excluir coluna"
-            >
-              - Coluna
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().deleteTable().run()}
-              className="px-2 py-0.5 text-[10px] bg-zinc-800 text-red-500 rounded hover:bg-red-900 hover:text-white font-bold"
-              title="Excluir tabela"
-            >
-              Excluir Tabela
-            </button>
-          </>
-        ) : (
-          <>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={cn(
-                'px-2.5 py-1 text-xs font-bold rounded transition-colors hover:bg-zinc-800',
-                editor.isActive('bold') ? 'bg-zinc-800 text-amber-400' : 'text-zinc-300'
-              )}
-            >
-              B
-            </button>
-            <button
-              type="button"
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={cn(
-                'px-2.5 py-1 text-xs italic rounded transition-colors hover:bg-zinc-800',
-                editor.isActive('italic') ? 'bg-zinc-800 text-amber-400' : 'text-zinc-300'
-              )}
-            >
-              I
-            </button>
-            <div className="w-px h-4 bg-zinc-800 self-stretch my-0.5" />
-            <button
-              type="button"
-              onClick={() => {
-                if (onOpenPortalSearch) {
-                  onOpenPortalSearch((selectedId: string) => {
-                    editor.chain().focus().insertContent(`((${selectedId}))`).run();
-                  });
-                }
-              }}
-              className="px-2 py-1 text-xs rounded transition-colors hover:bg-slate-800 text-slate-300 hover:text-slate-200 font-medium flex items-center gap-0.5"
-            >
-              <Link2 size={11} /> Portal
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
-              }}
-              className="px-2 py-1 text-xs rounded transition-colors hover:bg-zinc-800 text-emerald-300 hover:text-emerald-200 font-medium flex items-center gap-0.5"
-            >
-              📅 Tabela
-            </button>
-          </>
-        )}
-      </BubbleMenu>
+      <EditorContextMenu editor={editor} />
       <EditorContent editor={editor} />
     </div>
   );
@@ -281,10 +190,10 @@ const PortalSearchModal: React.FC<PortalSearchModalProps> = ({ onClose, onSelect
 
   return (
     <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md border border-zinc-200 overflow-hidden flex flex-col max-h-[70vh]">
+      <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-2xl w-full max-w-md border border-border overflow-hidden flex flex-col max-h-[70vh] transition-colors">
         {/* Header */}
-        <div className="px-4 py-3 border-b border-zinc-100 flex items-center justify-between bg-zinc-50">
-          <span className="font-semibold text-sm text-zinc-800 flex items-center gap-1.5">
+        <div className="px-4 py-3 border-b border-border flex items-center justify-between bg-zinc-50 dark:bg-zinc-800">
+          <span className="font-semibold text-sm text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
             <Link2 size={16} className="text-indigo-500" />
             Criar Portal: Buscar Bloco
           </span>
@@ -294,19 +203,19 @@ const PortalSearchModal: React.FC<PortalSearchModalProps> = ({ onClose, onSelect
         </div>
 
         {/* Input */}
-        <div className="p-3 border-b border-zinc-100 bg-white">
+        <div className="p-3 border-b border-border bg-white dark:bg-zinc-900">
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Digite palavras-chave do bloco..."
-            className="w-full text-sm px-3 py-2 border border-border rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full text-sm px-3 py-2 border border-border bg-transparent text-zinc-800 dark:text-zinc-100 rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             autoFocus
           />
         </div>
 
         {/* Results List */}
-        <div className="flex-1 overflow-y-auto p-2 min-h-[150px] bg-zinc-50/50">
+        <div className="flex-1 overflow-y-auto p-2 min-h-[150px] bg-zinc-50/50 dark:bg-zinc-950/50">
           {loading && (
             <div className="text-center py-8 text-xs text-zinc-400 animate-pulse">
               Buscando blocos...
@@ -331,7 +240,7 @@ const PortalSearchModal: React.FC<PortalSearchModalProps> = ({ onClose, onSelect
               onClick={() => {
                 onSelect(bloco.id);
               }}
-              className="w-full text-left p-3 hover:bg-white hover:shadow-sm hover:border-zinc-300 border border-transparent rounded-lg mb-1 transition-all flex flex-col gap-1 group bg-white"
+              className="w-full text-left p-3 hover:bg-white dark:hover:bg-zinc-800 hover:shadow-sm border border-transparent hover:border-border rounded-lg mb-1 transition-all flex flex-col gap-1 group bg-white dark:bg-zinc-900/50"
             >
               <div className="text-xs font-semibold text-indigo-600 flex items-center justify-between">
                 <span>{bloco.identificador ? bloco.identificador : 'Bloco'}</span>
@@ -339,7 +248,7 @@ const PortalSearchModal: React.FC<PortalSearchModalProps> = ({ onClose, onSelect
                   in {bloco.pasta_nome} &rsaquo; {bloco.documento_titulo}
                 </span>
               </div>
-              <div className="text-sm text-zinc-800 line-clamp-2 leading-relaxed">
+              <div className="text-sm text-zinc-800 dark:text-zinc-300 line-clamp-2 leading-relaxed">
                 {bloco.conteudo || <span className="text-zinc-400 italic">Bloco vazio</span>}
               </div>
             </button>
@@ -469,7 +378,7 @@ const MermaidRenderer: React.FC<MermaidRendererProps> = ({ chart }) => {
 
   return (
     <div 
-      className="w-full flex justify-center p-3 bg-zinc-50 border border-zinc-100 rounded-md overflow-x-auto select-none"
+      className="w-full flex justify-center p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-border rounded-md overflow-x-auto select-none transition-colors"
       dangerouslySetInnerHTML={{ __html: svgContent || '<span class="text-xs text-zinc-400 select-none">Renderizando fluxograma...</span>' }}
     />
   );
@@ -584,17 +493,33 @@ const AnotacaoItem: React.FC<AnotacaoItemProps> = ({ anot, index, portalMap, onG
           cleanText = cleanText.replace(/(\b[a-z]\))\s*\n+/g, '$1 ');
 
           return (
-            <div key={i} className="text-slate-800 text-[14px] leading-relaxed">
-              {cleanText.split(/\n\n+/).map((para, pIdx, arr) => (
-                <p key={pIdx} className={pIdx < arr.length - 1 ? "mb-1.5" : ""}>
-                  {para.split('\n').map((line, lIdx, lArr) => (
-                    <React.Fragment key={lIdx}>
+            <div key={i} className="text-slate-800 dark:text-slate-300 text-[14px] leading-relaxed transition-colors">
+              {cleanText.split(/\n\n+/).map((para, pIdx, arr) => {
+                const inlineNodes = para.split(/(\*\*.*?\*\*|\*.*?\*|<span[^>]*style=["'][^"']*color:\s*[^"']+["'][^>]*>.*?<\/span>)/gi).map((part, i) => {
+                  if (!part) return null;
+                  if (part.startsWith('**') && part.endsWith('**'))
+                    return <strong key={i} className="font-semibold text-slate-900 dark:text-slate-100">{part.slice(2, -2)}</strong>;
+                  if (part.startsWith('*') && part.endsWith('*'))
+                    return <em key={i} className="italic text-slate-800 dark:text-slate-300">{part.slice(1, -1)}</em>;
+                  
+                  const spanMatch = part.match(/^<span[^>]*style=["'][^"']*color:\s*([^;"']+)[^"']*["'][^>]*>(.*?)<\/span>$/i);
+                  if (spanMatch) {
+                    return <span key={i} style={{ color: spanMatch[1].trim() }}>{spanMatch[2]}</span>;
+                  }
+                  
+                  return part.split('\n').map((line, lIdx, lArr) => (
+                    <React.Fragment key={`${i}-${lIdx}`}>
                       {line}
                       {lIdx < lArr.length - 1 && <br />}
                     </React.Fragment>
-                  ))}
-                </p>
-              ))}
+                  ));
+                });
+                return (
+                  <p key={pIdx} className={pIdx < arr.length - 1 ? "mb-1.5" : ""}>
+                    {inlineNodes}
+                  </p>
+                );
+              })}
             </div>
           );
         })}
@@ -609,40 +534,38 @@ const AnotacaoItem: React.FC<AnotacaoItemProps> = ({ anot, index, portalMap, onG
           ref={provided.innerRef}
           {...provided.draggableProps}
           className={cn(
-            "bg-card border border-transparent hover:border-border rounded-xl shadow-soft-sm overflow-hidden flex flex-row items-stretch relative group min-h-[60px]",
-            "transition-all focus-within:border-slate-300 focus-within:ring-1 focus-within:ring-slate-300",
-            snapshot.isDragging && "shadow-soft border-slate-300 rotate-[0.5deg] opacity-95"
+            "bg-white dark:bg-zinc-900 border border-transparent hover:border-border rounded-xl shadow-soft-sm overflow-hidden flex flex-row items-stretch relative group min-h-[60px]",
+            "transition-all focus-within:border-slate-300 dark:focus-within:border-zinc-700 focus-within:ring-1 focus-within:ring-slate-300 dark:focus-within:ring-zinc-700",
+            snapshot.isDragging && "shadow-soft border-slate-300 dark:border-zinc-700 rotate-[0.5deg] opacity-95"
           )}
         >
           {/* Subtle vertical Drag Handle on the left */}
           <div
             {...provided.dragHandleProps}
-            className="flex items-center justify-center w-6 bg-zinc-50/50 hover:bg-zinc-50 border-r border-zinc-100 text-zinc-300 hover:text-zinc-500 cursor-grab active:cursor-grabbing transition-colors shrink-0"
+            className="flex items-center justify-center w-6 bg-zinc-50/50 dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-800 border-r border-border text-zinc-300 dark:text-zinc-600 hover:text-zinc-500 dark:hover:text-zinc-400 cursor-grab active:cursor-grabbing transition-colors shrink-0"
             title="Arrastar para reordenar"
           >
             <GripVertical size={14} />
           </div>
 
           {/* Action Overlay (top right) - visible on hover */}
-          <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 backdrop-blur-sm px-1.5 py-1 rounded-md shadow-sm border border-zinc-200 z-10">
+          <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 dark:bg-zinc-800/95 backdrop-blur-sm px-1.5 py-1 rounded-md shadow-sm border border-border z-10">
             {isSaving && (
               <span className="text-[10px] text-amber-600 font-medium animate-pulse mr-1 select-none">
                 Salvando...
               </span>
             )}
             
-            {hasMermaid && (
-              <button
-                onClick={() => setIsEditing(!isEditing)}
-                className={cn(
-                  "p-1 rounded text-zinc-400 hover:bg-zinc-100 transition-colors",
-                  isEditing ? "hover:text-emerald-600" : "hover:text-amber-600"
-                )}
-                title={isEditing ? "Visualizar gráfico" : "Editar fluxograma"}
-              >
-                {isEditing ? <Eye size={13} /> : <FileEdit size={13} />}
-              </button>
-            )}
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className={cn(
+                "p-1 rounded text-zinc-400 hover:bg-zinc-100 transition-colors",
+                isEditing ? "hover:text-emerald-600" : "hover:text-amber-600"
+              )}
+              title={isEditing ? "Visualizar anotação" : "Editar anotação"}
+            >
+              {isEditing ? <Eye size={13} /> : <FileEdit size={13} />}
+            </button>
 
             <button
               onClick={() => onDelete(anot.id)}
@@ -661,7 +584,7 @@ const AnotacaoItem: React.FC<AnotacaoItemProps> = ({ anot, index, portalMap, onG
                 resolved={portalMap[String(portalRefId)]}
                 onGoToSource={onGoToSource}
               />
-            ) : !isEditing && hasMermaid ? (
+            ) : !isEditing ? (
               renderPreviewContent()
             ) : (
               <AnnotationContentEditor
@@ -809,11 +732,11 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ blocoId, onClo
   };
 
   return (
-    <div className="w-full min-w-0 bg-background border-l border-border flex flex-col h-full shadow-soft-sm animate-in slide-in-from-right-8 duration-300">
-      <div className="h-14 px-4 border-b border-border flex items-center justify-between bg-card shrink-0 shadow-soft-sm">
+    <div className="w-full min-w-0 bg-zinc-50/50 dark:bg-zinc-950 border-l border-border flex flex-col h-full shadow-soft-sm animate-in slide-in-from-right-8 duration-300 transition-colors">
+      <div className="h-14 px-4 border-b border-border flex items-center justify-between bg-card shrink-0 shadow-soft-sm transition-colors">
         <div className="flex items-center gap-2">
           <FileEdit size={18} className="text-amber-500" />
-          <h2 className="font-semibold text-sm text-zinc-800">Anotações do Bloco</h2>
+          <h2 className="font-semibold text-sm text-zinc-800 dark:text-zinc-200">Anotações do Bloco</h2>
           {orderedAnotacoes.length > 0 && (
             <span className="bg-amber-100 text-amber-700 text-xs font-bold px-1.5 py-0.5 rounded-full">
               {orderedAnotacoes.length}
@@ -895,7 +818,7 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ blocoId, onClo
                 </DragDropContext>
 
                 {!isCreating && (
-                  <div className="flex gap-2 w-full mt-4 border-t border-zinc-100 pt-3">
+                  <div className="flex gap-2 w-full mt-4 border-t border-border pt-3">
                     <button
                       onClick={() => handleInitiateCreation('texto')}
                       className="flex-1 py-2 px-1 border border-zinc-200 rounded-lg text-[10px] font-semibold text-zinc-600 hover:text-amber-700 hover:border-amber-300 hover:bg-amber-50 transition-colors flex items-center justify-center gap-1"
@@ -926,7 +849,7 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ blocoId, onClo
             )}
 
             {isCreating && (
-              <div className="bg-white border border-amber-200 rounded-lg shadow-sm p-3 space-y-2 animate-in fade-in">
+              <div className="bg-white dark:bg-zinc-900 border border-amber-200 dark:border-amber-900 rounded-lg shadow-sm p-3 space-y-2 animate-in fade-in transition-colors">
                 <div className="text-xs font-semibold text-amber-700 uppercase mb-2">
                   Nova Anotação ({creationType === 'fluxograma' ? 'Fluxograma' : 'Texto'})
                 </div>

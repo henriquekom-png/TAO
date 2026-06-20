@@ -94,7 +94,7 @@ export function GlobalSearch({ onSelectResult }: GlobalSearchProps) {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => { if (query.length >= 3) setIsOpen(true); }}
           placeholder="Buscar em Tudo..."
-          className="w-full bg-zinc-100 border-none rounded-full py-1.5 pl-9 pr-8 text-sm focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-colors"
+          className="w-full bg-zinc-100 dark:bg-zinc-800 border-none rounded-full py-1.5 pl-9 pr-8 text-sm text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400 focus:ring-2 focus:ring-indigo-500 focus:bg-white dark:focus:bg-zinc-700 transition-colors"
         />
         {isLoading && (
           <Loader2 size={14} className="absolute right-3 text-zinc-400 animate-spin" />
@@ -111,9 +111,9 @@ export function GlobalSearch({ onSelectResult }: GlobalSearchProps) {
 
       {/* Dropdown */}
       {isOpen && query.length >= 3 && (
-        <div className="absolute top-full mt-2 w-full bg-white border border-zinc-200 rounded-lg shadow-xl overflow-hidden z-[9999]">
+        <div className="absolute top-full mt-2 w-full bg-white dark:bg-zinc-900 border border-border rounded-lg shadow-xl overflow-hidden z-[9999]">
           {results.length === 0 && !isLoading ? (
-            <div className="p-4 text-sm text-zinc-500 text-center">
+            <div className="p-4 text-sm text-zinc-500 dark:text-zinc-400 text-center">
               Nenhum resultado encontrado para "{query}"
             </div>
           ) : (
@@ -122,13 +122,13 @@ export function GlobalSearch({ onSelectResult }: GlobalSearchProps) {
                 <li key={`${item.kind}-${item.id}`}>
                   <button
                     onClick={() => handleSelect(item)}
-                    className="w-full text-left px-4 py-2.5 hover:bg-zinc-50 transition-colors flex gap-3 items-start border-b border-zinc-100 last:border-0"
+                    className="w-full text-left px-4 py-2.5 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors flex gap-3 items-start border-b border-border last:border-0"
                   >
                     {getIcon(item.kind)}
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-zinc-800 truncate">{item.title}</p>
+                      <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate">{item.title}</p>
                       {item.subtitle && (
-                        <p className="text-xs text-zinc-500 truncate mt-0.5">{item.subtitle}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-0.5">{item.subtitle}</p>
                       )}
                     </div>
                   </button>

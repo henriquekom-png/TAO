@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Group, Panel, Separator } from 'react-resizable-panels';
 import { Sidebar } from './components/layout/Sidebar';
 import { DocumentViewer } from './components/document/DocumentViewer';
@@ -8,13 +8,25 @@ import { LoginGate } from './components/layout/LoginGate';
 
 import { QuizSessionModal } from './components/quiz/QuizSessionModal';
 import { QuestoesHub } from './components/quiz/QuestoesHub';
-import { PanelLeft, ClipboardList } from 'lucide-react';
+import { PanelLeft, ClipboardList, Sun, Moon } from 'lucide-react';
 import { PortalNavigationTarget } from './hooks/usePortals';
 import { cn } from './lib/utils';
 import type { Questao } from './types';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('tao_auth') === 'true');
+  const [isDarkMode, setIsDarkMode] = useState(() => sessionStorage.getItem('theme') === 'dark');
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      sessionStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      sessionStorage.setItem('theme', 'light');
+    }
+  }, [isDarkMode]);
+
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [selectedBlocoId, setSelectedBlocoId] = useState<string | null>(null);
 
@@ -53,7 +65,7 @@ function App() {
       onClearInitialEditQuestao={() => setHubEditingQuestao(null)}
     />
   ) : (
-    <div className="h-full overflow-y-auto bg-zinc-50/50">
+    <div className="h-full overflow-y-auto bg-zinc-50/50 dark:bg-zinc-950 transition-colors">
       <DocumentViewer
         documentId={selectedDocId}
         selectedBlocoId={selectedBlocoId}
@@ -77,7 +89,7 @@ function App() {
   }
 
   return (
-    <div className="h-screen w-screen bg-zinc-50 overflow-hidden font-sans text-zinc-900 flex flex-col">
+    <div className="h-screen w-screen bg-zinc-50 dark:bg-background overflow-hidden font-sans text-zinc-900 dark:text-foreground flex flex-col transition-colors">
       <Group orientation="horizontal" id="main-layout" key={`main-layout-${isSidebarOpen}`}>
         {/* Sidebar Panel */}
         {isSidebarOpen && (
@@ -104,8 +116,8 @@ function App() {
         )}
 
         {/* Central Workspace Panel */}
-        <Panel id="workspace-panel" className="h-full min-w-0 bg-white flex flex-col">
-          <header className="h-14 bg-background border-b border-border flex items-center justify-between px-6 shrink-0 shadow-soft-sm z-10 relative select-none">
+        <Panel id="workspace-panel" className="h-full min-w-0 bg-white dark:bg-card flex flex-col transition-colors">
+          <header className="h-14 bg-background border-b border-border flex items-center justify-between px-6 shrink-0 shadow-soft-sm z-10 relative select-none transition-colors">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -120,9 +132,16 @@ function App() {
 
             <div className="flex items-center gap-3">
               <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-md text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors"
+                title={isDarkMode ? "Modo Claro" : "Modo Escuro"}
+              >
+                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+              <button
                 id="quiz-session-open-btn"
                 onClick={() => setIsQuizSessionOpen(true)}
-                className="flex items-center gap-2 bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-slate-200 transition-colors border border-slate-200"
+                className="flex items-center gap-2 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors border border-slate-200 dark:border-zinc-700"
               >
                 <ClipboardList size={16} />
                 Simulado

@@ -78,14 +78,14 @@ export const QuizSessionModal: React.FC<QuizSessionModalProps> = ({
       aria-modal="true"
       aria-label="Modal de Simulado"
     >
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="bg-white dark:bg-zinc-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] transition-colors">
         {/* Header */}
-        <div className="h-14 px-5 border-b border-zinc-100 flex items-center justify-between bg-white shrink-0">
-          <div className="flex items-center gap-2.5 text-zinc-800 font-semibold">
+        <div className="h-14 px-5 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-zinc-900 shrink-0 transition-colors">
+          <div className="flex items-center gap-2.5 text-zinc-800 dark:text-zinc-100 font-semibold">
             <ClipboardList size={18} className="text-violet-500" />
             <span>Simulado</span>
             {showQuestion && (
-              <span className="ml-1 bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full text-xs font-bold">
+              <span className="ml-1 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 px-2 py-0.5 rounded-full text-xs font-bold">
                 {quiz.currentIndex + 1} / {quiz.questionsArray.length}
               </span>
             )}
@@ -93,7 +93,7 @@ export const QuizSessionModal: React.FC<QuizSessionModalProps> = ({
           <button
             id="quiz-session-close"
             onClick={onClose}
-            className="p-1.5 text-zinc-400 hover:text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors"
+            className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             aria-label="Fechar simulado"
           >
             <X size={18} />
@@ -164,10 +164,10 @@ const ErrorScreen: React.FC<{ message: string; onRetry: () => void }> = ({
 }) => (
   <div className="flex flex-col items-center justify-center py-16 gap-4 px-8 text-center">
     <AlertCircle size={40} className="text-red-400" />
-    <p className="text-zinc-700 font-medium">{message}</p>
+    <p className="text-zinc-700 dark:text-zinc-300 font-medium">{message}</p>
     <button
       onClick={onRetry}
-      className="flex items-center gap-2 px-4 py-2 bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 transition-colors text-sm font-medium"
+      className="flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-sm font-medium"
     >
       <RotateCcw size={14} /> Tentar novamente
     </button>
@@ -204,14 +204,14 @@ const QuizSetupScreen: React.FC<{
   };
 
   const field =
-    'w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white ' +
+    'w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-800 dark:text-zinc-200 bg-white dark:bg-zinc-950 ' +
     'focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition';
 
   return (
     <div className="p-8">
       <div className="mb-7">
-        <h2 className="text-xl font-bold text-zinc-900 mb-1">Configurar Simulado</h2>
-        <p className="text-sm text-zinc-500">
+        <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 mb-1">Configurar Simulado</h2>
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">
           Deixe os campos em branco para buscar questões de todas as categorias.
         </p>
       </div>
@@ -220,7 +220,7 @@ const QuizSetupScreen: React.FC<{
         <div className="grid grid-cols-2 gap-4">
           {/* Matéria */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="quiz-materia" className="text-xs font-semibold text-zinc-600 uppercase tracking-wide">
+            <label htmlFor="quiz-materia" className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide">
               Matéria
             </label>
             <input
@@ -235,7 +235,7 @@ const QuizSetupScreen: React.FC<{
 
           {/* Banca */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="quiz-banca" className="text-xs font-semibold text-zinc-600 uppercase tracking-wide">
+            <label htmlFor="quiz-banca" className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide">
               Banca
             </label>
             <input
@@ -250,7 +250,7 @@ const QuizSetupScreen: React.FC<{
 
           {/* Dificuldade */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="quiz-dificuldade" className="text-xs font-semibold text-zinc-600 uppercase tracking-wide">
+            <label htmlFor="quiz-dificuldade" className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide">
               Dificuldade
             </label>
             <select
@@ -268,7 +268,7 @@ const QuizSetupScreen: React.FC<{
 
           {/* Quantidade */}
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="quiz-limit" className="text-xs font-semibold text-zinc-600 uppercase tracking-wide">
+            <label htmlFor="quiz-limit" className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide">
               Quantidade (máx. 50)
             </label>
             <input
@@ -308,11 +308,11 @@ const QuizProgress: React.FC<{
   const pct = Math.round(((currentIndex) / total) * 100);
   return (
     <div className="px-8 pt-6 pb-2 space-y-2">
-      <div className="flex justify-between items-center text-xs text-zinc-500 font-medium">
+      <div className="flex justify-between items-center text-xs text-zinc-500 dark:text-zinc-400 font-medium">
         <span>Questão {currentIndex + 1} de {total}</span>
-        <span className="text-emerald-600 font-semibold">{score.acertos} acerto{score.acertos !== 1 ? 's' : ''}</span>
+        <span className="text-emerald-600 dark:text-emerald-500 font-semibold">{score.acertos} acerto{score.acertos !== 1 ? 's' : ''}</span>
       </div>
-      <div className="w-full bg-zinc-100 rounded-full h-1.5">
+      <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-1.5">
         <div
           className="bg-violet-500 h-1.5 rounded-full transition-all duration-500"
           style={{ width: `${pct}%` }}
@@ -340,27 +340,27 @@ const QuizQuestionCard: React.FC<{ question: Questao }> = ({ question }) => {
             {question.materia}
           </span>
         )}
-        <span className="bg-zinc-100 text-zinc-600 text-xs font-medium px-2.5 py-1 rounded-full">
+        <span className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-medium px-2.5 py-1 rounded-full">
           {tipoLabel[question.tipo] ?? question.tipo}
         </span>
         <span
           className={cn(
             'text-xs font-medium px-2.5 py-1 rounded-full',
-            question.dificuldade === 'facil'  && 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-            question.dificuldade === 'media'   && 'bg-amber-50 text-amber-700 border border-amber-200',
-            question.dificuldade === 'dificil' && 'bg-red-50 text-red-700 border border-red-200',
+            question.dificuldade === 'facil'  && 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800',
+            question.dificuldade === 'media'   && 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800',
+            question.dificuldade === 'dificil' && 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800',
           )}
         >
           {question.dificuldade === 'facil' ? 'Fácil' : question.dificuldade === 'media' ? 'Média' : 'Difícil'}
         </span>
         {meta && (
-          <span className="bg-zinc-50 text-zinc-500 text-xs px-2.5 py-1 rounded-full border border-zinc-200">
+          <span className="bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 text-xs px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-700">
             {meta}
           </span>
         )}
       </div>
 
-      <p className="text-zinc-800 text-[15px] leading-relaxed font-medium whitespace-pre-wrap">
+      <p className="text-zinc-800 dark:text-zinc-200 text-[15px] leading-relaxed font-medium whitespace-pre-wrap">
         {question.enunciado}
       </p>
     </div>
@@ -393,13 +393,13 @@ const MultipleChoicePanel: React.FC<{
         const isSelected = selectedAnswer === letter;
         const isCorrect  = question.gabarito.toUpperCase() === letter;
 
-        let variant = 'border-zinc-200 bg-white hover:border-violet-300 hover:bg-violet-50';
+        let variant = 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:border-violet-300 dark:hover:border-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 text-zinc-800 dark:text-zinc-200';
         if (isSubmitted) {
-          if (isCorrect)               variant = 'border-emerald-400 bg-emerald-50';
-          else if (isSelected)         variant = 'border-red-400 bg-red-50';
-          else                         variant = 'border-zinc-100 bg-zinc-50 opacity-60';
+          if (isCorrect)               variant = 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-900 dark:text-emerald-100';
+          else if (isSelected)         variant = 'border-red-400 bg-red-50 dark:bg-red-900/30 text-red-900 dark:text-red-100';
+          else                         variant = 'border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 opacity-60';
         } else if (isSelected) {
-          variant = 'border-violet-500 bg-violet-50';
+          variant = 'border-violet-500 bg-violet-50 dark:bg-violet-900/40 text-violet-900 dark:text-violet-100';
         }
 
         return (
@@ -420,12 +420,12 @@ const MultipleChoicePanel: React.FC<{
                 isSubmitted && isCorrect   ? 'bg-emerald-500 text-white'
                 : isSubmitted && isSelected ? 'bg-red-500 text-white'
                 : isSelected                 ? 'bg-violet-600 text-white'
-                :                             'bg-zinc-100 text-zinc-600',
+                :                             'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400',
               )}
             >
               {letter}
             </span>
-            <span className="text-sm text-zinc-800 leading-relaxed">{text}</span>
+            <span className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed">{text}</span>
             {isSubmitted && isCorrect  && <CheckCircle2 size={18} className="shrink-0 ml-auto text-emerald-500 mt-0.5" />}
             {isSubmitted && isSelected && !isCorrect && <XCircle size={18} className="shrink-0 ml-auto text-red-500 mt-0.5" />}
           </button>
@@ -454,13 +454,13 @@ const CertoErradoPanel: React.FC<{
         const isSelected = selectedAnswer === value;
         const isCorrect  = gabarito.trim().toLowerCase() === value.toLowerCase();
 
-        let variant = 'border-zinc-200 bg-white hover:border-violet-300 hover:bg-violet-50 text-zinc-700';
+        let variant = 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:border-violet-300 dark:hover:border-violet-700 hover:bg-violet-50 dark:hover:bg-violet-900/30 text-zinc-700 dark:text-zinc-300';
         if (isSubmitted) {
-          if (isCorrect)               variant = 'border-emerald-400 bg-emerald-50 text-emerald-800';
-          else if (isSelected)         variant = 'border-red-400 bg-red-50 text-red-800';
-          else                         variant = 'border-zinc-100 bg-zinc-50 text-zinc-400 opacity-60';
+          if (isCorrect)               variant = 'border-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-200';
+          else if (isSelected)         variant = 'border-red-400 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200';
+          else                         variant = 'border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 text-zinc-400 dark:text-zinc-500 opacity-60';
         } else if (isSelected) {
-          variant = 'border-violet-500 bg-violet-50 text-violet-800';
+          variant = 'border-violet-500 bg-violet-50 dark:bg-violet-900/40 text-violet-800 dark:text-violet-200';
         }
 
         return (
@@ -509,16 +509,16 @@ const CombinacaoItensPanel: React.FC<{
               'rounded-xl border-2 p-4 transition-all duration-150',
               isSubmitted
                 ? item.correto !== null && !isCorrect
-                  ? 'border-red-300 bg-red-50'
-                  : 'border-emerald-300 bg-emerald-50'
-                : 'border-zinc-200 bg-white',
+                  ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/30'
+                  : 'border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30'
+                : 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900',
             )}
           >
             <div className="flex items-start gap-3 mb-3">
-              <span className="shrink-0 w-7 h-7 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center mt-0.5">
+              <span className="shrink-0 w-7 h-7 rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 text-xs font-bold flex items-center justify-center mt-0.5">
                 {item.numero}
               </span>
-              <p className="text-sm text-zinc-800 leading-relaxed">{item.enunciado}</p>
+              <p className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed">{item.enunciado}</p>
             </div>
 
             <div className="flex gap-2 pl-10">
@@ -539,7 +539,7 @@ const CombinacaoItensPanel: React.FC<{
                       correct ? 'bg-emerald-500 text-white border-emerald-500'
                       : wrong  ? 'bg-red-500 text-white border-red-500'
                       : selected ? 'bg-violet-600 text-white border-violet-600'
-                      : 'bg-zinc-100 text-zinc-600 border-zinc-200 hover:border-violet-300',
+                      : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 hover:border-violet-300 dark:hover:border-violet-700',
                       !isSubmitted && 'cursor-pointer',
                     )}
                   >
@@ -570,7 +570,7 @@ const QuizFeedbackBlock: React.FC<{
   onGoToSource: (blocoId: number) => void;
 }> = ({ question, isCorrect, onGoToSource }) => {
   return (
-    <div className="mx-8 mb-4 rounded-xl overflow-hidden border border-zinc-200">
+    <div className="mx-8 mb-4 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
       {/* Result banner */}
       <div
         className={cn(
@@ -585,12 +585,12 @@ const QuizFeedbackBlock: React.FC<{
 
       {/* Comment */}
       {question.comentario && (
-        <div className="p-5 bg-zinc-50 border-t border-zinc-100">
-          <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">
+        <div className="p-5 bg-zinc-50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800">
+          <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">
             📝 Comentário do gabarito
           </p>
           <div
-            className="text-sm text-zinc-700 leading-relaxed [&_strong]:font-semibold [&_strong]:text-zinc-900 [&_em]:italic [&_p]:mb-2 [&_p:last-child]:mb-0"
+            className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed [&_strong]:font-semibold [&_strong]:text-zinc-900 dark:[&_strong]:text-zinc-100 [&_em]:italic [&_p]:mb-2 [&_p:last-child]:mb-0"
             dangerouslySetInnerHTML={{ __html: markdownToHtml(question.comentario) }}
           />
         </div>
@@ -598,11 +598,11 @@ const QuizFeedbackBlock: React.FC<{
 
       {/* Source link */}
       {question.bloco_origem_id && (
-        <div className="px-5 pb-4 border-t border-zinc-100 pt-3 flex">
+        <div className="px-5 pb-4 border-t border-zinc-100 dark:border-zinc-800 pt-3 flex">
           <button
             id="quiz-review-source-btn"
             onClick={() => onGoToSource(question.bloco_origem_id!)}
-            className="flex items-center gap-2 text-xs font-semibold text-violet-700 hover:text-violet-900 bg-violet-50 hover:bg-violet-100 border border-violet-200 px-3 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-2 text-xs font-semibold text-violet-700 dark:text-violet-300 hover:text-violet-900 dark:hover:text-violet-100 bg-violet-50 dark:bg-violet-900/30 hover:bg-violet-100 dark:hover:bg-violet-900/50 border border-violet-200 dark:border-violet-800 px-3 py-1.5 rounded-lg transition-colors"
           >
             <BookOpen size={14} />
             Revisar material de origem
@@ -720,7 +720,7 @@ const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
           <button
             id="quiz-quit-btn"
             onClick={onQuit}
-            className="text-xs text-zinc-400 hover:text-zinc-600 underline transition-colors"
+            className="text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 underline transition-colors"
           >
             Encerrar sessão
           </button>
@@ -728,7 +728,7 @@ const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
           {!isSubmitted && (
             <button
               onClick={onSkip}
-              className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-800 transition-colors bg-zinc-100 hover:bg-zinc-200 px-3 py-1.5 rounded-lg"
+              className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-3 py-1.5 rounded-lg"
               title="Pular esta questão"
             >
               <FastForward size={14} /> Pular
@@ -738,7 +738,7 @@ const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
           {onEditQuestion && (
             <button
               onClick={() => onEditQuestion(question)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-violet-700 transition-colors bg-zinc-100 hover:bg-violet-50 px-3 py-1.5 rounded-lg"
+              className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors bg-zinc-100 dark:bg-zinc-800 hover:bg-violet-50 dark:hover:bg-violet-900/30 px-3 py-1.5 rounded-lg"
               title="Corrigir no banco de questões"
             >
               <Pencil size={14} /> Corrigir
@@ -755,7 +755,7 @@ const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
               'flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm transition-all duration-150',
               hasAnswer
                 ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-md hover:shadow-lg'
-                : 'bg-zinc-100 text-zinc-400 cursor-not-allowed',
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed',
             )}
           >
             Responder
@@ -795,19 +795,19 @@ const QuizResultsScreen: React.FC<{
 
       <div>
         <p className={cn('text-5xl font-extrabold mb-1', resultColor)}>{pct}%</p>
-        <p className="text-lg font-semibold text-zinc-800">{resultLabel}</p>
+        <p className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">{resultLabel}</p>
       </div>
 
-      <div className="bg-zinc-50 border border-zinc-200 rounded-2xl px-8 py-5 w-full max-w-xs">
-        <div className="flex justify-between items-center text-sm font-medium text-zinc-600 mb-3">
+      <div className="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-2xl px-8 py-5 w-full max-w-xs">
+        <div className="flex justify-between items-center text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-3">
           <span>Acertos</span>
-          <span className="text-emerald-600 font-bold text-base">{score.acertos}</span>
+          <span className="text-emerald-600 dark:text-emerald-500 font-bold text-base">{score.acertos}</span>
         </div>
-        <div className="flex justify-between items-center text-sm font-medium text-zinc-600 mb-3">
+        <div className="flex justify-between items-center text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-3">
           <span>Erros</span>
-          <span className="text-red-500 font-bold text-base">{score.total - score.acertos}</span>
+          <span className="text-red-500 dark:text-red-400 font-bold text-base">{score.total - score.acertos}</span>
         </div>
-        <div className="border-t border-zinc-200 pt-3 flex justify-between items-center text-sm font-semibold text-zinc-700">
+        <div className="border-t border-zinc-200 dark:border-zinc-700 pt-3 flex justify-between items-center text-sm font-semibold text-zinc-700 dark:text-zinc-300">
           <span>Total</span>
           <span className="text-base">{score.total}</span>
         </div>
@@ -817,7 +817,7 @@ const QuizResultsScreen: React.FC<{
         <button
           id="quiz-restart-btn"
           onClick={onRestart}
-          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 font-semibold rounded-xl transition-colors text-sm"
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold rounded-xl transition-colors text-sm"
         >
           <RefreshCw size={15} /> Novo simulado
         </button>

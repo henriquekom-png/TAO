@@ -433,7 +433,7 @@ const HubMultipleChoice: React.FC<{ question: Questao; selectedAnswer: string | 
               : sel ? 'bg-violet-600 text-white' : 'bg-zinc-100 text-zinc-600')}>
               {letter}
             </span>
-            <span className="text-sm text-zinc-800 leading-relaxed">{text}</span>
+            <span className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed">{text}</span>
             {isSubmitted && corr && <CheckCircle2 size={18} className="shrink-0 ml-auto text-emerald-500 mt-0.5" />}
             {isSubmitted && sel && !corr && <XCircle size={18} className="shrink-0 ml-auto text-red-500 mt-0.5" />}
           </button>
@@ -476,7 +476,7 @@ const HubCombinacaoItens: React.FC<{ itens: QuestaoItem[]; itemAnswers: Record<n
             isSubmitted ? item.correto !== null && !ok ? 'border-red-300 bg-red-50' : 'border-emerald-300 bg-emerald-50' : 'border-zinc-200 bg-white')}>
             <div className="flex items-start gap-3 mb-3">
               <span className="shrink-0 w-7 h-7 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center mt-0.5">{item.numero}</span>
-              <p className="text-sm text-zinc-800 leading-relaxed">{item.enunciado}</p>
+              <p className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed">{item.enunciado}</p>
             </div>
             <div className="flex gap-2 pl-10">
               {[true, false].map((val) => {

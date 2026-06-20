@@ -62,8 +62,8 @@ export function htmlToMarkdown(html: string): string {
   if (!html) return '';
   let md = html;
 
-  // 1. Protege tags de tabela para não serem removidas no passo 5
-  const tableTagsRegex = /<\/?(table|thead|tbody|tr|th|td)( [^>]+)?>/gi;
+  // 1. Protege tags de tabela e span para não serem removidas no passo 6
+  const tableTagsRegex = /<\/?(table|thead|tbody|tr|th|td|span)( [^>]+)?>/gi;
   const placeholders: string[] = [];
   md = md.replace(tableTagsRegex, (match) => {
     placeholders.push(match);

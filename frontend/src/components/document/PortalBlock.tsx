@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ExternalLink, Link2, AlertTriangle } from 'lucide-react';
 import { useEditor, EditorContent } from '@tiptap/react';
-import { BubbleMenu } from '@tiptap/react/menus';
+import { EditorContextMenu } from './EditorContextMenu';
 import StarterKit from '@tiptap/starter-kit';
 import { markdownToHtml, htmlToMarkdown } from '../../lib/markdownHtmlConverter';
+import { Color } from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';
 import { useUpdateBloco } from '../../hooks/useBlocos';
 import { useUpdateAnotacao } from '../../hooks/useAnotacoes';
 import { ResolvedPortal, PortalNavigationTarget, portalToNavTarget } from '../../hooks/usePortals';
@@ -46,12 +48,12 @@ const EditableSourceField: React.FC<EditableSourceFieldProps> = ({
   const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [StarterKit, TextStyle, Color],
     content: markdownToHtml(value),
     editorProps: {
       attributes: {
         class: cn(
-          'w-full outline-none prose prose-sm max-w-none text-[13px] text-zinc-800 leading-relaxed bg-transparent cursor-text',
+          'w-full outline-none prose dark:prose-invert prose-sm max-w-none text-[13px] text-zinc-800 dark:text-zinc-200 leading-relaxed bg-transparent cursor-text',
           minHeight,
           className
         ),
@@ -82,28 +84,7 @@ const EditableSourceField: React.FC<EditableSourceFieldProps> = ({
 
   return (
     <div className="relative group/editor">
-      <BubbleMenu
-        editor={editor}
-        options={{ placement: 'top' }}
-        className="flex bg-zinc-950 text-white rounded-lg shadow-xl border border-zinc-800 p-1 gap-1 items-center z-50 select-none"
-      >
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={cn('px-2.5 py-1 text-xs font-bold rounded transition-colors hover:bg-zinc-800',
-            editor.isActive('bold') ? 'bg-zinc-800 text-amber-400' : 'text-zinc-300')}
-        >
-          B
-        </button>
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={cn('px-2.5 py-1 text-xs italic rounded transition-colors hover:bg-zinc-800',
-            editor.isActive('italic') ? 'bg-zinc-800 text-amber-400' : 'text-zinc-300')}
-        >
-          I
-        </button>
-      </BubbleMenu>
+      <EditorContextMenu editor={editor} />
       <EditorContent editor={editor} className="w-full" />
       {isSaving && (
         <span className="absolute top-1 right-1 text-[9px] text-indigo-500 animate-pulse">Salvando...</span>
@@ -124,7 +105,7 @@ export const PortalInline: React.FC<PortalInlineProps> = ({ refId, resolved, onG
 
   if (!resolved) {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 border border-dashed border-zinc-300 rounded text-xs text-zinc-400">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 border border-dashed border-zinc-300 dark:border-zinc-700 rounded text-xs text-zinc-400">
         <Link2 size={10} /> Carregando (({refId}))...
       </span>
     );
@@ -135,7 +116,7 @@ export const PortalInline: React.FC<PortalInlineProps> = ({ refId, resolved, onG
       ? resolved.conteudo
       : `(( ${refId} )) não encontrado`;
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 border border-dashed border-red-200 rounded text-xs text-red-600">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-50 dark:bg-red-900/20 border border-dashed border-red-200 dark:border-red-800/50 rounded text-xs text-red-600 dark:text-red-400">
         <AlertTriangle size={10} />
         <span>{errorMsg}</span>
       </span>
@@ -151,7 +132,7 @@ export const PortalInline: React.FC<PortalInlineProps> = ({ refId, resolved, onG
   };
 
   return (
-    <div className="my-1 border-l-2 border-dashed border-indigo-300 bg-indigo-50/40 rounded-r-md pl-3 pr-2 py-2">
+    <div className="my-1 border-l-2 border-dashed border-indigo-300 dark:border-indigo-500/50 bg-indigo-50/40 dark:bg-indigo-900/10 rounded-r-md pl-3 pr-2 py-2 transition-colors">
       <div className="flex items-center justify-between gap-2 mb-1">
         <span className="text-[10px] font-semibold text-indigo-600 uppercase tracking-wide flex items-center gap-1">
           <Link2 size={10} />
@@ -224,11 +205,11 @@ export const PortalTransclusion: React.FC<PortalTransclusionProps> = ({ refId, r
   if (!resolved.found) {
     const hasBackendMsg = !!resolved.conteudo;
     return (
-      <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600 flex flex-col gap-2">
+      <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-md text-sm text-red-600 dark:text-red-400 flex flex-col gap-2 transition-colors">
         <div className="flex items-center gap-2 font-medium">
           <AlertTriangle size={14} />
           {hasBackendMsg ? resolved.conteudo : (
-            <>Bloco <code className="bg-red-100 px-1 rounded">{refId}</code> não encontrado.</>
+            <>Bloco <code className="bg-red-100 dark:bg-red-900/40 px-1 rounded">{refId}</code> não encontrado.</>
           )}
         </div>
         {hasBackendMsg && (
@@ -251,15 +232,15 @@ export const PortalTransclusion: React.FC<PortalTransclusionProps> = ({ refId, r
   };
 
   return (
-    <div className="border-l-[3px] border-dashed border-indigo-400 bg-indigo-50/30 rounded-r-lg overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 bg-indigo-50/60 border-b border-indigo-100">
+    <div className="border-l-[3px] border-dashed border-indigo-400 dark:border-indigo-500/50 bg-indigo-50/30 dark:bg-indigo-900/10 rounded-r-lg overflow-hidden transition-colors">
+      <div className="flex items-center justify-between px-3 py-2 bg-indigo-50/60 dark:bg-indigo-900/20 border-b border-indigo-100 dark:border-indigo-800/30">
         <div className="flex items-center gap-2 min-w-0">
           <Link2 size={14} className="text-indigo-500 shrink-0" />
           <div className="min-w-0">
             {resolved.identificador && (
-              <span className="text-xs font-semibold text-indigo-700 mr-2">{resolved.identificador}</span>
+              <span className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 mr-2">{resolved.identificador}</span>
             )}
-            <span className="text-[10px] text-indigo-500 truncate">
+            <span className="text-[10px] text-indigo-500 dark:text-indigo-400 truncate">
               {resolved.documento_titulo}
             </span>
           </div>

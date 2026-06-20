@@ -253,11 +253,12 @@ const PastaTreeNode: React.FC<PastaTreeNodeProps> = ({
     <div>
       {/* ── Pasta header row ─────────────────────────────────────────────── */}
       <div
+        title={pasta.nome}
         className={cn(
-          'flex items-center py-1.5 px-2 cursor-pointer rounded-md text-sm text-slate-700 group transition-all select-none',
+          'flex items-center py-1.5 px-2 cursor-pointer rounded-md text-sm text-slate-700 dark:text-slate-300 group transition-all select-none',
           isDropTarget
-            ? 'bg-slate-100 ring-1 ring-inset ring-slate-300 text-slate-800'
-            : 'hover:bg-slate-100',
+            ? 'bg-slate-100 dark:bg-zinc-800 ring-1 ring-inset ring-slate-300 dark:ring-zinc-600 text-slate-800 dark:text-slate-200'
+            : 'hover:bg-slate-100 dark:hover:bg-zinc-800/50',
         )}
         style={{ paddingLeft: `${indentPx}px` }}
         onClick={() => !isRenaming && setExpanded(v => !v)}
@@ -319,11 +320,12 @@ const PastaTreeNode: React.FC<PastaTreeNodeProps> = ({
                   <div className="h-0.5 rounded-full bg-slate-400 mx-1" style={{ marginLeft: `${docIndentPx}px` }} />
                 )}
                 <div
+                  title={doc.titulo}
                   className={cn(
                     'flex items-center py-1.5 px-2 cursor-pointer rounded-md text-sm transition-colors select-none group/doc',
                     isSelected
-                      ? 'bg-slate-100 text-slate-900 font-medium'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800',
+                      ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-slate-200 font-medium'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50 hover:text-slate-800 dark:hover:text-slate-200',
                   )}
                   style={{ paddingLeft: `${docIndentPx}px` }}
                   onClick={e => { e.stopPropagation(); onSelectDoc(doc.id); }}
@@ -568,10 +570,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
-      <div className="w-full bg-slate-50 border-r border-slate-200 flex flex-col h-full">
+      <div className="w-full bg-slate-50 dark:bg-card border-r border-border flex flex-col h-full transition-colors">
         {/* Header */}
-        <div className="p-4 border-b border-slate-200 flex items-center justify-between shrink-0">
-          <h2 className="font-semibold text-lg text-slate-800 tracking-tight">TAO</h2>
+        <div className="p-4 border-b border-border flex items-center justify-between shrink-0 transition-colors">
+          <h2 className="font-semibold text-lg text-slate-800 dark:text-slate-200 tracking-tight">TAO</h2>
         </div>
 
         {/* Timer */}
@@ -622,7 +624,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-200 shrink-0 flex flex-col gap-3">
+        <div className="p-4 border-t border-border shrink-0 flex flex-col gap-3 transition-colors">
           {/* Hub shortcut */}
           <button
             id="sidebar-hub-btn"
@@ -630,8 +632,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className={cn(
               'flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border',
               isHubActive
-                ? 'bg-slate-100 text-slate-800 border-slate-300 shadow-sm'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-700 hover:border-slate-200 shadow-sm',
+                ? 'bg-slate-100 dark:bg-zinc-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-zinc-700 shadow-sm'
+                : 'bg-white dark:bg-zinc-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:text-slate-700 dark:hover:text-slate-200 shadow-sm',
             )}
           >
             <BrainCircuit size={16} className={isHubActive ? 'text-slate-600' : 'text-slate-400'} shrink-0="true" />
@@ -640,7 +642,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
           <button
             onClick={handleBackup}
-            className="flex items-center justify-center w-full py-2 px-3 bg-white border border-slate-200 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+            className="flex items-center justify-center w-full py-2 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-md text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-sm"
           >
             <Database size={14} className="mr-2" />
             Backup do Banco

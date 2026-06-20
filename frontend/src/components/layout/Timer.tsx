@@ -39,21 +39,21 @@ export function Timer() {
   };
 
   return (
-    <div className="px-4 py-2 border-b border-zinc-200 bg-zinc-100 flex items-center justify-between shrink-0 text-zinc-700">
-      <div className={cn("font-mono text-lg font-semibold", isRunning ? "text-violet-600" : "text-zinc-600")}>
+    <div className="px-4 py-2 border-b border-border bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-between shrink-0 text-zinc-700 dark:text-zinc-300 transition-colors">
+      <div className={cn("font-mono text-lg font-semibold", isRunning ? "text-violet-600 dark:text-violet-400" : "text-zinc-600 dark:text-zinc-400")}>
         {formatTime(seconds)}
       </div>
       <div className="flex items-center gap-1">
         <button
           onClick={toggleTimer}
-          className="p-1.5 rounded hover:bg-zinc-200 transition-colors text-zinc-500 hover:text-zinc-800"
+          className="p-1.5 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
           title={isRunning ? 'Pausar' : 'Iniciar'}
         >
           {isRunning ? <Pause size={18} /> : <Play size={18} />}
         </button>
         <button
           onClick={stopTimer}
-          className="p-1.5 rounded hover:bg-zinc-200 transition-colors text-zinc-500 hover:text-red-600"
+          className="p-1.5 rounded hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-zinc-500 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400"
           title="Parar"
         >
           <Square size={16} className="fill-current" />
