@@ -1,38 +1,21 @@
 # ============================================================
-# TAO App — Dependências Python
-# Instalar: pip install -r requirements.txt
+# TAO App — Dependências Python (raiz)
+# Uso: scripts utilitários (seed_questoes.py, etc.)
+# Para o backend FastAPI, veja backend/requirements.txt
 # ============================================================
 
-# ── Sprint 1+2: Base, banco de dados e interface ─────────────
-streamlit>=1.33.0           # Framework web + st.fragment (rerun parcial)
+# ── Banco de dados ────────────────────────────────────────────
+psycopg2-binary>=2.9.9      # conexão direta ao PostgreSQL do Supabase
+python-dotenv>=1.0.0        # seed_questoes.py: SUPABASE_DB_URL em .env na raiz
 
-# ── Sprint 3+4: Visualizador e anotações (preparação) ────────
-# (sem novas dependências — apenas stdlib + streamlit)
+# ── AI / Embeddings (usado por scripts utilitários) ──────────
+google-generativeai>=0.8.0  # Gemini SDK
+google-genai>=1.0.0         # Gemini SDK novo
 
-# ── Sprint 5: Portais e menu de contexto ─────────────────────
-# streamlit-js-eval>=0.1.7  # (descomente no Sprint 5)
-
-# ── Sprint 6: Upload, embedding e ChromaDB ───────────────────
+# ── Vector store (se usado diretamente por scripts) ──────────
 chromadb>=0.5.0
 sentence-transformers>=2.6.0
-protobuf>=3.20.3,<5.0.0         # pin para compatibilidade com chromadb no Python 3.12
-PyMuPDF>=1.23.0           # fitz — leitura de PDFs
-python-docx>=1.1.0        # leitura de DOCX
+protobuf>=3.20.3,<5.0.0     # pin para compatibilidade com chromadb
 
-# ── Sprint 7: Chatbot RAG + exportação ───────────────────────
-google-generativeai>=0.8.0  # Gemini — SDK usado pelo chatbot (google.generativeai)
-google-genai>=1.0.0         # Gemini — SDK novo (reservado para futuro)
-openai>=1.30.0              # OpenAI — gpt-4o-mini
-Jinja2>=3.1.3               # templates HTML de exportação
-# pdfkit>=1.0.0             # PDF direto (requer wkhtmltopdf no sistema)
-
-# ── Sprint 8: Supabase / PostgreSQL ──────────────────────────
-psycopg2-binary>=2.9.9      # conexão direta ao PostgreSQL do Supabase
-python-dotenv>=1.0.0       # seed_questoes.py: SUPABASE_DB_URL em .env na raiz
-
-# ── Fast Entry Telegram (opcional; secrets TELEGRAM_* + SUPABASE_DB_URL) ──
-python-telegram-bot>=21.0
-
-# ── Sprint 9: FSRS v5 + exportação PDF real ──────────────────
+# ── FSRS ─────────────────────────────────────────────────────
 fsrs>=6.3.0                 # algoritmo Free Spaced Repetition Scheduler v5
-xhtml2pdf>=0.2.17           # motor PDF puro-Python (HTML → PDF via ReportLab)

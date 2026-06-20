@@ -11,8 +11,8 @@ PRAGMA encoding="UTF-8";
 -- 1. PASTAS — árvore hierárquica dinâmica da sidebar
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS pastas (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    parent_id   INTEGER REFERENCES pastas(id) ON DELETE CASCADE,
+    id          TEXT PRIMARY KEY,
+    parent_id   TEXT REFERENCES pastas(id) ON DELETE CASCADE,
     nome        TEXT NOT NULL,
     nivel       INTEGER NOT NULL DEFAULT 0,
     ordem       INTEGER NOT NULL DEFAULT 0,
@@ -27,8 +27,8 @@ CREATE INDEX IF NOT EXISTS idx_pastas_nivel  ON pastas(nivel);
 -- 2. DOCUMENTOS — arquivos mestres (coluna esquerda)
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS documentos (
-    id            INTEGER PRIMARY KEY AUTOINCREMENT,
-    pasta_id      INTEGER NOT NULL REFERENCES pastas(id) ON DELETE CASCADE,
+    id            TEXT PRIMARY KEY,
+    pasta_id      TEXT NOT NULL REFERENCES pastas(id) ON DELETE CASCADE,
     titulo        TEXT NOT NULL,
     descricao     TEXT,
     ordem         INTEGER NOT NULL DEFAULT 0,
@@ -49,8 +49,8 @@ END;
 -- 3. BLOCOS ATÔMICOS — cada artigo, parágrafo, inciso, alínea
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS blocos (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    documento_id    INTEGER NOT NULL REFERENCES documentos(id) ON DELETE CASCADE,
+    id              TEXT PRIMARY KEY,
+    documento_id    TEXT NOT NULL REFERENCES documentos(id) ON DELETE CASCADE,
 
     -- Identificação estrutural
     tipo            TEXT NOT NULL DEFAULT 'texto_livre'
@@ -129,8 +129,8 @@ END;
 -- 5. ANOTAÇÕES DE LINK — blocos da coluna direita
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS anotacoes (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    bloco_id        INTEGER NOT NULL REFERENCES blocos(id) ON DELETE CASCADE,
+    id              TEXT PRIMARY KEY,
+    bloco_id        TEXT NOT NULL REFERENCES blocos(id) ON DELETE CASCADE,
     tipo            TEXT NOT NULL DEFAULT 'texto'
                         CHECK(tipo IN ('texto','tabela','fluxograma','portal')),
     conteudo        TEXT NOT NULL DEFAULT '',
@@ -151,9 +151,9 @@ END;
 -- 6. PORTAIS — referências cruzadas entre blocos
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS portais (
-    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
-    bloco_origem_id     INTEGER NOT NULL REFERENCES blocos(id) ON DELETE CASCADE,
-    bloco_alvo_id       INTEGER NOT NULL REFERENCES blocos(id) ON DELETE CASCADE,
+    id                  TEXT PRIMARY KEY,
+    bloco_origem_id     TEXT NOT NULL REFERENCES blocos(id) ON DELETE CASCADE,
+    bloco_alvo_id       TEXT NOT NULL REFERENCES blocos(id) ON DELETE CASCADE,
     criado_em           TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(bloco_origem_id, bloco_alvo_id)
 );
@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS portais (
 -- 7. MATERIAL DE APOIO — arquivos enviados via upload
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS materiais (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    id              TEXT PRIMARY KEY,
     nome_arquivo    TEXT NOT NULL,
     tipo            TEXT NOT NULL CHECK(tipo IN ('pdf','docx','txt')),
     caminho         TEXT NOT NULL UNIQUE,

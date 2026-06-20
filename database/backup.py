@@ -70,7 +70,21 @@ def download_cloud_to_local() -> dict:
     Retorna dict com contagem de registros por tabela.
     """
     pg   = _pg_conn()
-    lite = _sqlite_conn()
+    
+    # Recria o banco local a partir do schema e migrações para garantir integridade estrutural
+    if DB_PATH.exists():
+        try:
+            DB_PATH.unlink()
+        except Exception:
+            pass
+
+    lite = sqlite3.connect(str(DB_PATH), check_same_thread=False)
+    from database import db_connection_sqlite
+    db_connection_sqlite._apply_schema(lite)
+    db_connection_sqlite._run_migrations(lite)
+    
+    lite.row_factory = sqlite3.Row
+    lite.execute("PRAGMA foreign_keys=OFF")
     counts = {}
 
     try:
@@ -79,6 +93,12 @@ def download_cloud_to_local() -> dict:
 
         for table in _TABLES:
             cols = _col_names(pg_cur, table)
+            
+            # Filtrar colunas que existem no SQLite local para evitar erros de compatibilidade
+            lite_cols_info = lite.execute(f"PRAGMA table_info({table})").fetchall()
+            lite_cols = {c[1] for c in lite_cols_info}
+            cols = [c for c in cols if c in lite_cols]
+            
             cols_sql = ", ".join(cols)
             placeholders = ", ".join(["?"] * len(cols))
 

@@ -126,6 +126,14 @@ def _adapt_sql(sql: str) -> str:
         adapted,
         flags=re.IGNORECASE,
     )
+    
+    # 3. Corrige ORDER BY rank para PostgreSQL (rank não é coluna no pg)
+    adapted = re.sub(
+        r"ORDER\s+BY\s+rank",
+        "ORDER BY b.id",
+        adapted,
+        flags=re.IGNORECASE,
+    )
 
     return adapted
 

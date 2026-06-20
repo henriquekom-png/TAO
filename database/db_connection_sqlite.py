@@ -113,7 +113,7 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
     # ── Sprint 6: tabela materiais ───────────────────────────────
     conn.execute("""
         CREATE TABLE IF NOT EXISTS materiais (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            id              TEXT PRIMARY KEY,
             nome_arquivo    TEXT NOT NULL,
             tipo            TEXT NOT NULL CHECK(tipo IN ('pdf','docx','txt')),
             caminho         TEXT NOT NULL UNIQUE,
@@ -133,7 +133,7 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
     if "questoes" not in _tables:
         conn.execute("""
             CREATE TABLE questoes (
-                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                id              TEXT PRIMARY KEY,
                 banca           TEXT,
                 ano             INTEGER,
                 cargo           TEXT,
@@ -154,7 +154,7 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
                 comentario      TEXT,
                 dificuldade     TEXT NOT NULL DEFAULT 'media'
                                     CHECK(dificuldade IN ('facil','media','dificil')),
-                bloco_origem_id INTEGER REFERENCES blocos(id) ON DELETE SET NULL,
+                bloco_origem_id TEXT REFERENCES blocos(id) ON DELETE SET NULL,
                 criado_em       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -163,7 +163,7 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
         # recria preservando os dados existentes
         conn.executescript("""
             CREATE TABLE questoes_v2 (
-                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                id              TEXT PRIMARY KEY,
                 banca           TEXT,
                 ano             INTEGER,
                 cargo           TEXT,
@@ -184,7 +184,7 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
                 comentario      TEXT,
                 dificuldade     TEXT NOT NULL DEFAULT 'media'
                                     CHECK(dificuldade IN ('facil','media','dificil')),
-                bloco_origem_id INTEGER REFERENCES blocos(id) ON DELETE SET NULL,
+                bloco_origem_id TEXT REFERENCES blocos(id) ON DELETE SET NULL,
                 criado_em       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             INSERT OR IGNORE INTO questoes_v2 SELECT * FROM questoes;
@@ -195,8 +195,8 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
     # questao_itens — afirmações romanas (I, II, III…) para combinacao_itens
     conn.execute("""
         CREATE TABLE IF NOT EXISTS questao_itens (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            questao_id  INTEGER NOT NULL REFERENCES questoes(id) ON DELETE CASCADE,
+            id          TEXT PRIMARY KEY,
+            questao_id  TEXT NOT NULL REFERENCES questoes(id) ON DELETE CASCADE,
             numero      TEXT NOT NULL,
             enunciado   TEXT NOT NULL,
             correto     INTEGER DEFAULT NULL,
@@ -206,8 +206,8 @@ def _run_migrations(conn: sqlite3.Connection) -> None:
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS quiz_resultados (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            questao_id    INTEGER REFERENCES questoes(id) ON DELETE CASCADE,
+            id            TEXT PRIMARY KEY,
+            questao_id    TEXT REFERENCES questoes(id) ON DELETE CASCADE,
             acertou       BOOLEAN NOT NULL,
             respondido_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
