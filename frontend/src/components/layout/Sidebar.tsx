@@ -572,8 +572,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <>
       <div className="w-full bg-slate-50 dark:bg-card border-r border-border flex flex-col h-full transition-colors">
         {/* Header */}
-        <div className="p-4 border-b border-border flex items-center justify-between shrink-0 transition-colors">
-          <h2 className="font-semibold text-lg text-slate-800 dark:text-slate-200 tracking-tight">TAO</h2>
+        <div className="p-4 border-b border-border flex items-center justify-center shrink-0 transition-colors">
+          <img src="/logo.png" alt="TAO Logo" className="h-12 w-auto object-contain drop-shadow-sm mix-blend-multiply dark:mix-blend-normal dark:invert opacity-90 hover:opacity-100 transition-opacity" />
         </div>
 
         {/* Timer */}

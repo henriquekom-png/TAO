@@ -33,10 +33,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS configurado para o Frontend Híbrido (React/Vite e Electron)
+# CORS configurado para PWA/Nuvem e Desenvolvimento Local
+# Pega a lista de origens permitidas da variável de ambiente ou usa um padrão seguro
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173,http://localhost:3000")
+allowed_origins = [origin.strip() for origin in frontend_url.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "*"], # Atenção: Em prod, restringir origens!
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

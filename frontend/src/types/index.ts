@@ -1,9 +1,9 @@
 // Base Types mirroring backend Pydantic models
 
 export interface Pasta {
-  id: string;
+  id: number;
   nome: string;
-  parent_id: string | null;
+  parent_id: number | null;
   nivel: number;
   ordem: number;
   criado_em: string;
@@ -11,8 +11,8 @@ export interface Pasta {
 }
 
 export interface Documento {
-  id: string;
-  pasta_id: string;
+  id: number;
+  pasta_id: number;
   titulo: string;
   descricao: string | null;
   ordem: number;
@@ -27,8 +27,8 @@ export type CorFonte = 'padrao' | 'vermelho' | 'verde' | 'azul' | 'destaque';
 export type Alinhamento = 'esquerda' | 'centro' | 'direita' | 'justificado';
 
 export interface Bloco {
-  id: string;
-  documento_id: string;
+  id: number;
+  documento_id: number;
   tipo: TipoBloco;
   identificador: string | null;
   conteudo: string;
@@ -53,8 +53,8 @@ export type TipoQuestao = 'multipla_escolha' | 'certo_errado' | 'combinacao_iten
 export type DificuldadeQuestao = 'facil' | 'media' | 'dificil';
 
 export interface QuestaoItem {
-  id: string;
-  questao_id: string;
+  id: number;
+  questao_id: number;
   numero: string;
   enunciado: string;
   correto: boolean | null;
@@ -62,7 +62,7 @@ export interface QuestaoItem {
 }
 
 export interface Questao {
-  id: string;
+  id: number;
   banca: string | null;
   ano: number | null;
   cargo: string | null;
@@ -77,7 +77,7 @@ export interface Questao {
   gabarito: string;
   comentario: string | null;
   dificuldade: DificuldadeQuestao;
-  bloco_origem_id: string | null;
+  bloco_origem_id: number | null;
   criado_em: string;
   /** Populated by GET /api/v1/quiz/session for tipo='combinacao_itens' */
   itens?: QuestaoItem[];
@@ -98,8 +98,8 @@ export interface QuizScore {
 }
 
 export interface DueBloco {
-  id: string;
-  documento_id: string;
+  id: number;
+  documento_id: number;
   identificador: string | null;
   conteudo: string;
   importancia: Importancia;

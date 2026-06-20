@@ -7,8 +7,15 @@ export const usePastasTree = () => {
   return useQuery({
     queryKey: ['pastas', 'tree'],
     queryFn: async () => {
-      const response = await api.get<Pasta>('/pastas/tree')
-      return response.data
+      try {
+        const response = await api.get<Pasta>('/pastas/tree')
+        localStorage.setItem('tao_pastas_tree', JSON.stringify(response.data))
+        return response.data
+      } catch (error) {
+        const cache = localStorage.getItem('tao_pastas_tree')
+        if (cache) return JSON.parse(cache)
+        throw error
+      }
     },
   })
 }

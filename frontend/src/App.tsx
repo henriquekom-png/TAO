@@ -133,10 +133,22 @@ function App() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-md text-slate-500 dark:text-zinc-400 hover:text-slate-800 dark:hover:text-zinc-200 transition-colors"
-                title={isDarkMode ? "Modo Claro" : "Modo Escuro"}
+                className="relative inline-flex items-center h-[26px] w-[46px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-opacity-75 bg-slate-300 dark:bg-zinc-700 shadow-inner"
+                title={isDarkMode ? "Mudar para Modo Claro" : "Mudar para Modo Escuro"}
               >
-                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+                <span className="sr-only">Toggle Theme</span>
+                <span
+                  className={cn(
+                    "pointer-events-none flex h-5 w-5 transform items-center justify-center rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                    isDarkMode ? "translate-x-5" : "translate-x-0"
+                  )}
+                >
+                  {isDarkMode ? (
+                    <Moon size={12} className="text-zinc-700" />
+                  ) : (
+                    <Sun size={12} className="text-amber-500" />
+                  )}
+                </span>
               </button>
               <button
                 id="quiz-session-open-btn"

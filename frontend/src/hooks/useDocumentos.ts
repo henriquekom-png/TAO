@@ -1,17 +1,27 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import { api } from '../api/client'
 import { Documento } from '../types'
+import { db } from '../lib/db'
 
 export const useDocumento = (documentId: number | null) => {
   return useQuery({
     queryKey: ['documento', documentId],
     queryFn: async () => {
-      const response = await api.get<Documento>(`/documentos/${documentId}`)
-      return response.data
+      try {
+        const response = await api.get<Documento>(`/documentos/${documentId}`)
+        await db.documentos.put(response.data)
+        return response.data
+      } catch (error) {
+        if (!documentId) throw error
+        const doc = await db.documentos.get(String(documentId))
+        if (doc) return doc
+        // Also try number in case types are mixed
+        const docNum = await db.documentos.get(documentId as any)
+        if (docNum) return docNum
+        throw error
+      }
     },
     enabled: !!documentId,
-    // Keep showing old data while a background refetch is in progress
-    // so the viewer never flashes "Carregando" when cache is invalidated.
     placeholderData: keepPreviousData,
     staleTime: 30_000,
   })
@@ -21,8 +31,19 @@ export const useDocumentosByPasta = (pastaId: number | null, enabled: boolean = 
   return useQuery({
     queryKey: ['documentos', 'pasta', pastaId],
     queryFn: async () => {
-      const response = await api.get<Documento[]>(`/documentos/pasta/${pastaId}`)
-      return response.data
+      try {
+        const response = await api.get<Documento[]>(`/documentos/pasta/${pastaId}`)
+        await db.documentos.bulkPut(response.data)
+        return response.data
+      } catch (error) {
+        if (!pastaId) throw error
+        let docs = await db.documentos.where('pasta_id').equals(pastaId).toArray()
+        if (docs.length === 0) {
+           docs = await db.documentos.where('pasta_id').equals(String(pastaId)).toArray()
+        }
+        if (docs.length > 0) return docs
+        throw error
+      }
     },
     enabled: !!pastaId && enabled,
   })

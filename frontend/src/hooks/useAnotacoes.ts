@@ -1,13 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
 import { Anotacao } from '../types'
+import { db } from '../lib/db'
 
 export const useAnotacoesByBloco = (blocoId: string | null) => {
   return useQuery({
     queryKey: ['anotacoes', 'bloco', blocoId],
     queryFn: async () => {
-      const response = await api.get<Anotacao[]>(`/anotacoes/bloco/${blocoId}`)
-      return response.data
+      try {
+        const response = await api.get<Anotacao[]>(`/anotacoes/bloco/${blocoId}`)
+        await db.anotacoes.bulkPut(response.data)
+        return response.data
+      } catch (error) {
+        if (!blocoId) throw error
+        let anotacoes = await db.anotacoes.where('bloco_id').equals(blocoId).toArray()
+        if (anotacoes.length === 0) {
+          anotacoes = await db.anotacoes.where('bloco_id').equals(String(blocoId)).toArray()
+        }
+        if (anotacoes.length > 0) return anotacoes
+        throw error
+      }
     },
     enabled: !!blocoId,
   })
