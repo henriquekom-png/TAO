@@ -146,7 +146,7 @@ export const PortalInline: React.FC<PortalInlineProps> = ({ refId, resolved, onG
 };
 
 interface NestedAnotacaoEditorProps {
-  anotId: string;
+  anotId: number;
   tipo: string;
   conteudo: string;
 }

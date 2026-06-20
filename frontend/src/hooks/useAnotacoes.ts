@@ -3,7 +3,7 @@ import { api } from '../api/client'
 import { Anotacao } from '../types'
 import { db } from '../lib/db'
 
-export const useAnotacoesByBloco = (blocoId: string | null) => {
+export const useAnotacoesByBloco = (blocoId: number | null) => {
   return useQuery({
     queryKey: ['anotacoes', 'bloco', blocoId],
     queryFn: async () => {
@@ -41,7 +41,7 @@ export const useCreateAnotacao = () => {
 export const useUpdateAnotacao = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<Anotacao> }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Anotacao> }) => {
       const response = await api.patch<Anotacao>(`/anotacoes/${id}`, data)
       return response.data
     },
@@ -59,7 +59,7 @@ export const useUpdateAnotacao = () => {
 export const useDeleteAnotacao = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id }: { id: string; blocoId: string }) => {
+    mutationFn: async ({ id }: { id: number; blocoId: number }) => {
       await api.delete(`/anotacoes/${id}`)
     },
     onSuccess: (_, variables) => {
@@ -76,7 +76,7 @@ export const useDeleteAnotacao = () => {
 export const useReorderAnotacoes = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (items: { id: string; ordem: number }[]) => {
+    mutationFn: async (items: { id: number; ordem: number }[]) => {
       await api.post('/anotacoes/reorder', items)
     },
     onSuccess: () => {

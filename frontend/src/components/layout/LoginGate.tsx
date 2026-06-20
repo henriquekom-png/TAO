@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../../api/client';
-import { Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
 
 interface LoginGateProps {
   onSuccess: () => void;

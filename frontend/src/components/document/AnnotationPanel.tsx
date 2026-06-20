@@ -18,7 +18,7 @@ import { PortalSearchModal } from './annotation/PortalSearchModal';
 import { AnotacaoItem } from './annotation/AnotacaoItem';
 
 interface AnnotationPanelProps {
-  blocoId: string | null;
+  blocoId: number | null;
   onClose: () => void;
   onGoToSource?: (target: PortalNavigationTarget) => void;
 }
@@ -35,7 +35,7 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ blocoId, onClo
   const [creationType, setCreationType] = useState<'texto' | 'fluxograma'>('texto');
 
   const [openPortalSearch, setOpenPortalSearch] = useState(false);
-  const [portalSearchCallback, setPortalSearchCallback] = useState<((id: string) => void) | null>(null);
+  const [portalSearchCallback, setPortalSearchCallback] = useState<((id: number) => void) | null>(null);
 
   useEffect(() => {
     setEditContent('');
@@ -61,7 +61,7 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ blocoId, onClo
     onGoToSource?.(target);
   }, [onGoToSource]);
 
-  const handleDelete = (anotacaoId: string) => {
+  const handleDelete = (anotacaoId: number) => {
     if (confirm('Tem certeza que deseja excluir esta anotação?')) {
       setOrderedAnotacoes((prev) => prev.filter((a) => a.id !== anotacaoId));
       deleteAnotacao(
@@ -77,14 +77,14 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ blocoId, onClo
     }
   };
 
-  const handleOpenPortalSearch = useCallback((callback: (id: string) => void) => {
+  const handleOpenPortalSearch = useCallback((callback: (id: number) => void) => {
     setPortalSearchCallback(() => callback);
     setOpenPortalSearch(true);
   }, []);
 
   const handleInitiateCreation = (type: 'texto' | 'portal' | 'fluxograma' | 'tabela') => {
     if (type === 'portal') {
-      handleOpenPortalSearch((selectedId: string) => {
+      handleOpenPortalSearch((selectedId: number) => {
         createAnotacao(
           { bloco_id: blocoId!, conteudo: `((${selectedId}))`, tipo: 'portal', ordem: orderedAnotacoes.length },
           {

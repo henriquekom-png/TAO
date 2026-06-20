@@ -262,7 +262,7 @@ export const BlocoItem: React.FC<BlocoItemProps> = ({
                 bloco.cor_fonte === 'verde'    && 'text-green-600',
                 bloco.cor_fonte === 'azul'     && 'text-blue-600',
               )}>
-                {renderMarkdown(bloco.conteudo, bloco.identificador, bloco.next_review)}
+                {renderMarkdown(bloco.conteudo, bloco.identificador || undefined, bloco.next_review || undefined)}
               </div>
             )}
           </div>

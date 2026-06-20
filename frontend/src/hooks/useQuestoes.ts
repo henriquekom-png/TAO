@@ -115,7 +115,7 @@ export function useQuestoesPaginated(filtros: QuestoesFiltros = {}) {
 
 // ─── useQuestaoDetail ─────────────────────────────────────────────────────────
 
-export function useQuestaoDetail(id: string | null) {
+export function useQuestaoDetail(id: number | string | null) {
   return useQuery<Questao>({
     queryKey: questoesKeys.detail(id ?? ''),
     queryFn:  () => api.get<Questao>(`/questoes/${id}`).then((r) => r.data),

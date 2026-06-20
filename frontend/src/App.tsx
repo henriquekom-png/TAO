@@ -27,13 +27,13 @@ function App() {
     }
   }, [isDarkMode]);
 
-  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
-  const [selectedBlocoId, setSelectedBlocoId] = useState<string | null>(null);
+  const [selectedDocId, setSelectedDocId] = useState<number | null>(null);
+  const [selectedBlocoId, setSelectedBlocoId] = useState<number | null>(null);
 
   const [isQuizSessionOpen, setIsQuizSessionOpen] = useState(false);
   const [isHubActive, setIsHubActive] = useState(false);
-  const [expandPastaIds, setExpandPastaIds] = useState<string[]>([]);
-  const [scrollToBlocoId, setScrollToBlocoId] = useState<string | null>(null);
+  const [expandPastaIds, setExpandPastaIds] = useState<number[]>([]);
+  const [scrollToBlocoId, setScrollToBlocoId] = useState<number | null>(null);
   const [preloadedQuestions, setPreloadedQuestions] = useState<Questao[] | undefined>(undefined);
   const [hubEditingQuestao, setHubEditingQuestao] = useState<Questao | null>(null);
 
@@ -43,7 +43,7 @@ function App() {
   }, []);
 
   // Selecting a document exits hub mode
-  const handleSelectDoc = useCallback((id: string) => {
+  const handleSelectDoc = useCallback((id: number) => {
     setSelectedDocId(id);
     setIsHubActive(false);
   }, []);

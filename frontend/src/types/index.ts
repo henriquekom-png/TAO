@@ -131,8 +131,8 @@ export interface ChatStatus {
 }
 
 export interface Anotacao {
-  id: string;
-  bloco_id: string;
+  id: number;
+  bloco_id: number;
   tipo: 'texto' | 'tabela' | 'fluxograma' | 'portal';
   conteudo: string;
   ordem: number;

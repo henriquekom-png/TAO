@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
 
 export interface PortalNestedAnotacao {
-  id: string;
+  id: number;
   tipo: string;
   conteudo: string;
   ordem: number;
@@ -10,22 +10,22 @@ export interface PortalNestedAnotacao {
 
 export interface ResolvedPortal {
   kind: 'anotacao' | 'bloco';
-  id: string;
+  id: number;
   conteudo: string;
-  bloco_id: string;
-  documento_id: string;
-  pasta_id: string;
+  bloco_id: number;
+  documento_id: number;
+  pasta_id: number;
   documento_titulo: string;
   identificador: string | null;
-  pasta_path: string[];
+  pasta_path: number[];
   anotacoes: PortalNestedAnotacao[];
   found: boolean;
 }
 
 export interface PortalNavigationTarget {
-  pastaPath: string[];
-  docId: string;
-  blocoId: string;
+  pastaPath: number[];
+  docId: number;
+  blocoId: number;
 }
 
 export const useResolvePortals = (ids: string[]) => {

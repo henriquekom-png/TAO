@@ -18,7 +18,7 @@ interface TipTapEditorProps {
   value: string;
   onChange: (val: string) => void;
   placeholder?: string;
-  onOpenPortalSearch?: (insertCallback: (id: string) => void) => void;
+  onOpenPortalSearch?: (insertCallback: (id: number) => void) => void;
   className?: string;
   autoFocus?: boolean;
 }
@@ -80,7 +80,7 @@ interface AnnotationContentEditorProps {
   onChange: (content: string) => void;
   portalMap: Record<string, import('../../../hooks/usePortals').ResolvedPortal>;
   onGoToSource: (target: PortalNavigationTarget) => void;
-  onOpenPortalSearch: (insertCallback: (id: string) => void) => void;
+  onOpenPortalSearch: (insertCallback: (id: number) => void) => void;
 }
 
 export const AnnotationContentEditor: React.FC<AnnotationContentEditorProps> = ({

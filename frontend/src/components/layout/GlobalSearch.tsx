@@ -5,13 +5,13 @@ import { PortalNavigationTarget } from '../../hooks/usePortals';
 
 interface SearchResultItem {
   kind: 'documento' | 'bloco' | 'anotacao';
-  id: string;
+  id: number;
   title: string;
   subtitle: string;
-  documento_id: string;
-  bloco_id: string | null;
-  pasta_id: string;
-  pasta_path: string[];
+  documento_id: number;
+  bloco_id: number | null;
+  pasta_id: number;
+  pasta_path: number[];
 }
 
 interface SearchResponse {
@@ -71,7 +71,7 @@ export function GlobalSearch({ onSelectResult }: GlobalSearchProps) {
     onSelectResult({
       pastaPath: item.pasta_path,
       docId: item.documento_id,
-      blocoId: item.bloco_id || '' // if it's a doc, we might not have a blocoId
+      blocoId: item.bloco_id || 0
     });
   };
 

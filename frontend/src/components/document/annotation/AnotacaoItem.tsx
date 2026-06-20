@@ -34,8 +34,8 @@ interface AnotacaoItemProps {
   index: number;
   portalMap: Record<string, import('../../../hooks/usePortals').ResolvedPortal>;
   onGoToSource: (target: PortalNavigationTarget) => void;
-  onDelete: (id: string) => void;
-  onOpenPortalSearch: (insertCallback: (id: string) => void) => void;
+  onDelete: (id: number) => void;
+  onOpenPortalSearch: (insertCallback: (id: number) => void) => void;
 }
 
 export const AnotacaoItem: React.FC<AnotacaoItemProps> = ({ anot, index, portalMap, onGoToSource, onDelete, onOpenPortalSearch }) => {

@@ -4,7 +4,7 @@ import { api } from '../../../api/client';
 
 interface PortalSearchModalProps {
   onClose: () => void;
-  onSelect: (id: string) => void;
+  onSelect: (id: number) => void;
 }
 
 export const PortalSearchModal: React.FC<PortalSearchModalProps> = ({ onClose, onSelect }) => {
