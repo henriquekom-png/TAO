@@ -114,7 +114,6 @@ function App() {
               >
                 <PanelLeft size={18} className={isSidebarOpen ? "" : "rotate-180"} />
               </button>
-              <h1 className="font-semibold text-foreground text-lg tracking-tight">Ambiente de Estudos</h1>
             </div>
 
             <GlobalSearch onSelectResult={handleGoToSource} />
@@ -198,4 +197,8 @@ function App() {
           }}
         />
       )}
-    </div
+    </div>
+  );
+}
+
+export default App;

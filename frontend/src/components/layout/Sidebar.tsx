@@ -66,7 +66,7 @@ const InlineEdit: React.FC<{
         e.stopPropagation();
       }}
       onClick={e => e.stopPropagation()}
-      className="flex-1 min-w-0 bg-white border border-indigo-300 rounded px-1 text-sm outline-none focus:ring-1 focus:ring-indigo-400 text-zinc-800"
+      className="flex-1 min-w-0 bg-white border border-slate-300 rounded px-1 text-sm outline-none focus:ring-1 focus:ring-slate-400 text-slate-800"
     />
   );
 };
@@ -86,7 +86,7 @@ const InlineForm: React.FC<{
   useEffect(() => { ref.current?.focus(); }, []);
 
   return (
-    <div className="mx-2 mb-1 flex items-center gap-1 bg-white border border-indigo-200 rounded-md shadow-sm px-2 py-1.5">
+    <div className="mx-2 mb-1 flex items-center gap-1 bg-white border border-slate-200 rounded-md shadow-sm px-2 py-1.5">
       <input
         ref={ref} value={value} disabled={isPending}
         onChange={e => setValue(e.target.value)}
@@ -95,13 +95,13 @@ const InlineForm: React.FC<{
           if (e.key === 'Escape') onCancel();
         }}
         placeholder={placeholder}
-        className="flex-1 text-sm bg-transparent outline-none text-zinc-800 placeholder-zinc-400 min-w-0"
+        className="flex-1 text-sm bg-transparent outline-none text-slate-800 placeholder-slate-400 min-w-0"
       />
       <button onClick={() => value.trim() && onConfirm(value.trim())} disabled={!value.trim() || isPending}
-        className="p-0.5 text-indigo-600 hover:text-indigo-800 disabled:opacity-40">
+        className="p-0.5 text-slate-600 hover:text-slate-800 disabled:opacity-40">
         <Check size={14} />
       </button>
-      <button onClick={onCancel} className="p-0.5 text-zinc-400 hover:text-zinc-600"><X size={14} /></button>
+      <button onClick={onCancel} className="p-0.5 text-slate-400 hover:text-slate-600"><X size={14} /></button>
     </div>
   );
 };
@@ -154,26 +154,26 @@ const ContextMenu: React.FC<{
         left: Math.min(state.x, window.innerWidth - 215),
         zIndex: 9999,
       }}
-      className="bg-white border border-zinc-200 rounded-lg shadow-xl py-1 w-52 select-none animate-in fade-in duration-100"
+      className="bg-white border border-slate-200 rounded-lg shadow-xl py-1 w-52 select-none animate-in fade-in duration-100"
     >
-      <div className="px-3 py-1.5 text-xs font-semibold text-zinc-400 uppercase tracking-wider border-b border-zinc-100 mb-1 truncate">
+      <div className="px-3 py-1.5 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-100 mb-1 truncate">
         {state.name}
       </div>
       {state.type === 'pasta' && (
         <>
-          <button className={cn(mi, 'text-zinc-700 hover:bg-indigo-50 hover:text-indigo-800')} onClick={() => { onNewSubpasta?.(); onClose(); }}>
-            <FolderPlus size={14} className="text-indigo-500 shrink-0" /> Nova Subpasta
+          <button className={cn(mi, 'text-slate-700 hover:bg-slate-50 hover:text-slate-800')} onClick={() => { onNewSubpasta?.(); onClose(); }}>
+            <FolderPlus size={14} className="text-slate-500 shrink-0" /> Nova Subpasta
           </button>
-          <button className={cn(mi, 'text-zinc-700 hover:bg-amber-50 hover:text-amber-800')} onClick={() => { onNewDocumento?.(); onClose(); }}>
-            <FilePlus size={14} className="text-amber-500 shrink-0" /> Novo Documento
+          <button className={cn(mi, 'text-slate-700 hover:bg-slate-50 hover:text-slate-800')} onClick={() => { onNewDocumento?.(); onClose(); }}>
+            <FilePlus size={14} className="text-slate-500 shrink-0" /> Novo Documento
           </button>
-          <div className="border-t border-zinc-100 my-1" />
+          <div className="border-t border-slate-100 my-1" />
         </>
       )}
-      <button className={cn(mi, 'text-zinc-700 hover:bg-blue-50 hover:text-blue-800')} onClick={() => { onRename(); onClose(); }}>
-        <Pencil size={14} className="text-blue-500 shrink-0" /> Renomear
+      <button className={cn(mi, 'text-slate-700 hover:bg-slate-50 hover:text-slate-800')} onClick={() => { onRename(); onClose(); }}>
+        <Pencil size={14} className="text-slate-500 shrink-0" /> Renomear
       </button>
-      <div className="border-t border-zinc-100 my-1" />
+      <div className="border-t border-slate-100 my-1" />
       <button className={cn(mi, 'text-red-600 hover:bg-red-50')} onClick={() => { onDelete(); onClose(); }}>
         <Trash2 size={14} className="shrink-0" />
         {state.type === 'pasta' ? 'Excluir Pasta' : 'Excluir Documento'}
@@ -254,10 +254,10 @@ const PastaTreeNode: React.FC<PastaTreeNodeProps> = ({
       {/* ── Pasta header row ─────────────────────────────────────────────── */}
       <div
         className={cn(
-          'flex items-center py-1.5 px-2 cursor-pointer rounded-md text-sm text-zinc-700 group transition-all select-none',
+          'flex items-center py-1.5 px-2 cursor-pointer rounded-md text-sm text-slate-700 group transition-all select-none',
           isDropTarget
-            ? 'bg-indigo-100 ring-1 ring-inset ring-indigo-300 text-indigo-800'
-            : 'hover:bg-zinc-100',
+            ? 'bg-slate-100 ring-1 ring-inset ring-slate-300 text-slate-800'
+            : 'hover:bg-slate-100',
         )}
         style={{ paddingLeft: `${indentPx}px` }}
         onClick={() => !isRenaming && setExpanded(v => !v)}
@@ -276,16 +276,16 @@ const PastaTreeNode: React.FC<PastaTreeNodeProps> = ({
         onDragLeave={onDragLeavePasta}
         onDrop={e => onDropOnPasta(e, pasta)}
       >
-        <div className="w-4 h-4 mr-1 text-zinc-400 flex items-center justify-center shrink-0">
+        <div className="w-4 h-4 mr-1 text-slate-400 flex items-center justify-center shrink-0">
           {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
         </div>
-        <Folder size={14} className={cn('mr-2 shrink-0 transition-colors', expanded ? 'text-amber-500' : 'text-zinc-400')} />
+        <Folder size={14} className={cn('mr-2 shrink-0 transition-colors', expanded ? 'text-slate-500' : 'text-slate-400')} />
         {isRenaming ? (
           <InlineEdit initialValue={pasta.nome} onConfirm={nome => onPastaRenameConfirm(pasta.id, nome)} onCancel={onRenameCancel} />
         ) : (
           <>
             <span className="truncate font-medium flex-1">{pasta.nome}</span>
-            <GripVertical size={12} className="opacity-0 group-hover:opacity-25 text-zinc-400 shrink-0 mr-0.5" />
+            <GripVertical size={12} className="opacity-0 group-hover:opacity-25 text-slate-400 shrink-0 mr-0.5" />
           </>
         )}
       </div>
@@ -300,8 +300,8 @@ const PastaTreeNode: React.FC<PastaTreeNodeProps> = ({
 
           {/* Loading spinner */}
           {docsLoading && (
-            <div className="py-1 text-xs text-zinc-400 flex items-center gap-1.5" style={{ paddingLeft: `${docIndentPx}px` }}>
-              <span className="inline-block w-3 h-3 border-2 border-zinc-300 border-t-transparent rounded-full animate-spin" />
+            <div className="py-1 text-xs text-slate-400 flex items-center gap-1.5" style={{ paddingLeft: `${docIndentPx}px` }}>
+              <span className="inline-block w-3 h-3 border-2 border-slate-300 border-t-transparent rounded-full animate-spin" />
               Carregando...
             </div>
           )}
@@ -316,14 +316,14 @@ const PastaTreeNode: React.FC<PastaTreeNodeProps> = ({
             return (
               <React.Fragment key={doc.id}>
                 {showBefore && (
-                  <div className="h-0.5 rounded-full bg-indigo-400 mx-1" style={{ marginLeft: `${docIndentPx}px` }} />
+                  <div className="h-0.5 rounded-full bg-slate-400 mx-1" style={{ marginLeft: `${docIndentPx}px` }} />
                 )}
                 <div
                   className={cn(
                     'flex items-center py-1.5 px-2 cursor-pointer rounded-md text-sm transition-colors select-none group/doc',
                     isSelected
-                      ? 'bg-amber-100 text-amber-900 font-medium'
-                      : 'text-zinc-600 hover:bg-amber-50 hover:text-amber-800',
+                      ? 'bg-slate-100 text-slate-900 font-medium'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800',
                   )}
                   style={{ paddingLeft: `${docIndentPx}px` }}
                   onClick={e => { e.stopPropagation(); onSelectDoc(doc.id); }}
@@ -342,8 +342,8 @@ const PastaTreeNode: React.FC<PastaTreeNodeProps> = ({
                   onDragLeave={onDragLeaveDoc}
                   onDrop={e => onDropOnDoc(e, doc.id, doc.ordem ?? idx, pasta.id)}
                 >
-                  <GripVertical size={12} className="mr-1 opacity-0 group-hover/doc:opacity-25 text-zinc-400 shrink-0 cursor-grab" />
-                  <FileText size={13} className="mr-2 text-zinc-400 shrink-0" />
+                  <GripVertical size={12} className="mr-1 opacity-0 group-hover/doc:opacity-25 text-slate-400 shrink-0 cursor-grab" />
+                  <FileText size={13} className="mr-2 text-slate-400 shrink-0" />
                   {isRenamingDoc ? (
                     <InlineEdit initialValue={doc.titulo} onConfirm={titulo => onDocRenameConfirm(doc.id, titulo)} onCancel={onRenameCancel} />
                   ) : (
@@ -351,14 +351,14 @@ const PastaTreeNode: React.FC<PastaTreeNodeProps> = ({
                   )}
                 </div>
                 {showAfter && (
-                  <div className="h-0.5 rounded-full bg-indigo-400 mx-1" style={{ marginLeft: `${docIndentPx}px` }} />
+                  <div className="h-0.5 rounded-full bg-slate-400 mx-1" style={{ marginLeft: `${docIndentPx}px` }} />
                 )}
               </React.Fragment>
             );
           })}
 
           {isEmpty && (
-            <div className="py-1 text-xs text-zinc-400 italic" style={{ paddingLeft: `${docIndentPx}px` }}>
+            <div className="py-1 text-xs text-slate-400 italic" style={{ paddingLeft: `${docIndentPx}px` }}>
               Vazio
             </div>
           )}
@@ -568,10 +568,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
-      <div className="w-full bg-zinc-50 border-r border-zinc-200 flex flex-col h-full">
+      <div className="w-full bg-slate-50 border-r border-slate-200 flex flex-col h-full">
         {/* Header */}
-        <div className="p-4 border-b border-zinc-200 flex items-center justify-between shrink-0">
-          <h2 className="font-semibold text-lg text-zinc-800 tracking-tight">TAO</h2>
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+          <h2 className="font-semibold text-lg text-slate-800 tracking-tight">TAO</h2>
         </div>
 
         {/* Timer */}
@@ -579,9 +579,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Tree */}
         <div className="flex-1 overflow-y-auto p-2 flex flex-col min-h-0">
-          <div className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-2 mt-2 px-2">
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-2 px-2">
             Workspace
-            <span className="ml-1 normal-case font-normal text-zinc-300">(botão direito • arraste para mover)</span>
+            <span className="ml-1 normal-case font-normal text-slate-300">(botão direito • arraste para mover)</span>
           </div>
 
 
@@ -605,7 +605,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             />
           )}
 
-          {isLoading && <div className="px-2 text-sm text-zinc-500">Carregando...</div>}
+          {isLoading && <div className="px-2 text-sm text-slate-500">Carregando...</div>}
 
           {!isLoading && (
             <div className="flex flex-col gap-0.5">
@@ -615,14 +615,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   ))
                 : treeData
                   ? <PastaTreeNode pasta={treeData as Pasta} level={0} {...nodeProps} />
-                  : <div className="px-2 text-sm text-zinc-400 italic">Nenhuma pasta encontrada.</div>
+                  : <div className="px-2 text-sm text-slate-400 italic">Nenhuma pasta encontrada.</div>
               }
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-zinc-200 shrink-0 flex flex-col gap-3">
+        <div className="p-4 border-t border-slate-200 shrink-0 flex flex-col gap-3">
           {/* Hub shortcut */}
           <button
             id="sidebar-hub-btn"
@@ -630,17 +630,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className={cn(
               'flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border',
               isHubActive
-                ? 'bg-violet-100 text-violet-800 border-violet-300 shadow-sm'
-                : 'bg-white text-zinc-700 border-zinc-200 hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200 shadow-sm',
+                ? 'bg-slate-100 text-slate-800 border-slate-300 shadow-sm'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-700 hover:border-slate-200 shadow-sm',
             )}
           >
-            <BrainCircuit size={16} className={isHubActive ? 'text-violet-600' : 'text-violet-400'} shrink-0="true" />
+            <BrainCircuit size={16} className={isHubActive ? 'text-slate-600' : 'text-slate-400'} shrink-0="true" />
             <span className="truncate">🧠 Banco de Questões</span>
           </button>
 
           <button
             onClick={handleBackup}
-            className="flex items-center justify-center w-full py-2 px-3 bg-white border border-zinc-200 rounded-md text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors shadow-sm"
+            className="flex items-center justify-center w-full py-2 px-3 bg-white border border-slate-200 rounded-md text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
           >
             <Database size={14} className="mr-2" />
             Backup do Banco

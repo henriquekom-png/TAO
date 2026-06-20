@@ -34,14 +34,48 @@ interface DocumentViewerProps {
 
 
 
-const renderMarkdown = (text: string): React.ReactNode[] => {
-  if (!text) return [];
-  return text.split(/(\*\*.*?\*\*|\*.*?\*)/g).map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**'))
-      return <strong key={i} className="font-semibold text-zinc-900">{part.slice(2, -2)}</strong>;
-    if (part.startsWith('*') && part.endsWith('*'))
-      return <em key={i} className="italic text-zinc-800">{part.slice(1, -1)}</em>;
-    return part;
+const renderMarkdown = (text: string, identificador?: string, nextReview?: string): React.ReactNode[] => {
+  const badge = identificador ? (
+    <span className="inline-flex items-center gap-1.5 mr-2 align-baseline translate-y-[-1px]">
+      <span className="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-[11px] font-bold text-slate-600 select-none shadow-sm">
+        {identificador}
+      </span>
+      {nextReview && (
+        <span className="text-[11px] text-blue-500 font-medium" title="Next FSRS Review">FSRS: {nextReview}</span>
+      )}
+    </span>
+  ) : null;
+
+  if (!text) return badge ? [<p key="badge">{badge}</p>] : [];
+
+  // Corrige quebras de linha órfãs geradas ao colar de PDFs (ex: Art. 1º \n Texto...)
+  let cleanText = text;
+  cleanText = cleanText.replace(/(Art\.\s*\d+[-A-Z0-9ºo.]*|§\s*\d+[-A-Z0-9ºo.]*|Parágrafo único\.?)\s*\n+/gi, '$1 ');
+  cleanText = cleanText.replace(/(\b[IVXLCDM]+\s*-)\s*\n+/g, '$1 ');
+  cleanText = cleanText.replace(/(\b[a-z]\))\s*\n+/g, '$1 ');
+
+  const blocks = cleanText.split(/\n\n+/);
+  return blocks.map((block, bIdx) => {
+    const inlineNodes = block.split(/(\*\*.*?\*\*|\*.*?\*)/g).map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**'))
+        return <strong key={i} className="font-semibold text-slate-900">{part.slice(2, -2)}</strong>;
+      if (part.startsWith('*') && part.endsWith('*'))
+        return <em key={i} className="italic text-slate-800">{part.slice(1, -1)}</em>;
+      
+      return part.split('\n').map((line, j, arr) => (
+        <React.Fragment key={`${i}-${j}`}>
+          {line}
+          {j < arr.length - 1 && <br />}
+        </React.Fragment>
+      ));
+    });
+    
+    return (
+      <p key={bIdx} className={bIdx < blocks.length - 1 ? "mb-1.5" : ""}>
+        {bIdx === 0 && badge}
+        {inlineNodes}
+      </p>
+    );
   });
 };
 
@@ -85,9 +119,9 @@ const AddBlocoButton: React.FC<AddBlocoButtonProps> = ({ documentId, insertAtOrd
         onClick={handleClick}
         disabled={isPending}
         className={cn(
-          'flex items-center gap-1.5 text-xs font-medium text-zinc-400 hover:text-blue-600',
-          'border border-dashed border-zinc-200 hover:border-blue-300 hover:bg-blue-50/40',
-          'rounded-md px-2.5 py-1 transition-all duration-150',
+          'flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-slate-700',
+          'border border-dashed border-border hover:border-slate-300 hover:bg-slate-50',
+          'rounded-md px-2.5 py-1 transition-all duration-200',
           'disabled:opacity-50 disabled:cursor-not-allowed',
           alwaysVisible && 'w-full justify-center border-solid border-zinc-200 text-zinc-500 mt-2'
         )}
@@ -206,7 +240,7 @@ const BulkImportModal: React.FC<BulkImportModalProps> = ({ documentId, nextOrdem
             <button
               onClick={handleImport}
               disabled={isPending || preview.length === 0}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors font-medium"
+              className="flex items-center gap-1.5 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-slate-700 disabled:opacity-50 transition-colors font-medium"
             >
               <ClipboardList size={14} />
               {isPending ? 'Importando…' : `Importar ${preview.length} bloco${preview.length !== 1 ? 's' : ''}`}
@@ -297,7 +331,7 @@ const GenerateSimuladoModal: React.FC<GenerateSimuladoModalProps> = ({ documentI
           <button
             onClick={handleGenerate}
             disabled={isPending}
-            className="flex items-center gap-2 px-4 py-2 text-sm bg-violet-600 text-white rounded-md hover:bg-violet-700 disabled:opacity-50 transition-colors font-semibold"
+            className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-slate-700 disabled:opacity-50 transition-colors font-semibold"
           >
             {isPending ? <Circle className="animate-spin" size={14} /> : <FileQuestion size={14} />}
             {isPending ? 'Gerando...' : 'Gerar Simulado'}
@@ -328,10 +362,12 @@ const BlocoItem: React.FC<BlocoItemProps> = ({
   const { mutate: deleteBloco } = useDeleteBloco();
   const [isEditing, setIsEditing] = useState(autoFocusEditor ?? false);
   const [localImportancia, setLocalImportancia] = useState<Importancia>(bloco.importancia);
+  const [localIdentificador, setLocalIdentificador] = useState<string>(bloco.identificador || '');
 
   useEffect(() => {
     setLocalImportancia(bloco.importancia);
-  }, [bloco.importancia]);
+    setLocalIdentificador(bloco.identificador || '');
+  }, [bloco.importancia, bloco.identificador]);
 
   const editor = useEditor({
     extensions: [
@@ -382,9 +418,9 @@ const BlocoItem: React.FC<BlocoItemProps> = ({
   const handleSave = () => {
     if (!editor) return;
     const md = htmlToMarkdown(editor.getHTML());
-    const hasChanges = md !== bloco.conteudo || localImportancia !== bloco.importancia;
+    const hasChanges = md !== bloco.conteudo || localImportancia !== bloco.importancia || localIdentificador !== (bloco.identificador || '');
     if (hasChanges) {
-      updateBloco({ id: bloco.id, data: { conteudo: md, importancia: localImportancia } });
+      updateBloco({ id: bloco.id, data: { conteudo: md, importancia: localImportancia, identificador: localIdentificador } });
     }
     setIsEditing(false);
   };
@@ -392,6 +428,7 @@ const BlocoItem: React.FC<BlocoItemProps> = ({
   const handleCancel = () => {
     if (editor) editor.commands.setContent(markdownToHtml(bloco.conteudo));
     setLocalImportancia(bloco.importancia);
+    setLocalIdentificador(bloco.identificador || '');
     setIsEditing(false);
   };
 
@@ -414,11 +451,11 @@ const BlocoItem: React.FC<BlocoItemProps> = ({
           onClick={onClick}
           onDoubleClick={() => setIsEditing(true)}
           className={cn(
-            'group relative flex gap-3 p-3 -mx-3 rounded-lg transition-colors border cursor-pointer',
+            'group relative flex gap-3 p-3 -mx-3 rounded-xl transition-all duration-200 border cursor-pointer',
             isSelected
-              ? 'border-amber-200 bg-amber-50/30'
-              : 'border-transparent hover:bg-zinc-50 hover:border-zinc-100',
-            snapshot.isDragging && 'shadow-lg bg-white border-blue-200 border opacity-95 rotate-[0.5deg]',
+              ? 'border-slate-200 bg-slate-50 shadow-sm'
+              : 'border-transparent hover:bg-slate-50/50 hover:border-border',
+            snapshot.isDragging && 'shadow-soft bg-card border-slate-200 border opacity-95 rotate-[0.5deg]',
           )}
         >
           {/* Drag handle */}
@@ -459,17 +496,21 @@ const BlocoItem: React.FC<BlocoItemProps> = ({
 
           {/* Content */}
           <div className="flex-1 min-w-0 space-y-1">
-            {bloco.identificador && (
-              <div className="text-xs font-semibold text-zinc-500 flex items-center gap-2">
-                <span className="bg-zinc-100 px-1.5 py-0.5 rounded text-zinc-600">{bloco.identificador}</span>
-                {bloco.next_review && (
-                  <span className="text-blue-500" title="Next FSRS Review">FSRS: {bloco.next_review}</span>
-                )}
-              </div>
-            )}
-
             {isEditing ? (
               <div className="mt-1" onClick={(e) => e.stopPropagation()}>
+                <div className="mb-2 flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={localIdentificador}
+                    onChange={(e) => setLocalIdentificador(e.target.value)}
+                    placeholder="Identificador (ex: Art. 1º)"
+                    className="text-xs px-2 py-1.5 rounded-md border border-slate-200 w-48 focus:outline-none focus:border-primary font-mono text-slate-700 shadow-sm"
+                  />
+                  <span className="text-[11px] text-slate-400">Identificador opcional</span>
+                  {bloco.next_review && (
+                    <span className="text-[11px] text-blue-500 font-medium ml-auto" title="Next FSRS Review">FSRS: {bloco.next_review}</span>
+                  )}
+                </div>
                 {editor && (
                   <BubbleMenu
                     editor={editor}
@@ -535,14 +576,14 @@ const BlocoItem: React.FC<BlocoItemProps> = ({
                     <button onClick={handleCancel} className="px-3 py-1.5 text-xs text-zinc-500 hover:bg-zinc-100 rounded-md">
                       Cancelar
                     </button>
-                    <button onClick={handleSave} className="px-3 py-1.5 text-xs bg-blue-500 text-white hover:bg-blue-600 rounded-md font-medium">
+                    <button onClick={handleSave} className="px-3 py-1.5 text-xs bg-primary text-primary-foreground hover:bg-slate-700 rounded-md font-medium transition-colors">
                       Salvar
                     </button>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className={cn('text-zinc-800 text-[15px] leading-relaxed whitespace-pre-wrap font-sans transition-colors',
+              <div className={cn('text-slate-800 text-[15px] leading-relaxed font-sans transition-colors',
                 bloco.importancia === 'vital' && 'p-2 rounded-md border border-red-300 bg-red-50/20 -mx-2',
                 bloco.importancia === 'importante' && 'p-2 rounded-md border border-amber-300 bg-amber-50/20 -mx-2',
                 bloco.cor_fonte === 'destaque' && 'bg-yellow-100 px-1 rounded-sm',
@@ -550,7 +591,7 @@ const BlocoItem: React.FC<BlocoItemProps> = ({
                 bloco.cor_fonte === 'verde'    && 'text-green-600',
                 bloco.cor_fonte === 'azul'     && 'text-blue-600',
               )}>
-                {renderMarkdown(bloco.conteudo)}
+                {renderMarkdown(bloco.conteudo, bloco.identificador, bloco.next_review)}
               </div>
             )}
           </div>
@@ -639,7 +680,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
   return (
     <>
-      <div className="max-w-3xl mx-auto bg-white p-8 sm:px-12 rounded-lg shadow-sm border border-zinc-100 min-h-full">
+      <div className="max-w-3xl mx-auto bg-card p-8 sm:px-12 rounded-xl shadow-soft border border-border min-h-full">
         {/* Document header */}
         <div className="flex justify-between items-start mb-8 pb-4 border-b border-zinc-100">
           <div>
@@ -656,7 +697,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             </button>
             <button
               onClick={handleGenerateQuestions}
-              className="flex items-center gap-2 bg-violet-600 text-white px-3 py-1.5 rounded-md text-sm font-medium hover:bg-violet-700 transition-colors shadow-sm"
+              className="flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-sm font-medium hover:bg-slate-700 transition-colors shadow-sm"
             >
               <FileQuestion size={15} />
               Gerar Simulado

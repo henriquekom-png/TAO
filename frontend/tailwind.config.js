@@ -43,4 +43,14 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
-        title: ['Ubuntu', 'sans-serif'
+        title: ['Ubuntu', 'sans-serif'],
+      },
+      boxShadow: {
+        'soft': '0 10px 40px -10px rgba(0,0,0,0.05)',
+        'soft-sm': '0 4px 20px -5px rgba(0,0,0,0.05)',
+        'soft-md': '0 10px 50px -10px rgba(0,0,0,0.08)',
+      },
+    },
+  },
+  plugins: [],
+}

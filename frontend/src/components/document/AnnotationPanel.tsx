@@ -223,7 +223,7 @@ const TipTapEditor: React.FC<TipTapEditorProps> = ({
                   });
                 }
               }}
-              className="px-2 py-1 text-xs rounded transition-colors hover:bg-zinc-800 text-indigo-300 hover:text-indigo-200 font-medium flex items-center gap-0.5"
+              className="px-2 py-1 text-xs rounded transition-colors hover:bg-slate-800 text-slate-300 hover:text-slate-200 font-medium flex items-center gap-0.5"
             >
               <Link2 size={11} /> Portal
             </button>
@@ -300,7 +300,7 @@ const PortalSearchModal: React.FC<PortalSearchModalProps> = ({ onClose, onSelect
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Digite palavras-chave do bloco..."
-            className="w-full text-sm px-3 py-2 border border-zinc-300 rounded-lg outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            className="w-full text-sm px-3 py-2 border border-border rounded-lg outline-none focus:border-primary focus:ring-1 focus:ring-primary"
             autoFocus
           />
         </div>
@@ -578,9 +578,23 @@ const AnotacaoItem: React.FC<AnotacaoItemProps> = ({ anot, index, portalMap, onG
           if (block.type === 'mermaid') {
             return <MermaidRenderer key={i} chart={block.content} />;
           }
+          let cleanText = block.content;
+          cleanText = cleanText.replace(/(Art\.\s*\d+[-A-Z0-9ºo.]*|§\s*\d+[-A-Z0-9ºo.]*|Parágrafo único\.?)\s*\n+/gi, '$1 ');
+          cleanText = cleanText.replace(/(\b[IVXLCDM]+\s*-)\s*\n+/g, '$1 ');
+          cleanText = cleanText.replace(/(\b[a-z]\))\s*\n+/g, '$1 ');
+
           return (
-            <div key={i} className="text-zinc-800 text-[14px] whitespace-pre-wrap leading-relaxed">
-              {block.content}
+            <div key={i} className="text-slate-800 text-[14px] leading-relaxed">
+              {cleanText.split(/\n\n+/).map((para, pIdx, arr) => (
+                <p key={pIdx} className={pIdx < arr.length - 1 ? "mb-1.5" : ""}>
+                  {para.split('\n').map((line, lIdx, lArr) => (
+                    <React.Fragment key={lIdx}>
+                      {line}
+                      {lIdx < lArr.length - 1 && <br />}
+                    </React.Fragment>
+                  ))}
+                </p>
+              ))}
             </div>
           );
         })}
@@ -595,9 +609,9 @@ const AnotacaoItem: React.FC<AnotacaoItemProps> = ({ anot, index, portalMap, onG
           ref={provided.innerRef}
           {...provided.draggableProps}
           className={cn(
-            "bg-white border border-zinc-200 hover:border-zinc-300 rounded-lg shadow-sm overflow-hidden flex flex-row items-stretch relative group min-h-[60px]",
-            "transition-all focus-within:border-amber-400 focus-within:ring-1 focus-within:ring-amber-400",
-            snapshot.isDragging && "shadow-xl border-amber-400 rotate-[0.5deg] opacity-95"
+            "bg-card border border-transparent hover:border-border rounded-xl shadow-soft-sm overflow-hidden flex flex-row items-stretch relative group min-h-[60px]",
+            "transition-all focus-within:border-slate-300 focus-within:ring-1 focus-within:ring-slate-300",
+            snapshot.isDragging && "shadow-soft border-slate-300 rotate-[0.5deg] opacity-95"
           )}
         >
           {/* Subtle vertical Drag Handle on the left */}
@@ -795,8 +809,8 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ blocoId, onClo
   };
 
   return (
-    <div className="w-full min-w-0 bg-zinc-50 border-l border-zinc-200 flex flex-col h-full shadow-sm animate-in slide-in-from-right-8 duration-300">
-      <div className="h-14 px-4 border-b border-zinc-200 flex items-center justify-between bg-white shrink-0">
+    <div className="w-full min-w-0 bg-background border-l border-border flex flex-col h-full shadow-soft-sm animate-in slide-in-from-right-8 duration-300">
+      <div className="h-14 px-4 border-b border-border flex items-center justify-between bg-card shrink-0 shadow-soft-sm">
         <div className="flex items-center gap-2">
           <FileEdit size={18} className="text-amber-500" />
           <h2 className="font-semibold text-sm text-zinc-800">Anotações do Bloco</h2>
