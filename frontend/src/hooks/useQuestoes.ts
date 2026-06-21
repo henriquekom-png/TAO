@@ -108,7 +108,7 @@ export function useQuestoesPaginated(filtros: QuestoesFiltros = {}) {
   return useQuery<PaginatedQuestoes>({
     queryKey: questoesKeys.list(filtros),
     queryFn:  () =>
-      api.get<PaginatedQuestoes>(`/questoes?${params.toString()}`).then((r) => r.data),
+      api.get<PaginatedQuestoes>(`/questoes/?${params.toString()}`).then((r) => r.data),
     placeholderData: (prev) => prev, // keep previous data while refetching (smooth pagination)
   });
 }

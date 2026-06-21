@@ -28,7 +28,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
         runtimeCaching: [
           {
-            urlPattern: /^http:\/\/localhost:8000\/api\/v1\/.*/i,
+            urlPattern: /^https:\/\/tao-backend-900893471328\.southamerica-east1\.run\.app\/api\/v1\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'tao-api-cache',

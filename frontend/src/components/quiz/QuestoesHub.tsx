@@ -60,18 +60,18 @@ export const QuestoesHub: React.FC<{
   ];
 
   return (
-    <div className="h-full flex flex-col bg-zinc-50">
+    <div className="h-full flex flex-col bg-zinc-50 dark:bg-zinc-950">
       {/* Page Header */}
-      <div className="bg-white border-b border-zinc-200 px-8 pt-6 pb-0 shrink-0">
+      <div className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 px-8 pt-6 pb-0 shrink-0">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
             <span className="text-lg">🧠</span>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-zinc-900 leading-tight">
+            <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100 leading-tight">
               Banco de Questões &amp; Simulados
             </h1>
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
               Pratique com simulados e gerencie seu banco de questões
             </p>
           </div>
@@ -87,8 +87,8 @@ export const QuestoesHub: React.FC<{
               className={cn(
                 'flex items-center gap-2 px-5 py-3 text-sm font-semibold border-b-2 transition-colors',
                 activeTab === tab.id
-                  ? 'border-violet-600 text-violet-700 bg-violet-50/50'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:border-zinc-300',
+                  ? 'border-violet-600 text-violet-700 bg-violet-50 dark:bg-violet-500/10/50 dark:bg-violet-500/10'
+                  : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:border-zinc-300 dark:hover:border-zinc-700',
               )}
             >
               {tab.icon}
@@ -178,13 +178,13 @@ const HubSetupForm: React.FC<{
   });
 
   const fieldCls =
-    'w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white ' +
-    'focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition';
+    'w-full border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-800 dark:text-zinc-200 bg-white dark:bg-zinc-900 ' +
+    'focus:outline-none focus:ring-2 focus:ring-violet-400 dark:focus:ring-violet-500/50 focus:border-transparent transition';
 
   return (
-    <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-8">
-      <h2 className="text-lg font-bold text-zinc-900 mb-1">🚀 Configurar Simulado</h2>
-      <p className="text-sm text-zinc-500 mb-6">
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm p-8">
+      <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-100 mb-1">🚀 Configurar Simulado</h2>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-6">
         Defina os filtros e inicie uma sessão de prática. Deixe em branco para buscar de todas as categorias.
       </p>
 
@@ -202,17 +202,17 @@ const HubSetupForm: React.FC<{
       >
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Matéria</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Matéria</label>
             <input className={fieldCls} placeholder="Ex.: Direito do Trabalho"
               value={form.materia} onChange={(e) => setForm(f => ({ ...f, materia: e.target.value }))} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Banca</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Banca</label>
             <input className={fieldCls} placeholder="Ex.: CESPE, FGV"
               value={form.banca} onChange={(e) => setForm(f => ({ ...f, banca: e.target.value }))} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Dificuldade</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Dificuldade</label>
             <select className={fieldCls} value={form.dificuldade}
               onChange={(e) => setForm(f => ({ ...f, dificuldade: e.target.value as DificuldadeQuestao | '' }))}>
               <option value="">Qualquer</option>
@@ -222,7 +222,7 @@ const HubSetupForm: React.FC<{
             </select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Quantidade (máx. 50)</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Quantidade (máx. 50)</label>
             <input type="number" min={1} max={50} className={fieldCls} value={form.limit}
               onChange={(e) => setForm(f => ({ ...f, limit: Math.min(50, Math.max(1, Number(e.target.value))) }))} />
           </div>
@@ -284,48 +284,48 @@ const HubQuestionView: React.FC<HubQuestionViewProps> = ({
   return (
     <div className="space-y-5">
       {/* Progress */}
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm px-6 py-4">
-        <div className="flex justify-between items-center text-xs text-zinc-500 font-medium mb-2">
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm px-6 py-4">
+        <div className="flex justify-between items-center text-xs text-zinc-500 dark:text-zinc-400 font-medium mb-2">
           <span>Questão {currentIndex + 1} de {total}</span>
           <span className="text-emerald-600 font-semibold">{score.acertos} acerto{score.acertos !== 1 ? 's' : ''}</span>
         </div>
-        <div className="w-full bg-zinc-100 rounded-full h-1.5">
+        <div className="w-full bg-zinc-100 dark:bg-zinc-800 rounded-full h-1.5">
           <div className="bg-violet-500 h-1.5 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
         </div>
       </div>
 
       {/* Question card */}
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6">
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm p-6">
         <div className="flex flex-wrap gap-2 mb-4">
           {question.materia && (
-            <span className="bg-violet-50 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-violet-200">
+            <span className="bg-violet-50 dark:bg-violet-500/10 text-violet-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-violet-200 dark:border-violet-500/20">
               {question.materia}
             </span>
           )}
-          <span className="bg-zinc-100 text-zinc-600 text-xs font-medium px-2.5 py-1 rounded-full">
+          <span className="bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-medium px-2.5 py-1 rounded-full">
             {tipoMap[question.tipo] ?? question.tipo}
           </span>
           <span className={cn(
             'text-xs font-medium px-2.5 py-1 rounded-full',
-            question.dificuldade === 'facil'  && 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-            question.dificuldade === 'media'   && 'bg-amber-50 text-amber-700 border border-amber-200',
-            question.dificuldade === 'dificil' && 'bg-red-50 text-red-700 border border-red-200',
+            question.dificuldade === 'facil'  && 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 border border-emerald-200 dark:border-emerald-500/20',
+            question.dificuldade === 'media'   && 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 border border-amber-200 dark:border-amber-500/20',
+            question.dificuldade === 'dificil' && 'bg-red-50 dark:bg-red-500/10 text-red-700 border border-red-200 dark:border-red-500/20',
           )}>
             {question.dificuldade === 'facil' ? 'Fácil' : question.dificuldade === 'media' ? 'Média' : 'Difícil'}
           </span>
           {[question.banca, question.ano, question.cargo].filter(Boolean).length > 0 && (
-            <span className="bg-zinc-50 text-zinc-500 text-xs px-2.5 py-1 rounded-full border border-zinc-200">
+            <span className="bg-zinc-50 dark:bg-zinc-950 text-zinc-500 dark:text-zinc-400 text-xs px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-800">
               {[question.banca, question.ano, question.cargo].filter(Boolean).join(' · ')}
             </span>
           )}
         </div>
-        <p className="text-zinc-800 text-[15px] leading-relaxed font-medium whitespace-pre-wrap">
+        <p className="text-zinc-800 dark:text-zinc-200 text-[15px] leading-relaxed font-medium whitespace-pre-wrap">
           {question.enunciado}
         </p>
       </div>
 
       {/* Answer panels */}
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-6 space-y-3">
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm p-6 space-y-3">
         {question.tipo === 'multipla_escolha' && (
           <HubMultipleChoice question={question} selectedAnswer={selectedAnswer} isSubmitted={isSubmitted} onSelect={onSelectAnswer} />
         )}
@@ -341,7 +341,7 @@ const HubQuestionView: React.FC<HubQuestionViewProps> = ({
       {isSubmitted && (
         <div className={cn(
           'rounded-2xl border-2 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300',
-          isCorrect ? 'border-emerald-300' : 'border-red-300',
+          isCorrect ? 'border-emerald-300 dark:border-emerald-500/40' : 'border-red-300 dark:border-red-500/40',
         )}>
           <div className={cn(
             'flex items-center gap-2.5 px-5 py-3 font-semibold text-sm',
@@ -350,10 +350,10 @@ const HubQuestionView: React.FC<HubQuestionViewProps> = ({
             {isCorrect ? <><CheckCircle2 size={18} /> Resposta Correta!</> : <><XCircle size={18} /> Resposta Incorreta</>}
           </div>
           {question.comentario && (
-            <div className="p-5 bg-white">
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-wide mb-2">📝 Comentário do gabarito</p>
+            <div className="p-5 bg-white dark:bg-zinc-900">
+              <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">📝 Comentário do gabarito</p>
               <div
-                className="text-sm text-zinc-700 leading-relaxed [&_strong]:font-semibold [&_strong]:text-zinc-900 [&_em]:italic [&_p]:mb-2 [&_p:last-child]:mb-0"
+                className="text-sm text-zinc-700 dark:text-zinc-300 leading-relaxed [&_strong]:font-semibold [&_strong]:text-zinc-900 [&_em]:italic [&_p]:mb-2 [&_p:last-child]:mb-0"
                 dangerouslySetInnerHTML={{ __html: markdownToHtml(question.comentario) }}
               />
             </div>
@@ -364,13 +364,13 @@ const HubQuestionView: React.FC<HubQuestionViewProps> = ({
       {/* Action row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <button onClick={onQuit} className="text-xs text-zinc-400 hover:text-zinc-600 underline transition-colors">
+          <button onClick={onQuit} className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 underline transition-colors">
             Encerrar sessão
           </button>
           {!isSubmitted && (
             <button
               onClick={onSkip}
-              className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-800 transition-colors bg-zinc-100 hover:bg-zinc-200 px-3 py-1.5 rounded-lg"
+              className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-3 py-1.5 rounded-lg"
               title="Pular esta questão"
             >
               <FastForward size={14} /> Pular
@@ -378,7 +378,7 @@ const HubQuestionView: React.FC<HubQuestionViewProps> = ({
           )}
           <button
             onClick={() => onEditQuestion(question)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-violet-700 transition-colors bg-zinc-100 hover:bg-violet-50 px-3 py-1.5 rounded-lg"
+            className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-violet-700 transition-colors bg-zinc-100 dark:bg-zinc-800 hover:bg-violet-50 dark:hover:bg-violet-500/20 px-3 py-1.5 rounded-lg"
             title="Corrigir no banco de questões"
           >
             <Pencil size={14} /> Corrigir
@@ -389,7 +389,7 @@ const HubQuestionView: React.FC<HubQuestionViewProps> = ({
           <button onClick={onSubmit} disabled={!hasAnswer}
             className={cn(
               'flex items-center gap-2 px-6 py-2.5 rounded-xl font-semibold text-sm transition-all',
-              hasAnswer ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-md' : 'bg-zinc-100 text-zinc-400 cursor-not-allowed',
+              hasAnswer ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-md' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 cursor-not-allowed',
             )}>
             Responder <ChevronRight size={16} />
           </button>
@@ -419,18 +419,18 @@ const HubMultipleChoice: React.FC<{ question: Questao; selectedAnswer: string | 
         const text = question[key]; if (!text) return null;
         const sel  = selectedAnswer === letter;
         const corr = question.gabarito.toUpperCase() === letter;
-        let cls = 'border-zinc-200 bg-white hover:border-violet-300 hover:bg-violet-50';
+        let cls = 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-violet-300 dark:hover:border-violet-500/50 hover:bg-violet-50 dark:hover:bg-violet-500/20';
         if (isSubmitted) {
-          if (corr) cls = 'border-emerald-400 bg-emerald-50';
-          else if (sel) cls = 'border-red-400 bg-red-50';
-          else cls = 'border-zinc-100 bg-zinc-50 opacity-60';
-        } else if (sel) cls = 'border-violet-500 bg-violet-50';
+          if (corr) cls = 'border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10';
+          else if (sel) cls = 'border-red-400 bg-red-50 dark:bg-red-500/10';
+          else cls = 'border-zinc-100 dark:border-zinc-800/50 bg-zinc-50 dark:bg-zinc-950 opacity-60';
+        } else if (sel) cls = 'border-violet-500 bg-violet-50 dark:bg-violet-500/10';
         return (
           <button key={letter} onClick={() => !isSubmitted && onSelect(letter)} disabled={isSubmitted}
             className={cn('w-full flex items-start gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all', cls, !isSubmitted && 'cursor-pointer')}>
             <span className={cn('shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mt-0.5',
               isSubmitted && corr ? 'bg-emerald-500 text-white' : isSubmitted && sel ? 'bg-red-500 text-white'
-              : sel ? 'bg-violet-600 text-white' : 'bg-zinc-100 text-zinc-600')}>
+              : sel ? 'bg-violet-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400')}>
               {letter}
             </span>
             <span className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed">{text}</span>
@@ -448,12 +448,12 @@ const HubCertoErrado: React.FC<{ gabarito: string; selectedAnswer: string | null
       {[{ v: 'Certo', e: '✅' }, { v: 'Errado', e: '❌' }].map(({ v, e }) => {
         const sel  = selectedAnswer === v;
         const corr = gabarito.trim().toLowerCase() === v.toLowerCase();
-        let cls = 'border-zinc-200 bg-white hover:border-violet-300 text-zinc-700';
+        let cls = 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-violet-300 dark:hover:border-violet-500/50 text-zinc-700 dark:text-zinc-300';
         if (isSubmitted) {
-          if (corr) cls = 'border-emerald-400 bg-emerald-50 text-emerald-800';
-          else if (sel) cls = 'border-red-400 bg-red-50 text-red-800';
-          else cls = 'border-zinc-100 bg-zinc-50 text-zinc-400 opacity-60';
-        } else if (sel) cls = 'border-violet-500 bg-violet-50 text-violet-800';
+          if (corr) cls = 'border-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800';
+          else if (sel) cls = 'border-red-400 bg-red-50 dark:bg-red-500/10 text-red-800';
+          else cls = 'border-zinc-100 dark:border-zinc-800/50 bg-zinc-50 dark:bg-zinc-950 text-zinc-400 dark:text-zinc-500 opacity-60';
+        } else if (sel) cls = 'border-violet-500 bg-violet-50 dark:bg-violet-500/10 text-violet-800';
         return (
           <button key={v} onClick={() => !isSubmitted && onSelect(v)} disabled={isSubmitted}
             className={cn('flex-1 flex flex-col items-center justify-center gap-2 py-6 rounded-2xl border-2 font-semibold text-lg transition-all', cls, !isSubmitted && 'cursor-pointer')}>
@@ -467,13 +467,13 @@ const HubCertoErrado: React.FC<{ gabarito: string; selectedAnswer: string | null
 const HubCombinacaoItens: React.FC<{ itens: QuestaoItem[]; itemAnswers: Record<number, boolean>; isSubmitted: boolean; onToggle: (id: number, v: boolean) => void }> =
   ({ itens, itemAnswers, isSubmitted, onToggle }) => (
     <div className="space-y-3">
-      <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Julgue cada item:</p>
+      <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Julgue cada item:</p>
       {itens.map((item) => {
         const ua = itemAnswers[item.id]; const has = ua !== undefined;
         const ok = item.correto === null ? true : item.correto === ua;
         return (
           <div key={item.id} className={cn('rounded-xl border-2 p-4 transition-all',
-            isSubmitted ? item.correto !== null && !ok ? 'border-red-300 bg-red-50' : 'border-emerald-300 bg-emerald-50' : 'border-zinc-200 bg-white')}>
+            isSubmitted ? item.correto !== null && !ok ? 'border-red-300 dark:border-red-500/40 bg-red-50 dark:bg-red-500/10' : 'border-emerald-300 dark:border-emerald-500/40 bg-emerald-50 dark:bg-emerald-500/10' : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900')}>
             <div className="flex items-start gap-3 mb-3">
               <span className="shrink-0 w-7 h-7 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center mt-0.5">{item.numero}</span>
               <p className="text-sm text-zinc-800 dark:text-zinc-200 leading-relaxed">{item.enunciado}</p>
@@ -486,7 +486,7 @@ const HubCombinacaoItens: React.FC<{ itens: QuestaoItem[]; itemAnswers: Record<n
                   <button key={label} onClick={() => !isSubmitted && onToggle(item.id, val)} disabled={isSubmitted}
                     className={cn('px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors',
                       corr2 ? 'bg-emerald-500 text-white border-emerald-500' : wrong2 ? 'bg-red-500 text-white border-red-500'
-                      : sel2 ? 'bg-violet-600 text-white border-violet-600' : 'bg-zinc-100 text-zinc-600 border-zinc-200 hover:border-violet-300',
+                      : sel2 ? 'bg-violet-600 text-white border-violet-600' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-violet-300 dark:hover:border-violet-500/50',
                       !isSubmitted && 'cursor-pointer')}>
                     {label}
                   </button>
@@ -505,15 +505,15 @@ const HubResultsView: React.FC<{ score: QuizScore; onRestart: () => void }> = ({
   const color = pct >= 70 ? 'text-emerald-600' : pct >= 50 ? 'text-amber-600' : 'text-red-500';
   const label = pct >= 70 ? 'Ótimo desempenho!' : pct >= 50 ? 'Bom trabalho!' : 'Continue praticando!';
   return (
-    <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm p-10 flex flex-col items-center text-center gap-5">
-      <Trophy size={52} className={pct >= 70 ? 'text-amber-400' : 'text-zinc-300'} />
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm p-10 flex flex-col items-center text-center gap-5">
+      <Trophy size={52} className={pct >= 70 ? 'text-amber-400' : 'text-zinc-300 dark:text-zinc-600'} />
       <div>
         <p className={cn('text-5xl font-extrabold mb-1', color)}>{pct}%</p>
-        <p className="text-lg font-semibold text-zinc-800">{label}</p>
+        <p className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">{label}</p>
       </div>
-      <div className="bg-zinc-50 border border-zinc-200 rounded-2xl px-8 py-5 w-full max-w-xs">
-        {[['Acertos', score.acertos, 'text-emerald-600'], ['Erros', score.total - score.acertos, 'text-red-500'], ['Total', score.total, 'text-zinc-700']].map(([l, v, c]) => (
-          <div key={l as string} className="flex justify-between items-center text-sm font-medium text-zinc-600 py-1.5 border-b border-zinc-100 last:border-0">
+      <div className="bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-8 py-5 w-full max-w-xs">
+        {[['Acertos', score.acertos, 'text-emerald-600'], ['Erros', score.total - score.acertos, 'text-red-500'], ['Total', score.total, 'text-zinc-700 dark:text-zinc-300']].map(([l, v, c]) => (
+          <div key={l as string} className="flex justify-between items-center text-sm font-medium text-zinc-600 dark:text-zinc-400 py-1.5 border-b border-zinc-100 dark:border-zinc-800/50 last:border-0">
             <span>{l}</span><span className={cn('font-bold text-base', c)}>{v}</span>
           </div>
         ))}
@@ -559,7 +559,7 @@ const GerenciarTab: React.FC<{
     multipla_escolha: 'M.E.', certo_errado: 'C/E', combinacao_itens: 'Comb.',
   };
   const difColor: Record<string, string> = {
-    facil: 'text-emerald-700 bg-emerald-50', media: 'text-amber-700 bg-amber-50', dificil: 'text-red-700 bg-red-50',
+    facil: 'text-emerald-700 bg-emerald-50 dark:bg-emerald-500/10', media: 'text-amber-700 bg-amber-50 dark:bg-amber-500/10', dificil: 'text-red-700 bg-red-50 dark:bg-red-500/10',
   };
 
   return (
@@ -578,12 +578,12 @@ const GerenciarTab: React.FC<{
         {/* Quick filters */}
         <div className="ml-auto flex flex-wrap items-center gap-2">
           {/* Search */}
-          <div className="flex items-center border border-zinc-200 rounded-lg overflow-hidden bg-white shadow-sm">
+          <div className="flex items-center border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden bg-white dark:bg-zinc-900 shadow-sm">
             <input placeholder="Buscar no enunciado..." value={searchDraft}
               onChange={(e) => setSearchDraft(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && applySearch()}
               className="px-3 py-2 text-sm outline-none bg-transparent min-w-[200px]" />
-            <button onClick={applySearch} className="px-3 py-2 text-zinc-400 hover:text-violet-600 border-l border-zinc-200 transition-colors">
+            <button onClick={applySearch} className="px-3 py-2 text-zinc-400 dark:text-zinc-500 hover:text-violet-600 border-l border-zinc-200 dark:border-zinc-800 transition-colors">
               <Search size={14} />
             </button>
           </div>
@@ -616,7 +616,7 @@ const GerenciarTab: React.FC<{
 
       {/* Stats bar */}
       {data && (
-        <div className="text-xs text-zinc-500 font-medium">
+        <div className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
           {data.total} questão{data.total !== 1 ? 'ões' : ''} encontrada{data.total !== 1 ? 's' : ''}
           {filtros.search ? ` · busca: "${filtros.search}"` : ''}
         </div>
@@ -628,10 +628,10 @@ const GerenciarTab: React.FC<{
 
       {!isLoading && !isError && data && (
         <>
-          <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-zinc-50 border-b border-zinc-200 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                <tr className="bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                   <th className="px-5 py-3 text-left w-16">ID</th>
                   <th className="px-5 py-3 text-left">Enunciado</th>
                   <th className="px-5 py-3 text-left w-28">Matéria</th>
@@ -641,21 +641,21 @@ const GerenciarTab: React.FC<{
                   <th className="px-5 py-3 text-right w-24">Ação</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-100">
+              <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
                 {data.data.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-5 py-10 text-center text-zinc-400 italic text-sm">
+                    <td colSpan={7} className="px-5 py-10 text-center text-zinc-400 dark:text-zinc-500 italic text-sm">
                       Nenhuma questão encontrada com os filtros aplicados.
                     </td>
                   </tr>
                 ) : data.data.map((q) => (
-                  <tr key={q.id} className="hover:bg-violet-50/30 transition-colors">
-                    <td className="px-5 py-3 text-zinc-400 font-mono text-xs">{q.id}</td>
-                    <td className="px-5 py-3 text-zinc-800 max-w-xs">
+                  <tr key={q.id} className="hover:bg-violet-50 dark:hover:bg-violet-500/20/30 transition-colors">
+                    <td className="px-5 py-3 text-zinc-400 dark:text-zinc-500 font-mono text-xs">{q.id}</td>
+                    <td className="px-5 py-3 text-zinc-800 dark:text-zinc-200 max-w-xs">
                       <span className="line-clamp-2 leading-snug">{q.enunciado}</span>
                     </td>
                     <td className="px-5 py-3">
-                      <span className="text-xs text-zinc-600 bg-zinc-100 px-2 py-0.5 rounded-full">{q.materia || '—'}</span>
+                      <span className="text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 rounded-full">{q.materia || '—'}</span>
                     </td>
                     <td className="px-5 py-3 text-xs font-medium text-violet-700">{tipoLabel[q.tipo] ?? q.tipo}</td>
                     <td className="px-5 py-3">
@@ -663,12 +663,12 @@ const GerenciarTab: React.FC<{
                         {q.dificuldade === 'facil' ? 'Fácil' : q.dificuldade === 'media' ? 'Média' : 'Difícil'}
                       </span>
                     </td>
-                    <td className="px-5 py-3 text-xs text-zinc-500">{q.banca || '—'}</td>
+                    <td className="px-5 py-3 text-xs text-zinc-500 dark:text-zinc-400">{q.banca || '—'}</td>
                     <td className="px-5 py-3 text-right">
                       <button
                         id={`hub-edit-${q.id}`}
                         onClick={() => setEditingQuestao(q)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 hover:border-zinc-300 transition-colors"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
                       >
                         <Pencil size={12} /> Editar
                       </button>
@@ -684,15 +684,15 @@ const GerenciarTab: React.FC<{
             <div className="flex items-center justify-center gap-2">
               <button onClick={() => setFiltros(f => ({ ...f, page: Math.max(1, (f.page ?? 1) - 1) }))}
                 disabled={(filtros.page ?? 1) <= 1}
-                className="p-2 rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 disabled:opacity-40 transition-colors">
+                className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-40 transition-colors">
                 <ChevronLeft size={16} />
               </button>
-              <span className="text-sm text-zinc-600 font-medium px-2">
+              <span className="text-sm text-zinc-600 dark:text-zinc-400 font-medium px-2">
                 Página {filtros.page ?? 1} de {totalPages}
               </span>
               <button onClick={() => setFiltros(f => ({ ...f, page: Math.min(totalPages, (f.page ?? 1) + 1) }))}
                 disabled={(filtros.page ?? 1) >= totalPages}
-                className="p-2 rounded-lg border border-zinc-200 text-zinc-500 hover:bg-zinc-50 disabled:opacity-40 transition-colors">
+                className="p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-40 transition-colors">
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -736,10 +736,10 @@ const FilterSelect: React.FC<{
 }> = ({ value, onChange, options }) => (
   <div className="relative">
     <select value={value} onChange={(e) => onChange(e.target.value)}
-      className="appearance-none border border-zinc-200 rounded-lg px-3 py-2 pr-8 text-sm text-zinc-700 bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 cursor-pointer shadow-sm">
+      className="appearance-none border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 pr-8 text-sm text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-violet-400 dark:focus:ring-violet-500/50 cursor-pointer shadow-sm">
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
-    <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+    <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-500 pointer-events-none" />
   </div>
 );
 
@@ -780,7 +780,7 @@ const EditQuestaoModal: React.FC<{
     }
   }, [fullQuestao]);
 
-  const field = 'w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 transition';
+  const field = 'w-full border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-800 dark:text-zinc-200 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-violet-400 dark:focus:ring-violet-500/50 transition';
   const ta    = `${field} resize-y`;
 
   return (
@@ -788,15 +788,15 @@ const EditQuestaoModal: React.FC<{
       <div className="space-y-4 overflow-y-auto max-h-[65vh] pr-1">
         <div className="grid grid-cols-3 gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Banca</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Banca</label>
             <input className={field} value={form.banca ?? ''} onChange={(e) => setForm(f => ({ ...f, banca: e.target.value }))} />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Ano</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Ano</label>
             <input type="number" className={field} value={form.ano ?? ''} onChange={(e) => setForm(f => ({ ...f, ano: e.target.value ? Number(e.target.value) : undefined }))} />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Dificuldade</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Dificuldade</label>
             <select className={field} value={form.dificuldade} onChange={(e) => setForm(f => ({ ...f, dificuldade: e.target.value as DificuldadeQuestao }))}>
               <option value="facil">Fácil</option><option value="media">Média</option><option value="dificil">Difícil</option>
             </select>
@@ -805,17 +805,17 @@ const EditQuestaoModal: React.FC<{
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Matéria</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Matéria</label>
             <input className={field} value={form.materia ?? ''} onChange={(e) => setForm(f => ({ ...f, materia: e.target.value }))} />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Cargo</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Cargo</label>
             <input className={field} value={form.cargo ?? ''} onChange={(e) => setForm(f => ({ ...f, cargo: e.target.value }))} />
           </div>
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Enunciado *</label>
+          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Enunciado *</label>
           <textarea rows={4} className={ta} value={form.enunciado} onChange={(e) => setForm(f => ({ ...f, enunciado: e.target.value }))} />
         </div>
 
@@ -825,7 +825,7 @@ const EditQuestaoModal: React.FC<{
               const key = `alternativa_${l}` as keyof QuestaoUpdatePayload;
               return (
                 <div key={l} className="flex items-start gap-2">
-                  <span className="mt-2 w-6 h-6 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold flex items-center justify-center shrink-0">{l.toUpperCase()}</span>
+                  <span className="mt-2 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-bold flex items-center justify-center shrink-0">{l.toUpperCase()}</span>
                   <input className={`${field} flex-1`} placeholder={`Alternativa ${l.toUpperCase()}`}
                     value={(form[key] as string) ?? ''}
                     onChange={(e) => setForm(f => ({ ...f, [key]: e.target.value }))} />
@@ -838,7 +838,7 @@ const EditQuestaoModal: React.FC<{
         {form.tipo === 'combinacao_itens' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Itens da Combinação</label>
+              <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Itens da Combinação</label>
               <button
                 onClick={() => setForm(f => ({ ...f, itens: [...(f.itens || []), { numero: '', enunciado: '', correto: null }] }))}
                 className="text-xs font-semibold text-violet-600 flex items-center gap-1 hover:text-violet-700"
@@ -846,9 +846,9 @@ const EditQuestaoModal: React.FC<{
                 <Plus size={12} /> Adicionar Item
               </button>
             </div>
-            {isLoading && <div className="text-xs text-zinc-500">Carregando itens...</div>}
+            {isLoading && <div className="text-xs text-zinc-500 dark:text-zinc-400">Carregando itens...</div>}
             {(!isLoading && form.itens) && form.itens.map((item, idx) => (
-              <div key={idx} className="flex flex-col gap-2 bg-zinc-50 p-3 rounded-lg border border-zinc-200 shadow-sm relative">
+              <div key={idx} className="flex flex-col gap-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm relative">
                 <div className="flex gap-2 items-center justify-between">
                   <div className="flex items-center gap-2">
                     <input
@@ -882,7 +882,7 @@ const EditQuestaoModal: React.FC<{
                       newItens.splice(idx, 1);
                       setForm({ ...form, itens: newItens });
                     }}
-                    className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                    className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
                     title="Remover item"
                   >
                     <Trash2 size={16} />
@@ -905,19 +905,19 @@ const EditQuestaoModal: React.FC<{
         )}
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Gabarito *</label>
+          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Gabarito *</label>
           <input className={field} value={form.gabarito} onChange={(e) => setForm(f => ({ ...f, gabarito: e.target.value }))}
             placeholder={form.tipo === 'multipla_escolha' ? 'A, B, C, D ou E' : form.tipo === 'certo_errado' ? 'Certo ou Errado' : 'I-Certo, II-Errado...'} />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Comentário / Justificativa</label>
+          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Comentário / Justificativa</label>
           <textarea rows={3} className={ta} value={form.comentario ?? ''} onChange={(e) => setForm(f => ({ ...f, comentario: e.target.value }))} />
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100 mt-4">
-        <button onClick={onClose} disabled={isSaving} className="px-4 py-2 text-sm font-medium text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
+      <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800/50 mt-4">
+        <button onClick={onClose} disabled={isSaving} className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
           Cancelar
         </button>
         <button onClick={() => onSave(form)} disabled={isSaving || !form.enunciado || !form.gabarito}
@@ -945,7 +945,7 @@ const InsertQuestaoModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     {numero: 'II', enunciado: '', correto: null},
   ]);
 
-  const field = 'w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm text-zinc-800 bg-white focus:outline-none focus:ring-2 focus:ring-violet-400 transition';
+  const field = 'w-full border border-zinc-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-800 dark:text-zinc-200 bg-white dark:bg-zinc-900 focus:outline-none focus:ring-2 focus:ring-violet-400 dark:focus:ring-violet-500/50 transition';
   const ta    = `${field} resize-y`;
 
   const handleSubmit = () => {
@@ -971,7 +971,7 @@ const InsertQuestaoModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       <ModalShell title="➕ Inserir Questão" onClose={onClose}>
         <div className="flex flex-col items-center gap-4 py-6">
           <CheckCircle2 size={48} className="text-emerald-500" />
-          <p className="text-zinc-800 font-semibold">Questão inserida com sucesso!</p>
+          <p className="text-zinc-800 dark:text-zinc-200 font-semibold">Questão inserida com sucesso!</p>
           <button onClick={onClose} className="px-5 py-2 bg-violet-600 text-white text-sm font-semibold rounded-lg hover:bg-violet-700 transition-colors">Fechar</button>
         </div>
       </ModalShell>
@@ -983,7 +983,7 @@ const InsertQuestaoModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       <div className="space-y-4 overflow-y-auto max-h-[65vh] pr-1">
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Tipo *</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Tipo *</label>
             <select className={field} value={tipo} onChange={(e) => setTipo(e.target.value as TipoQuestao)}>
               <option value="multipla_escolha">Múltipla Escolha</option>
               <option value="certo_errado">Certo/Errado</option>
@@ -991,23 +991,23 @@ const InsertQuestaoModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             </select>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Dificuldade</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Dificuldade</label>
             <select className={field} value={form.dificuldade} onChange={(e) => setForm(f => ({ ...f, dificuldade: e.target.value as DificuldadeQuestao }))}>
               <option value="facil">Fácil</option><option value="media">Média</option><option value="dificil">Difícil</option>
             </select>
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Matéria</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Matéria</label>
             <input className={field} value={form.materia} onChange={(e) => setForm(f => ({ ...f, materia: e.target.value }))} />
           </div>
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Banca</label>
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Banca</label>
             <input className={field} value={form.banca} onChange={(e) => setForm(f => ({ ...f, banca: e.target.value }))} />
           </div>
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Enunciado *</label>
+          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Enunciado *</label>
           <textarea rows={4} className={`${field} resize-y`} value={form.enunciado} onChange={(e) => setForm(f => ({ ...f, enunciado: e.target.value }))} />
         </div>
 
@@ -1015,7 +1015,7 @@ const InsertQuestaoModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <div className="space-y-2">
             {(['a','b','c','d','e'] as const).map((l) => (
               <div key={l} className="flex items-start gap-2">
-                <span className="mt-2 w-6 h-6 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold flex items-center justify-center shrink-0">{l.toUpperCase()}</span>
+                <span className="mt-2 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-bold flex items-center justify-center shrink-0">{l.toUpperCase()}</span>
                 <input className={`${field} flex-1`} placeholder={`Alternativa ${l.toUpperCase()}`}
                   value={form[`alt_${l}` as keyof typeof form]}
                   onChange={(e) => setForm(f => ({ ...f, [`alt_${l}`]: e.target.value }))} />
@@ -1027,7 +1027,7 @@ const InsertQuestaoModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         {tipo === 'combinacao_itens' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Itens da Combinação</label>
+              <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Itens da Combinação</label>
               <button
                 onClick={() => setItens(curr => [...curr, { numero: '', enunciado: '', correto: null }])}
                 className="text-xs font-semibold text-violet-600 flex items-center gap-1 hover:text-violet-700"
@@ -1036,7 +1036,7 @@ const InsertQuestaoModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               </button>
             </div>
             {itens.map((item, idx) => (
-              <div key={idx} className="flex flex-col gap-2 bg-zinc-50 p-3 rounded-lg border border-zinc-200 shadow-sm relative">
+              <div key={idx} className="flex flex-col gap-2 bg-zinc-50 dark:bg-zinc-950 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 shadow-sm relative">
                 <div className="flex gap-2 items-center justify-between">
                   <div className="flex items-center gap-2">
                     <input
@@ -1070,7 +1070,7 @@ const InsertQuestaoModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       newItens.splice(idx, 1);
                       setItens(newItens);
                     }}
-                    className="p-1.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                    className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
                     title="Remover item"
                   >
                     <Trash2 size={16} />
@@ -1093,18 +1093,18 @@ const InsertQuestaoModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         )}
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Gabarito *</label>
+          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Gabarito *</label>
           <input className={field} value={form.gabarito} onChange={(e) => setForm(f => ({ ...f, gabarito: e.target.value }))} />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Comentário</label>
+          <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Comentário</label>
           <textarea rows={2} className={`${field} resize-y`} value={form.comentario} onChange={(e) => setForm(f => ({ ...f, comentario: e.target.value }))} />
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100 mt-4">
-        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Cancelar</button>
+      <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800/50 mt-4">
+        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">Cancelar</button>
         <button onClick={handleSubmit} disabled={isPending || !form.enunciado || !form.gabarito}
           className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 rounded-lg transition-colors disabled:opacity-50 shadow-sm">
           {isPending ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
@@ -1127,11 +1127,11 @@ const IngestModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="flex flex-col items-center gap-4 py-6 text-center">
           <CheckCircle2 size={48} className="text-emerald-500" />
           <div>
-            <p className="text-lg font-bold text-zinc-900">{result.criadas} questão{result.criadas !== 1 ? 'ões' : ''} inserida{result.criadas !== 1 ? 's' : ''}!</p>
-            <p className="text-sm text-zinc-500 mt-1">O banco foi atualizado com sucesso.</p>
+            <p className="text-lg font-bold text-zinc-900 dark:text-zinc-100">{result.criadas} questão{result.criadas !== 1 ? 'ões' : ''} inserida{result.criadas !== 1 ? 's' : ''}!</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">O banco foi atualizado com sucesso.</p>
           </div>
           <div className="flex gap-3">
-            <button onClick={reset} className="px-4 py-2 text-sm font-medium border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors text-zinc-600">
+            <button onClick={reset} className="px-4 py-2 text-sm font-medium border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-zinc-600 dark:text-zinc-400">
               Inserir mais
             </button>
             <button onClick={onClose} className="px-5 py-2 bg-violet-600 text-white text-sm font-semibold rounded-lg hover:bg-violet-700 transition-colors">
@@ -1145,14 +1145,14 @@ const IngestModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   return (
     <ModalShell title="⚡ Ingestão Inteligente via IA" onClose={onClose} maxW="max-w-2xl">
-      <p className="text-sm text-zinc-500 mb-4">
+      <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-4">
         Cole o texto com uma ou mais questões (Markdown, PDF copiado, etc.). O Gemini irá parsear e estruturar automaticamente.
       </p>
 
       <textarea
         id="hub-ingest-textarea"
         rows={12}
-        className="w-full border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-800 bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition resize-y font-mono"
+        className="w-full border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-800 dark:text-zinc-200 bg-zinc-50 dark:bg-zinc-950 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition resize-y font-mono"
         placeholder={"Exemplo:\n\nQuestão 1 (CESPE/2023 - Analista MPT)\nÉ vedado ao empregador reter a carteira de trabalho do empregado.\n\n( ) Certo  ( ) Errado\n\nGabarito: Certo\nComentário: Art. 29 da CLT..."}
         value={texto}
         onChange={(e) => setTexto(e.target.value)}
@@ -1164,8 +1164,8 @@ const IngestModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </div>
       )}
 
-      <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100 mt-4">
-        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Cancelar</button>
+      <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800/50 mt-4">
+        <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">Cancelar</button>
         <button onClick={() => ingest({ texto, formato: 'markdown' })} disabled={isPending || texto.trim().length < 20}
           className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-colors disabled:opacity-50 shadow-sm">
           {isPending ? <><Loader2 size={14} className="animate-spin" /> Processando...</> : <><Zap size={14} /> Processar com IA</>}
@@ -1184,10 +1184,10 @@ const ModalShell: React.FC<{
   children: React.ReactNode;
 }> = ({ title, onClose, maxW = 'max-w-lg', children }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/50 backdrop-blur-sm p-4" role="dialog" aria-modal>
-    <div className={cn('bg-white rounded-2xl shadow-2xl w-full flex flex-col', maxW)}>
-      <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 shrink-0">
-        <h3 className="font-bold text-zinc-900 text-base">{title}</h3>
-        <button onClick={onClose} className="p-1.5 text-zinc-400 hover:text-zinc-700 rounded-lg hover:bg-zinc-100 transition-colors"><X size={16} /></button>
+    <div className={cn('bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full flex flex-col', maxW)}>
+      <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 dark:border-zinc-800/50 shrink-0">
+        <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-base">{title}</h3>
+        <button onClick={onClose} className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-zinc-700 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"><X size={16} /></button>
       </div>
       <div className="p-6">{children}</div>
     </div>
@@ -1197,7 +1197,7 @@ const ModalShell: React.FC<{
 // ─── Shared loading / error blocks ───────────────────────────────────────────
 
 const HubLoadingBlock: React.FC<{ text: string }> = ({ text }) => (
-  <div className="flex flex-col items-center justify-center py-20 gap-3 text-zinc-400">
+  <div className="flex flex-col items-center justify-center py-20 gap-3 text-zinc-400 dark:text-zinc-500">
     <Loader2 size={32} className="animate-spin text-violet-400" />
     <p className="text-sm font-medium">{text}</p>
   </div>
@@ -1206,8 +1206,8 @@ const HubLoadingBlock: React.FC<{ text: string }> = ({ text }) => (
 const HubErrorBlock: React.FC<{ message: string; onRetry: () => void }> = ({ message, onRetry }) => (
   <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
     <AlertCircle size={36} className="text-red-400" />
-    <p className="text-zinc-700 font-medium">{message}</p>
-    <button onClick={onRetry} className="flex items-center gap-2 px-4 py-2 bg-zinc-100 text-zinc-700 rounded-lg hover:bg-zinc-200 transition-colors text-sm font-medium">
+    <p className="text-zinc-700 dark:text-zinc-300 font-medium">{message}</p>
+    <button onClick={onRetry} className="flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-sm font-medium">
       <RotateCcw size={14} /> Tentar novamente
     </button>
   </div>

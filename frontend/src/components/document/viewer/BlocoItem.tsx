@@ -214,8 +214,8 @@ export const BlocoItem: React.FC<BlocoItemProps> = ({
                 {editor && <EditorContextMenu editor={editor} />}
                 <div className={cn(
                   "rounded-md border bg-white dark:bg-zinc-900 transition-all overflow-hidden focus-within:ring-2",
-                  localImportancia === 'vital' ? "border-red-300 dark:border-red-800 focus-within:ring-red-100 shadow-sm bg-red-50/10" : 
-                  localImportancia === 'importante' ? "border-amber-300 dark:border-amber-700 focus-within:ring-amber-100 shadow-sm bg-amber-50/10" :
+                  localImportancia === 'vital' ? "border-red-300 dark:border-red-800 focus-within:ring-red-100 shadow-sm bg-red-50/10 dark:bg-transparent" : 
+                  localImportancia === 'importante' ? "border-amber-300 dark:border-amber-700 focus-within:ring-amber-100 shadow-sm bg-amber-50/10 dark:bg-transparent" :
                   "border-blue-400 dark:border-zinc-700 focus-within:ring-blue-100"
                 )}>
                   <EditorContent editor={editor} />
@@ -226,7 +226,7 @@ export const BlocoItem: React.FC<BlocoItemProps> = ({
                       onClick={() => setLocalImportancia(prev => prev === 'vital' ? 'normal' : 'vital')} 
                       className={cn(
                         "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors border",
-                        localImportancia === 'vital' ? "bg-red-50 text-red-700 border-red-300" : "bg-white text-zinc-600 border-zinc-200"
+                        localImportancia === 'vital' ? "bg-red-50 text-red-700 border-red-300 dark:bg-red-900/40 dark:text-red-400 dark:border-red-800" : "bg-white text-zinc-600 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700"
                       )}
                     >
                       <Check size={14} strokeWidth={2.5} className={cn(localImportancia === 'vital' ? 'text-red-600' : 'text-zinc-400')} />
@@ -236,7 +236,7 @@ export const BlocoItem: React.FC<BlocoItemProps> = ({
                       onClick={() => setLocalImportancia(prev => prev === 'importante' ? 'normal' : 'importante')} 
                       className={cn(
                         "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors border",
-                        localImportancia === 'importante' ? "bg-amber-50 text-amber-700 border-amber-300" : "bg-white text-zinc-600 border-zinc-200"
+                        localImportancia === 'importante' ? "bg-amber-50 text-amber-700 border-amber-300 dark:bg-amber-900/40 dark:text-amber-400 dark:border-amber-800" : "bg-white text-zinc-600 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700"
                       )}
                     >
                       <Check size={14} strokeWidth={2.5} className={cn(localImportancia === 'importante' ? 'text-amber-600' : 'text-zinc-400')} />
@@ -255,8 +255,8 @@ export const BlocoItem: React.FC<BlocoItemProps> = ({
               </div>
             ) : (
               <div className={cn('text-slate-800 dark:text-slate-300 text-[15px] leading-relaxed font-sans transition-colors',
-                bloco.importancia === 'vital' && 'p-2 rounded-md border border-red-300 bg-red-50/20 -mx-2',
-                bloco.importancia === 'importante' && 'p-2 rounded-md border border-amber-300 bg-amber-50/20 -mx-2',
+                bloco.importancia === 'vital' && 'p-2 rounded-md border border-red-300 dark:border-red-800 bg-red-50/20 dark:bg-transparent -mx-2',
+                bloco.importancia === 'importante' && 'p-2 rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50/20 dark:bg-transparent -mx-2',
                 bloco.cor_fonte === 'destaque' && 'bg-yellow-100 px-1 rounded-sm text-yellow-900',
                 bloco.cor_fonte === 'vermelho' && 'text-red-600',
                 bloco.cor_fonte === 'verde'    && 'text-green-600',

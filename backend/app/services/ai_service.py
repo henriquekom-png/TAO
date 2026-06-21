@@ -69,7 +69,6 @@ _STOP_WORDS = {
 
 # ── Lazy client singleton ─────────────────────────────────────────────────────
 
-_api_key: str | None = os.getenv("GEMINI_API_KEY")
 _client = None   # initialised on first use
 
 
@@ -79,16 +78,20 @@ def _get_client():
     if _client is not None:
         return _client
 
-    if not _api_key:
+    from dotenv import load_dotenv, find_dotenv
+    load_dotenv(find_dotenv(), override=True)
+
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
         raise RuntimeError(
             "GEMINI_API_KEY environment variable is not set. "
-            "Add it to your .env file."
+            "Add it to your .env file e reinicie o backend."
         )
 
     try:
         from google import genai
         # Disable SSL verification for local dev environment
-        _client = genai.Client(api_key=_api_key)
+        _client = genai.Client(api_key=api_key)
         logger.info("google.genai Client initialised (model: %s) with SSL verification disabled via monkey-patch", DEFAULT_MODEL)
         return _client
     except ImportError as exc:

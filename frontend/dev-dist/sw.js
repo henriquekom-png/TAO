@@ -81,13 +81,13 @@ define(['./workbox-970124e6'], (function (workbox) { 'use strict';
     "revision": "3ca0b8505b4bec776b69afdba2768812"
   }, {
     "url": "index.html",
-    "revision": "0.nqqt8d75n6k"
+    "revision": "0.ttqif38rdqc"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("index.html"), {
     allowlist: [/^\/$/]
   }));
-  workbox.registerRoute(/^http:\/\/localhost:8000\/api\/v1\/.*/i, new workbox.NetworkFirst({
+  workbox.registerRoute(/^https:\/\/tao-backend-900893471328\.southamerica-east1\.run\.app\/api\/v1\/.*/i, new workbox.NetworkFirst({
     "cacheName": "tao-api-cache",
     plugins: [new workbox.ExpirationPlugin({
       maxEntries: 500,
