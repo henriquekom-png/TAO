@@ -128,8 +128,21 @@ export function useQuestaoDetail(id: number | string | null) {
 export function usePatchQuestao() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: QuestaoUpdatePayload }) =>
+    mutationFn: ({ id, payload }: { id: number | string; payload: QuestaoUpdatePayload }) =>
       api.patch<Questao>(`/questoes/${id}`, payload).then((r) => r.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: questoesKeys.all });
+    },
+  });
+}
+
+// ─── useDeleteQuestao ─────────────────────────────────────────────────────────
+
+export function useDeleteQuestao() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number | string) =>
+      api.delete(`/questoes/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: questoesKeys.all });
     },
@@ -142,11 +155,7 @@ export function useCreateQuestao() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: QuestaoCreatePayload) =>
-      api.post<Questao>('/questoes/ingest', {
-        // Wrap in the IngestPayload format — serialize to JSON for the AI to handle
-        texto:   JSON.stringify(payload),
-        formato: 'json',
-      }).then((r) => r.data),
+      api.post<Questao>('/questoes/', payload).then((r) => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: questoesKeys.all });
     },

@@ -9,17 +9,17 @@
  *   2. 🗃️ Gerenciar Questões  — paginated table, filters, CRUD modals
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   ClipboardList, Database, Plus, Zap, Pencil, Search,
   ChevronLeft, ChevronRight, X, Check, Loader2, AlertCircle,
   CheckCircle2, XCircle, RotateCcw, Trophy, RefreshCw,
-  ChevronDown, FastForward, Trash2,
+  ChevronDown, FastForward, Trash2, BookOpen, FileQuestion,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { markdownToHtml } from '../../lib/markdownHtmlConverter';
 import {
-  useQuestoesPaginated, usePatchQuestao, useIngestQuestoes, useQuestaoDetail,
+  useQuestoesPaginated, usePatchQuestao, useIngestQuestoes, useQuestaoDetail, useDeleteQuestao,
   type QuestoesFiltros, type QuestaoUpdatePayload,
 } from '../../hooks/useQuestoes';
 import { useQuizSession } from '../../hooks/useQuizSession';
@@ -548,6 +548,7 @@ const GerenciarTab: React.FC<{
 
   const { data, isLoading, isError } = useQuestoesPaginated(filtros);
   const { mutate: patchQuestao, isPending: patching } = usePatchQuestao();
+  const { mutate: deleteQuestao, isPending: deleting } = useDeleteQuestao();
 
   const totalPages = data ? Math.ceil(data.total / (data.limit || 20)) : 1;
 
@@ -665,13 +666,27 @@ const GerenciarTab: React.FC<{
                     </td>
                     <td className="px-5 py-3 text-xs text-zinc-500 dark:text-zinc-400">{q.banca || '—'}</td>
                     <td className="px-5 py-3 text-right">
-                      <button
-                        id={`hub-edit-${q.id}`}
-                        onClick={() => setEditingQuestao(q)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
-                      >
-                        <Pencil size={12} /> Editar
-                      </button>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          id={`hub-edit-${q.id}`}
+                          onClick={() => setEditingQuestao(q)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-colors"
+                        >
+                          <Pencil size={12} /> Editar
+                        </button>
+                        <button
+                          id={`hub-delete-${q.id}`}
+                          onClick={() => {
+                            if (window.confirm("Tem certeza que deseja excluir esta questão?")) {
+                              deleteQuestao(q.id);
+                            }
+                          }}
+                          disabled={deleting}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800/50 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 transition-colors disabled:opacity-50"
+                        >
+                          <Trash2 size={12} /> Excluir
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

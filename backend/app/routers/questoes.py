@@ -160,6 +160,54 @@ async def list_questoes(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# POST /  — create questao manually
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.post("/", response_model=QuestaoComItens, status_code=status.HTTP_201_CREATED)
+async def create_questao(body: QuestaoUpdate):
+    """
+    Manually create a new question without AI parsing.
+    Requires a full Questao payload.
+    """
+    # Convert QuestaoUpdate to QuestaoCreate mapping
+    q = QuestaoCreate(
+        banca=body.banca,
+        ano=body.ano,
+        cargo=body.cargo,
+        materia=body.materia or "Geral",
+        tipo=body.tipo or "multipla_escolha",
+        enunciado=body.enunciado or "",
+        alternativa_a=body.alternativa_a,
+        alternativa_b=body.alternativa_b,
+        alternativa_c=body.alternativa_c,
+        alternativa_d=body.alternativa_d,
+        alternativa_e=body.alternativa_e,
+        gabarito=body.gabarito or "",
+        comentario=body.comentario,
+        dificuldade=body.dificuldade or "media",
+        bloco_origem_id=body.bloco_origem_id,
+    )
+    
+    new_id = await _insert_questao(q)
+    
+    # Insert questao_itens if combinacao_itens
+    if q.tipo == "combinacao_itens" and body.itens:
+        await db.executemany(
+            """
+            INSERT INTO questao_itens (questao_id, numero, enunciado, correto, ordem)
+            VALUES ($1, $2, $3, $4, $5)
+            """,
+            [
+                (new_id, item.numero, item.enunciado, item.correto, idx)
+                for idx, item in enumerate(body.itens)
+            ],
+        )
+
+    return await _fetch_with_itens(str(new_id))
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # GET /{id}  — single questao
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -217,7 +265,7 @@ async def patch_questao(questao_id: str, body: QuestaoUpdate):
                 VALUES ($1, $2, $3, $4, $5)
                 """,
                 [
-                    (int(questao_id), item["numero"], item["enunciado"], item.get("correto"), idx)
+                    (questao_id, item["numero"], item["enunciado"], item.get("correto"), idx)
                     for idx, item in enumerate(itens_update)
                 ],
             )
@@ -225,6 +273,17 @@ async def patch_questao(questao_id: str, body: QuestaoUpdate):
     return await _fetch_with_itens(questao_id)
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# DELETE /{id}  — delete a questao
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.delete("/{questao_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_questao(questao_id: str):
+    """Delete a question."""
+    res = await db.execute("DELETE FROM questoes WHERE id = $1", questao_id)
+    if res == "DELETE 0":
+        raise HTTPException(status_code=404, detail="Questão não encontrada.")
+    return None
 
 # ─────────────────────────────────────────────────────────────────────────────
 # POST /generate  — generate a question via Gemini AI  (bug fix: RETURNING id)
@@ -559,8 +618,11 @@ async def generate_from_document(body: GenerateFromDocumentRequest):
     if not raw_questoes:
         raise HTTPException(status_code=422, detail="A IA não gerou nenhuma questão.")
 
-    # ── 5. Save to DB and return ─────────────────────────────────────────────
-    criadas_ids: list[str] = []
+    # ── 5. Build response objects without saving to DB ───────────────────────
+    questoes_criadas: list[QuestaoComItens] = []
+    
+    # We assign negative IDs so the frontend knows they are not in the DB
+    temp_id_counter = -1
 
     for q_data in raw_questoes:
         ref_index = q_data.get("bloco_ref_index", 0)
@@ -571,7 +633,24 @@ async def generate_from_document(body: GenerateFromDocumentRequest):
         tipo = q_data.get("tipo", "certo_errado")
 
         try:
-            q = QuestaoCreate(
+            # Build the mock QuestaoComItens
+            q_itens = []
+            if tipo == "combinacao_itens" and q_data.get("itens"):
+                for i, item in enumerate(q_data["itens"]):
+                    q_itens.append(QuestaoItem(
+                        id=str(temp_id_counter * 100 - i), # temporary negative id for item
+                        questao_id=str(temp_id_counter),
+                        numero=item["numero"],
+                        enunciado=item["enunciado"],
+                        correto=item.get("correto", True),
+                        ordem=i
+                    ))
+            
+            q_obj = QuestaoComItens(
+                id=str(temp_id_counter),
+                banca=q_data.get("banca"),
+                ano=q_data.get("ano"),
+                cargo=q_data.get("cargo"),
                 materia="Geral",
                 tipo=tipo,
                 enunciado=q_data.get("enunciado", ""),
@@ -583,34 +662,19 @@ async def generate_from_document(body: GenerateFromDocumentRequest):
                 gabarito=q_data.get("gabarito", ""),
                 comentario=q_data.get("comentario"),
                 dificuldade=body.dificuldade,   # type: ignore[arg-type]
-                bloco_origem_id=bloco_id,
+                bloco_origem_id=str(bloco_id),
+                itens=q_itens
             )
-            new_id = await _insert_questao(q)
-
-            # combinacao_itens sub-items
-            if tipo == "combinacao_itens" and q_data.get("itens"):
-                await db.executemany(
-                    """
-                    INSERT INTO questao_itens (questao_id, numero, enunciado, correto, ordem)
-                    VALUES ($1, $2, $3, $4, $5)
-                    """,
-                    [
-                        (new_id, item["numero"], item["enunciado"], item.get("correto", True), i)
-                        for i, item in enumerate(q_data["itens"])
-                    ],
-                )
-
-            criadas_ids.append(new_id)
+            
+            questoes_criadas.append(q_obj)
+            temp_id_counter -= 1
 
         except Exception as exc:
-            logger.error("Erro ao salvar questão gerada: %s — %s", q_data, exc)
+            logger.error("Erro ao processar questão gerada: %s — %s", q_data, exc)
             continue  # best-effort: skip bad items
 
-    if not criadas_ids:
-        raise HTTPException(status_code=500, detail="Nenhuma questão foi salva no banco.")
-
-    # Fetch full objects (with itens) for the response
-    questoes_criadas = [await _fetch_with_itens(qid) for qid in criadas_ids]
+    if not questoes_criadas:
+        raise HTTPException(status_code=500, detail="A IA falhou em gerar questões válidas.")
 
     return GeneratedQuestionsResult(criadas=len(questoes_criadas), questoes=questoes_criadas)
 

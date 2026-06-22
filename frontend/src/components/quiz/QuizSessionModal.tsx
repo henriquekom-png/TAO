@@ -38,7 +38,8 @@ import {
 import { cn } from '../../lib/utils';
 import { markdownToHtml } from '../../lib/markdownHtmlConverter';
 import { useQuizSession } from '../../hooks/useQuizSession';
-import type { Questao, QuestaoItem, DificuldadeQuestao, QuizScore } from '../../types';
+import { useCreateQuestao } from '../../hooks/useQuestoes';
+import type { Questao, QuestaoItem, DificuldadeQuestao, QuizScore, QuestaoCreatePayload } from '../../types';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
@@ -70,6 +71,44 @@ export const QuizSessionModal: React.FC<QuizSessionModalProps> = ({
   const showSetup = quiz.questionsArray.length === 0 && !quiz.isLoading && !preloadedQuestions;
   const showQuestion = quiz.questionsArray.length > 0 && !quiz.isFinished;
   const showResults = quiz.isFinished;
+
+  const { mutate: saveQuestao, isPending: isSaving } = useCreateQuestao();
+
+  const handleSaveQuestion = (question: Questao) => {
+    // Convert to QuestaoCreatePayload
+    const payload: QuestaoCreatePayload = {
+      banca: question.banca,
+      ano: question.ano,
+      cargo: question.cargo,
+      materia: question.materia,
+      tipo: question.tipo,
+      enunciado: question.enunciado,
+      alternativa_a: question.alternativa_a,
+      alternativa_b: question.alternativa_b,
+      alternativa_c: question.alternativa_c,
+      alternativa_d: question.alternativa_d,
+      alternativa_e: question.alternativa_e,
+      gabarito: question.gabarito,
+      comentario: question.comentario,
+      dificuldade: question.dificuldade,
+      bloco_origem_id: question.bloco_origem_id?.toString() || null,
+      itens: question.itens?.map(i => ({
+        numero: i.numero,
+        enunciado: i.enunciado,
+        correto: i.correto,
+        ordem: i.ordem
+      }))
+    };
+
+    saveQuestao(payload, {
+      onSuccess: (savedQuestion) => {
+        quiz.markQuestionAsSaved(Number(question.id), savedQuestion);
+      },
+      onError: (err: any) => {
+        alert('Erro ao salvar questão: ' + (err.response?.data?.detail || err.message));
+      }
+    });
+  };
 
   return (
     <div
@@ -131,6 +170,8 @@ export const QuizSessionModal: React.FC<QuizSessionModalProps> = ({
               onGoToSource={onGoToSource}
               onEditQuestion={onEditQuestion}
               onQuit={() => quiz.resetSession()}
+              onSaveQuestion={handleSaveQuestion}
+              isSaving={isSaving}
             />
           )}
 
@@ -568,7 +609,12 @@ const QuizFeedbackBlock: React.FC<{
   question: Questao;
   isCorrect: boolean;
   onGoToSource: (blocoId: number) => void;
-}> = ({ question, isCorrect, onGoToSource }) => {
+  onSaveQuestion?: (question: Questao) => void;
+  isSaving?: boolean;
+}> = ({ question, isCorrect, onGoToSource, onSaveQuestion, isSaving }) => {
+  // Negative ID indicates it's an unsaved generated question
+  const isUnsaved = Number(question.id) < 0;
+
   return (
     <div className="mx-8 mb-4 rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800">
       {/* Result banner */}
@@ -596,19 +642,30 @@ const QuizFeedbackBlock: React.FC<{
         </div>
       )}
 
-      {/* Source link */}
-      {question.bloco_origem_id && (
-        <div className="px-5 pb-4 border-t border-zinc-100 dark:border-zinc-800 pt-3 flex">
+      {/* Actions (Source link + Save) */}
+      <div className="px-5 pb-4 border-t border-zinc-100 dark:border-zinc-800 pt-3 flex gap-2 flex-wrap">
+        {question.bloco_origem_id && (
           <button
             id="quiz-review-source-btn"
-            onClick={() => onGoToSource(question.bloco_origem_id!)}
+            onClick={() => onGoToSource(Number(question.bloco_origem_id))}
             className="flex items-center gap-2 text-xs font-semibold text-violet-700 dark:text-violet-300 hover:text-violet-900 dark:hover:text-violet-100 bg-violet-50 dark:bg-violet-900/30 hover:bg-violet-100 dark:hover:bg-violet-900/50 border border-violet-200 dark:border-violet-800 px-3 py-1.5 rounded-lg transition-colors"
           >
             <BookOpen size={14} />
             Revisar material de origem
           </button>
-        </div>
-      )}
+        )}
+
+        {isUnsaved && onSaveQuestion && (
+          <button
+            onClick={() => onSaveQuestion(question)}
+            disabled={isSaving}
+            className="flex items-center gap-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 hover:text-emerald-900 dark:hover:text-emerald-100 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+          >
+            {isSaving ? <Loader2 size={14} className="animate-spin" /> : <ClipboardList size={14} />}
+            {isSaving ? 'Salvando...' : 'Adicionar ao Banco de Questões'}
+          </button>
+        )}
+      </div>
     </div>
   );
 };
@@ -631,6 +688,8 @@ interface QuizQuestionScreenProps {
   onGoToSource: (blocoId: number) => void;
   onEditQuestion?: (question: Questao) => void;
   onQuit: () => void;
+  onSaveQuestion?: (question: Questao) => void;
+  isSaving?: boolean;
 }
 
 const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
@@ -649,6 +708,8 @@ const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
   onGoToSource,
   onEditQuestion,
   onQuit,
+  onSaveQuestion,
+  isSaving,
 }) => {
   // Determine if user has provided an answer (to enable the submit button)
   const hasAnswer =
@@ -710,6 +771,8 @@ const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
             question={question}
             isCorrect={isCorrect}
             onGoToSource={onGoToSource}
+            onSaveQuestion={onSaveQuestion}
+            isSaving={isSaving}
           />
         </div>
       )}

@@ -51,6 +51,7 @@ interface QuizSessionActions {
   nextQuestion: () => void;
   skipQuestion: () => void;
   resetSession: () => void;
+  markQuestionAsSaved: (oldId: number, savedQuestion: Questao) => void;
 }
 
 export type UseQuizSessionReturn = QuizSessionState & QuizSessionActions;
@@ -240,6 +241,16 @@ export function useQuizSession(): UseQuizSessionReturn {
     setState(INITIAL_STATE);
   }, []);
 
+  // ── markQuestionAsSaved ───────────────────────────────────────────────────
+  const markQuestionAsSaved = useCallback((oldId: number, savedQuestion: Questao) => {
+    setState((prev) => {
+      const newQuestionsArray = prev.questionsArray.map((q) =>
+        q.id === oldId ? savedQuestion : q
+      );
+      return { ...prev, questionsArray: newQuestionsArray };
+    });
+  }, []);
+
   return {
     ...state,
     startSession,
@@ -250,5 +261,6 @@ export function useQuizSession(): UseQuizSessionReturn {
     nextQuestion,
     skipQuestion,
     resetSession,
+    markQuestionAsSaved,
   };
 }
