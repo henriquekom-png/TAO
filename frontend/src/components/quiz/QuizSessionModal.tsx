@@ -38,8 +38,8 @@ import {
 import { cn } from '../../lib/utils';
 import { markdownToHtml } from '../../lib/markdownHtmlConverter';
 import { useQuizSession } from '../../hooks/useQuizSession';
-import { useCreateQuestao } from '../../hooks/useQuestoes';
-import type { Questao, QuestaoItem, DificuldadeQuestao, QuizScore, QuestaoCreatePayload } from '../../types';
+import { useCreateQuestao, type QuestaoCreatePayload } from '../../hooks/useQuestoes';
+import type { Questao, QuestaoItem, DificuldadeQuestao, QuizScore } from '../../types';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 

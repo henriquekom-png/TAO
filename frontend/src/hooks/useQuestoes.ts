@@ -55,6 +55,7 @@ export interface QuestaoUpdatePayload {
   comentario?:    string | null;
   dificuldade?:   DificuldadeQuestao;
   itens?:         QuestaoItemInline[];
+  bloco_origem_id?: string | null;
 }
 
 export interface QuestaoCreatePayload extends QuestaoUpdatePayload {

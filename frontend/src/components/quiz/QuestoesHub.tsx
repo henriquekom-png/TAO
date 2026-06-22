@@ -9,12 +9,12 @@
  *   2. 🗃️ Gerenciar Questões  — paginated table, filters, CRUD modals
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   ClipboardList, Database, Plus, Zap, Pencil, Search,
   ChevronLeft, ChevronRight, X, Check, Loader2, AlertCircle,
   CheckCircle2, XCircle, RotateCcw, Trophy, RefreshCw,
-  ChevronDown, FastForward, Trash2, BookOpen, FileQuestion,
+  ChevronDown, FastForward, Trash2,
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { markdownToHtml } from '../../lib/markdownHtmlConverter';
