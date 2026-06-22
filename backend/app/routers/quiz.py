@@ -136,6 +136,16 @@ async def post_quiz_result(body: ResultPayload):
     This endpoint should be called fire-and-forget from the frontend (non-blocking).
     """
     try:
+        # If the questao_id is negative (e.g. "-1"), it's a temporary AI-generated question.
+        # We should NOT attempt to save it in the database. Just mock a success response.
+        if body.questao_id.startswith("-"):
+            return QuizResultado(
+                id="temp-" + body.questao_id.lstrip("-"),
+                questao_id=body.questao_id,
+                acertou=body.acertou,
+                respondido_em=None
+            )
+
         new_id = await db.fetchval(
             """
             INSERT INTO quiz_resultados (questao_id, acertou)

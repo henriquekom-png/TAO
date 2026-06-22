@@ -243,6 +243,10 @@ async def patch_questao(questao_id: str, body: QuestaoUpdate):
 
         values.append(questao_id)
         id_ph = f"${len(values)}"
+        if "-" in questao_id:
+            id_ph += "::uuid"
+        else:
+            id_ph += "::int"
 
         updated = await db.fetchrow(
             f"UPDATE questoes SET {', '.join(set_parts)} WHERE id = {id_ph} RETURNING *",
@@ -257,18 +261,32 @@ async def patch_questao(questao_id: str, body: QuestaoUpdate):
             raise HTTPException(status_code=404, detail="Questão não encontrada.")
 
     if itens_update is not None:
-        await db.execute("DELETE FROM questao_itens WHERE questao_id = $1", questao_id)
-        if itens_update:
-            await db.executemany(
-                """
-                INSERT INTO questao_itens (questao_id, numero, enunciado, correto, ordem)
-                VALUES ($1, $2, $3, $4, $5)
-                """,
-                [
-                    (questao_id, item["numero"], item["enunciado"], item.get("correto"), idx)
-                    for idx, item in enumerate(itens_update)
-                ],
-            )
+        if "-" in questao_id:
+            await db.execute("DELETE FROM questao_itens WHERE questao_id = $1::uuid", questao_id)
+            if itens_update:
+                await db.executemany(
+                    """
+                    INSERT INTO questao_itens (questao_id, numero, enunciado, correto, ordem)
+                    VALUES ($1::uuid, $2, $3, $4, $5)
+                    """,
+                    [
+                        (questao_id, item["numero"], item["enunciado"], item.get("correto"), idx)
+                        for idx, item in enumerate(itens_update)
+                    ],
+                )
+        else:
+            await db.execute("DELETE FROM questao_itens WHERE questao_id = $1::int", questao_id)
+            if itens_update:
+                await db.executemany(
+                    """
+                    INSERT INTO questao_itens (questao_id, numero, enunciado, correto, ordem)
+                    VALUES ($1::int, $2, $3, $4, $5)
+                    """,
+                    [
+                        (questao_id, item["numero"], item["enunciado"], item.get("correto"), idx)
+                        for idx, item in enumerate(itens_update)
+                    ],
+                )
 
     return await _fetch_with_itens(questao_id)
 
@@ -280,9 +298,17 @@ async def patch_questao(questao_id: str, body: QuestaoUpdate):
 @router.delete("/{questao_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_questao(questao_id: str):
     """Delete a question."""
-    res = await db.execute("DELETE FROM questoes WHERE id = $1", questao_id)
-    if res == "DELETE 0":
-        raise HTTPException(status_code=404, detail="Questão não encontrada.")
+    try:
+        if "-" in questao_id:
+            res = await db.execute("DELETE FROM questoes WHERE id = $1::uuid", questao_id)
+        else:
+            res = await db.execute("DELETE FROM questoes WHERE id = $1::int", questao_id)
+            
+        if res == "DELETE 0":
+            raise HTTPException(status_code=404, detail="Questão não encontrada.")
+    except Exception as e:
+        logger.error(f"Erro ao deletar questao: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao deletar questão.")
     return None
 
 # ─────────────────────────────────────────────────────────────────────────────

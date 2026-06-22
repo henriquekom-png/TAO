@@ -102,7 +102,7 @@ export const QuizSessionModal: React.FC<QuizSessionModalProps> = ({
 
     saveQuestao(payload, {
       onSuccess: (savedQuestion) => {
-        quiz.markQuestionAsSaved(Number(question.id), savedQuestion);
+        quiz.markQuestionAsSaved(question.id, savedQuestion);
       },
       onError: (err: any) => {
         alert('Erro ao salvar questão: ' + (err.response?.data?.detail || err.message));
