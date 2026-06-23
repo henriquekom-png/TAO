@@ -91,7 +91,7 @@ async def delete_anotacao(anotacao_id: int) -> None:
 from pydantic import BaseModel  # local import keeps top clean
 
 class ReorderAnotacaoItem(BaseModel):
-    id: str
+    id: int
     ordem: int
 
 @router.post("/reorder", status_code=status.HTTP_204_NO_CONTENT, summary="Bulk-reorder anotacoes")

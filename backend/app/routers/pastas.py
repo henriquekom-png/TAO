@@ -40,7 +40,7 @@ router = APIRouter()
 
 def _build_tree(
     rows: list[dict[str, Any]],
-    parent_id: Optional[str] = None,
+    parent_id: Optional[int] = None,
 ) -> list[dict[str, Any]]:
     """Recursively nest flat rows into a children-list tree.
 

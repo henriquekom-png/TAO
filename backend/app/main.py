@@ -36,7 +36,7 @@ app = FastAPI(
 # CORS configurado para PWA/Nuvem e Desenvolvimento Local
 # Pega a lista de origens permitidas da variável de ambiente ou usa um padrão seguro
 frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173,http://localhost:3000")
-allowed_origins = [origin.strip() for origin in frontend_url.split(",")]
+allowed_origins = [origin.strip().rstrip("/") for origin in frontend_url.split(",")]
 
 app.add_middleware(
     CORSMiddleware,

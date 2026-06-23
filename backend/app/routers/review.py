@@ -58,7 +58,7 @@ class ReviewResponse(BaseModel):
 class DueBloco(BaseModel):
     """Minimal bloco info returned by /review/due."""
 
-    id: str
+    id: int
     documento_id: int
     identificador: Optional[str]
     conteudo:     str

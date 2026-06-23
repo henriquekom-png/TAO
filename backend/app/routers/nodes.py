@@ -22,7 +22,7 @@ router = APIRouter()
 
 
 class PortalNestedAnotacao(BaseModel):
-    id: str
+    id: int
     tipo: str
     conteudo: str
     ordem: int
@@ -30,7 +30,7 @@ class PortalNestedAnotacao(BaseModel):
 
 class ResolvedPortal(BaseModel):
     kind: Literal["anotacao", "bloco"]
-    id: str
+    id: int
     conteudo: str
     bloco_id: int
     documento_id: int

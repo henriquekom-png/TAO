@@ -133,7 +133,7 @@ async def bulk_create_blocos(items: list[BulkBlocoItem]) -> list[Bloco]:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class ReorderItem(BaseModel):
-    id: str
+    id: int
     ordem: int
 
 

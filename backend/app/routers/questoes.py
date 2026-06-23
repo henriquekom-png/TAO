@@ -106,7 +106,7 @@ async def list_questoes(
     tipo:      Optional[str] = None,
     dificuldade: Optional[str] = None,
     search:    Optional[str] = None,
-    bloco_id: Optional[str] = None,
+    bloco_id: Optional[int] = None,
 ):
     """
     Fetch questions from the bank with pagination and optional filters.
