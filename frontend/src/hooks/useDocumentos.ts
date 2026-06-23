@@ -209,3 +209,20 @@ export const useReorderDocumento = () => {
   })
 }
 
+// ── Delete ──────────────────────────────────────────────────────────────────
+export const useDeleteDocumento = () => {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: number | string) => {
+      await api.delete(`/documentos/${id}`)
+      return id
+    },
+    onSuccess: () => {
+      // Invalidate both pastas and all documents query since we don't know the exact pasta_id
+      // unless we pass it to the mutation. Invalidate all to be safe.
+      queryClient.invalidateQueries({ queryKey: ['pastas'] })
+      queryClient.invalidateQueries({ queryKey: ['documentos'] })
+    },
+  })
+}
+

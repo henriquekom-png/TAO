@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.get("/bloco/{bloco_id}", response_model=List[Anotacao])
-async def get_anotacoes_by_bloco(bloco_id: int) -> List[Anotacao]:
+async def get_anotacoes_by_bloco(bloco_id: str) -> List[Anotacao]:
     rows = await db.fetch(
         """
         SELECT id, bloco_id, tipo, conteudo, ordem, criado_em, atualizado_em
@@ -23,7 +23,7 @@ async def get_anotacoes_by_bloco(bloco_id: int) -> List[Anotacao]:
     return [Anotacao(**dict(r)) for r in rows]
 
 @router.get("/documento/{documento_id}", response_model=List[Anotacao])
-async def get_anotacoes_by_documento(documento_id: int) -> List[Anotacao]:
+async def get_anotacoes_by_documento(documento_id: str) -> List[Anotacao]:
     rows = await db.fetch(
         """
         SELECT a.id, a.bloco_id, a.tipo, a.conteudo, a.ordem, a.criado_em, a.atualizado_em
@@ -54,7 +54,7 @@ async def create_anotacao(payload: AnotacaoCreate) -> Anotacao:
         raise HTTPException(status_code=500, detail=f"Erro ao criar anotação: {e}")
 
 @router.patch("/{anotacao_id}", response_model=Anotacao)
-async def update_anotacao(anotacao_id: int, payload: AnotacaoUpdate) -> Anotacao:
+async def update_anotacao(anotacao_id: str, payload: AnotacaoUpdate) -> Anotacao:
     updates = payload.model_dump(exclude_none=True)
     if not updates:
         raise HTTPException(status_code=422, detail="No fields to update")
@@ -76,7 +76,7 @@ async def update_anotacao(anotacao_id: int, payload: AnotacaoUpdate) -> Anotacao
     return Anotacao(**dict(row))
 
 @router.delete("/{anotacao_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_anotacao(anotacao_id: int) -> None:
+async def delete_anotacao(anotacao_id: str) -> None:
     # Check if the annotation exists first, then delete
     existing = await db.fetchrow(
         "SELECT id FROM anotacoes WHERE id = $1",
@@ -91,7 +91,7 @@ async def delete_anotacao(anotacao_id: int) -> None:
 from pydantic import BaseModel  # local import keeps top clean
 
 class ReorderAnotacaoItem(BaseModel):
-    id: int
+    id: str
     ordem: int
 
 @router.post("/reorder", status_code=status.HTTP_204_NO_CONTENT, summary="Bulk-reorder anotacoes")

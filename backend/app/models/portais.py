@@ -20,8 +20,8 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class PortalBase(BaseModel):
-    bloco_origem_id: int = Field(..., description="Bloco de origem do portal")
-    bloco_alvo_id: int = Field(..., description="Bloco de destino do portal")
+    bloco_origem_id: str = Field(..., description="Bloco de origem do portal")
+    bloco_alvo_id: str = Field(..., description="Bloco de destino do portal")
 
     @model_validator(mode="after")
     def origem_diferente_de_alvo(self) -> "PortalBase":
@@ -37,5 +37,5 @@ class PortalCreate(PortalBase):
 class Portal(PortalBase):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: str
     criado_em: Optional[datetime] = None

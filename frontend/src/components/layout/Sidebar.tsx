@@ -17,7 +17,7 @@ import {
 } from '../../hooks/usePastas';
 import {
   useDocumentosByPasta, useCreateDocumento, useRenameDocumento,
-  useMoveDocumento, useReorderDocumento,
+  useMoveDocumento, useReorderDocumento, useDeleteDocumento,
 } from '../../hooks/useDocumentos';
 import { Pasta } from '../../types';
 import { api } from '../../api/client';
@@ -398,6 +398,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const { mutate: renamePasta    } = useRenamePasta();
   const { mutate: movePasta      } = useMovePasta();
   const { mutate: renameDocumento} = useRenameDocumento();
+  const { mutate: deleteDocumento} = useDeleteDocumento();
   const { mutate: moveDocumento  } = useMoveDocumento();
   const { mutate: reorderDocumento } = useReorderDocumento();
 
@@ -439,8 +440,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (contextMenu.type === 'pasta') {
       if (window.confirm(`Excluir a pasta "${contextMenu.name}"?\nIsso removerá todos os documentos e blocos dentro dela.`))
         deletePasta(contextMenu.id);
+    } else if (contextMenu.type === 'documento') {
+      if (window.confirm(`Excluir o documento "${contextMenu.name}"?\nIsso removerá todos os blocos e anotações dentro dele.`))
+        deleteDocumento(contextMenu.id);
     }
-  }, [contextMenu, deletePasta]);
+  }, [contextMenu, deletePasta, deleteDocumento]);
 
   const handlePastaRenameConfirm = useCallback((id: number, nome: string) => {
     renamePasta({ id, nome }, { onSuccess: cancelRename });

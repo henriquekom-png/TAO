@@ -81,9 +81,9 @@ class DatabaseManager:
         async with self._pg_pool.acquire() as conn:
             return await conn.fetchval(query, *args)
 
-    async def execute(self, query: str, *args) -> None:
+    async def execute(self, query: str, *args) -> str:
         async with self._pg_pool.acquire() as conn:
-            await conn.execute(query, *args)
+            return await conn.execute(query, *args)
             
     async def executemany(self, query: str, args: List[tuple]) -> None:
         async with self._pg_pool.acquire() as conn:

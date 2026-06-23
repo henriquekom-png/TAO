@@ -22,7 +22,7 @@ router = APIRouter()
 
 
 class PortalNestedAnotacao(BaseModel):
-    id: int
+    id: str
     tipo: str
     conteudo: str
     ordem: int
@@ -30,11 +30,11 @@ class PortalNestedAnotacao(BaseModel):
 
 class ResolvedPortal(BaseModel):
     kind: Literal["anotacao", "bloco"]
-    id: int
+    id: str
     conteudo: str
-    bloco_id: int
-    documento_id: int
-    pasta_id: int
+    bloco_id: str
+    documento_id: str
+    pasta_id: str
     documento_titulo: str
     identificador: Optional[str] = None
     pasta_path: list[str] = Field(default_factory=list)
@@ -50,7 +50,7 @@ class ResolvePortalsResponse(BaseModel):
     resolved: dict[str, ResolvedPortal]
 
 
-async def _build_pasta_path(pasta_id: int) -> list[str]:
+async def _build_pasta_path(pasta_id: str) -> list[str]:
     """Return ancestor pasta IDs from root → target (inclusive)."""
     rows = await db.fetch("SELECT id, parent_id FROM pastas")
     by_id = {r["id"]: r["parent_id"] for r in rows}

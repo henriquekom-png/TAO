@@ -22,7 +22,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class DocumentoBase(BaseModel):
-    pasta_id: int = Field(..., description="FK → pastas.id")
+    pasta_id: str = Field(..., description="FK → pastas.id")
     titulo: str = Field(..., min_length=1, max_length=512, description="Título do documento")
     descricao: Optional[str] = Field(None, description="Descrição opcional")
     ordem: float = Field(0.0, description="Posição na sidebar dentro da pasta")
@@ -33,7 +33,7 @@ class DocumentoCreate(DocumentoBase):
 
 
 class DocumentoUpdate(BaseModel):
-    pasta_id: Optional[int] = None
+    pasta_id: Optional[str] = None
     titulo: Optional[str] = Field(None, min_length=1, max_length=512)
     descricao: Optional[str] = None
     ordem: Optional[float] = None
@@ -42,6 +42,6 @@ class DocumentoUpdate(BaseModel):
 class Documento(DocumentoBase):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: str
     criado_em: Optional[datetime] = None
     atualizado_em: Optional[datetime] = None

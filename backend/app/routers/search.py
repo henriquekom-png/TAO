@@ -16,12 +16,12 @@ router = APIRouter()
 
 class SearchResultItem(BaseModel):
     kind: Literal["documento", "bloco", "anotacao"]
-    id: int
+    id: str
     title: str
     subtitle: Optional[str] = None
-    documento_id: int
-    bloco_id: Optional[int] = None
-    pasta_id: int
+    documento_id: str
+    bloco_id: Optional[str] = None
+    pasta_id: str
     pasta_path: List[str] = Field(default_factory=list)
 
 class SearchResponse(BaseModel):

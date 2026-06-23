@@ -40,7 +40,7 @@ router = APIRouter()
 
 def _build_tree(
     rows: list[dict[str, Any]],
-    parent_id: Optional[int] = None,
+    parent_id: Optional[str] = None,
 ) -> list[dict[str, Any]]:
     """Recursively nest flat rows into a children-list tree.
 
@@ -107,7 +107,7 @@ async def get_tree() -> list[dict[str, Any]]:
     response_model=Pasta,
     summary="Fetch a single folder",
 )
-async def get_pasta(pasta_id: int) -> Pasta:
+async def get_pasta(pasta_id: str) -> Pasta:
     row = await db.fetchrow(
         "SELECT id, parent_id, nome, nivel, ordem, criado_em "
         "FROM pastas WHERE id = $1",
@@ -163,7 +163,7 @@ async def create_pasta(payload: PastaCreate) -> Pasta:
     response_model=Pasta,
     summary="Rename / re-parent / reorder a folder",
 )
-async def update_pasta(pasta_id: int, payload: PastaUpdate) -> Pasta:
+async def update_pasta(pasta_id: str, payload: PastaUpdate) -> Pasta:
     # Build SET clause dynamically from the non-None fields in the payload
     updates = payload.model_dump(exclude_none=True)
     if not updates:
@@ -199,7 +199,7 @@ async def update_pasta(pasta_id: int, payload: PastaUpdate) -> Pasta:
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a folder (cascades to documents and blocks)",
 )
-async def delete_pasta(pasta_id: int) -> None:
+async def delete_pasta(pasta_id: str) -> None:
     status_str = await db.execute(
         "DELETE FROM pastas WHERE id = $1", pasta_id
     )

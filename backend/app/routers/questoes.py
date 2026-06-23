@@ -35,7 +35,7 @@ router = APIRouter()
 # Helpers
 # ─────────────────────────────────────────────────────────────────────────────
 
-async def _fetch_with_itens(questao_id: int) -> QuestaoComItens:
+async def _fetch_with_itens(questao_id: str) -> QuestaoComItens:
     """Fetch a questao row and attach its questao_itens (if any)."""
     row = await db.fetchrow("SELECT * FROM questoes WHERE id = $1", questao_id)
     if not row:
@@ -106,7 +106,7 @@ async def list_questoes(
     tipo:      Optional[str] = None,
     dificuldade: Optional[str] = None,
     search:    Optional[str] = None,
-    bloco_id: Optional[int] = None,
+    bloco_id: Optional[str] = None,
 ):
     """
     Fetch questions from the bank with pagination and optional filters.
@@ -212,7 +212,7 @@ async def create_questao(body: QuestaoUpdate):
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.get("/{questao_id}", response_model=QuestaoComItens)
-async def get_questao(questao_id: int):
+async def get_questao(questao_id: str):
     """Fetch a single question with its itens (if combinacao_itens)."""
     return await _fetch_with_itens(questao_id)
 
@@ -222,7 +222,7 @@ async def get_questao(questao_id: int):
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.patch("/{questao_id}", response_model=QuestaoComItens)
-async def patch_questao(questao_id: int, body: QuestaoUpdate):
+async def patch_questao(questao_id: str, body: QuestaoUpdate):
     """
     Partial update of a questao. Only provided (non-None) fields are written.
     Returns the updated questao with its itens.
@@ -296,7 +296,7 @@ async def patch_questao(questao_id: int, body: QuestaoUpdate):
 # ─────────────────────────────────────────────────────────────────────────────
 
 @router.delete("/{questao_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_questao(questao_id: int):
+async def delete_questao(questao_id: str):
     """Delete a question."""
     try:
         if "-" in questao_id:
@@ -356,7 +356,7 @@ _GENERATE_SCHEMA_COMBINACAO = {
 
 
 class GenerateRequest(BaseModel):
-    bloco_id: int = Field(..., description="The ID of the bloco to generate a question from.")
+    bloco_id: str = Field(..., description="The ID of the bloco to generate a question from.")
     tipo: str = Field("multipla_escolha", description="Tipo de questão desejada")
     dificuldade: str = Field("media", description="Dificuldade desejada")
 
@@ -479,7 +479,7 @@ async def generate_questao(body: GenerateRequest):
 # ─────────────────────────────────────────────────────────────────────────────
 
 class GenerateFromDocumentRequest(BaseModel):
-    documento_id: int = Field(..., description="ID of the document to generate questions from.")
+    documento_id: str = Field(..., description="ID of the document to generate questions from.")
     quantidade:   int = Field(5, ge=1, le=20, description="Number of questions to generate.")
     dificuldade:  str = Field("media", description="Target difficulty level.")
 

@@ -45,7 +45,7 @@ class DocumentoDetail(Documento):
     response_model=list[Documento],
     summary="List documents in a folder",
 )
-async def list_documentos_by_pasta(pasta_id: int) -> list[Documento]:
+async def list_documentos_by_pasta(pasta_id: str) -> list[Documento]:
     """Return all documents belonging to *pasta_id*, ordered by ``ordem``."""
     # Verify the folder exists first (gives a clear 404 vs an empty list)
     pasta_exists = await db.fetchval(
@@ -78,7 +78,7 @@ async def list_documentos_by_pasta(pasta_id: int) -> list[Documento]:
     response_model=DocumentoDetail,
     summary="Fetch a document with all its blocos",
 )
-async def get_documento(doc_id: int) -> DocumentoDetail:
+async def get_documento(doc_id: str) -> DocumentoDetail:
     """Return the document header AND every bloco ordered by ``ordem``.
 
     The ``blocos`` list is always present (may be empty for a new document).
@@ -165,7 +165,7 @@ async def create_documento(payload: DocumentoCreate) -> Documento:
     response_model=Documento,
     summary="Update document metadata",
 )
-async def update_documento(doc_id: int, payload: DocumentoUpdate) -> Documento:
+async def update_documento(doc_id: str, payload: DocumentoUpdate) -> Documento:
     updates = payload.model_dump(exclude_none=True)
     if not updates:
         raise HTTPException(
@@ -204,7 +204,7 @@ async def update_documento(doc_id: int, payload: DocumentoUpdate) -> Documento:
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a document (cascades to blocos and anotacoes)",
 )
-async def delete_documento(doc_id: int) -> None:
+async def delete_documento(doc_id: str) -> None:
     status_str = await db.execute(
         "DELETE FROM documentos WHERE id = $1", doc_id
     )
