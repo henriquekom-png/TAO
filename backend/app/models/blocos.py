@@ -42,7 +42,7 @@ ImportanciaType = Literal["normal", "importante", "vital"]
 
 
 class BlocoBase(BaseModel):
-    documento_id: str = Field(..., description="FK → documentos.id")
+    documento_id: int = Field(..., description="FK → documentos.id")
     tipo: TipoBlocoType = Field("texto_livre", description="Tipo estrutural do bloco")
     identificador: Optional[str] = Field(None, description="Ex.: 'Art. 5º', 'I', 'a)'")
     conteudo: str = Field("", description="Conteúdo textual do bloco")
@@ -75,7 +75,7 @@ class BlocoCreate(BlocoBase):
 
 class BlocoUpdate(BaseModel):
     """All fields optional – send only what changes."""
-    documento_id: Optional[str] = None
+    documento_id: Optional[int] = None
     tipo: Optional[TipoBlocoType] = None
     identificador: Optional[str] = None
     conteudo: Optional[str] = None
@@ -97,7 +97,7 @@ class BlocoUpdate(BaseModel):
 class Bloco(BlocoBase):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: int
     criado_em: Optional[datetime] = None
     atualizado_em: Optional[datetime] = None
     # fts_vector is a server-side tsvector; never sent over the API

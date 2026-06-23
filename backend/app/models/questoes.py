@@ -66,7 +66,7 @@ class QuestaoBase(BaseModel):
     gabarito: str = Field(..., min_length=1, max_length=50)
     comentario: Optional[str] = None
     dificuldade: DificuldadeType = Field("media")
-    bloco_origem_id: Optional[str] = Field(None, description="FK → blocos.id (nullable)")
+    bloco_origem_id: Optional[int] = Field(None, description="FK → blocos.id (nullable)")
 
 
 class QuestaoCreate(QuestaoBase):
@@ -95,14 +95,14 @@ class QuestaoUpdate(BaseModel):
     gabarito: Optional[str] = Field(None, min_length=1, max_length=50)
     comentario: Optional[str] = None
     dificuldade: Optional[DificuldadeType] = None
-    bloco_origem_id: Optional[str] = None
+    bloco_origem_id: Optional[int] = None
     itens: Optional[list[QuestaoItemInline]] = None
 
 
 class Questao(QuestaoBase):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: int
     criado_em: Optional[datetime] = None
 
 
@@ -115,7 +115,7 @@ class QuestaoComItens(Questao):
 # ── QuestaoItem ────────────────────────────────────────────────────────────
 
 class QuestaoItemBase(BaseModel):
-    questao_id: str = Field(..., description="FK → questoes.id")
+    questao_id: int = Field(..., description="FK → questoes.id")
     numero: str = Field(..., min_length=1, max_length=20, description="Ex.: 'I', 'II', 'a)'")
     enunciado: str = Field(..., min_length=1)
     correto: Optional[bool] = Field(None, description="NULL = não gabaritado ainda")
@@ -129,13 +129,13 @@ class QuestaoItemCreate(QuestaoItemBase):
 class QuestaoItem(QuestaoItemBase):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: int
 
 
 # ── QuizResultado ──────────────────────────────────────────────────────────
 
 class QuizResultadoBase(BaseModel):
-    questao_id: Optional[str] = Field(None, description="FK → questoes.id (nullable on cascade)")
+    questao_id: Optional[int] = Field(None, description="FK → questoes.id (nullable on cascade)")
     acertou: bool = Field(..., description="True = acertou, False = errou")
 
 
@@ -146,7 +146,7 @@ class QuizResultadoCreate(QuizResultadoBase):
 class QuizResultado(QuizResultadoBase):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: int
     respondido_em: Optional[datetime] = None
 
 

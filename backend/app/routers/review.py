@@ -45,7 +45,7 @@ class ReviewRequest(BaseModel):
 class ReviewResponse(BaseModel):
     """Response body after a successful review."""
 
-    bloco_id: str
+    bloco_id: int
     stability:   float
     difficulty:  float
     reps:        int
@@ -59,7 +59,7 @@ class DueBloco(BaseModel):
     """Minimal bloco info returned by /review/due."""
 
     id: str
-    documento_id: str
+    documento_id: int
     identificador: Optional[str]
     conteudo:     str
     importancia:  str
@@ -79,7 +79,7 @@ _BLOCO_COLS = """
 """
 
 
-async def _fetch_bloco_or_404(bloco_id: str) -> dict:
+async def _fetch_bloco_or_404(bloco_id: int) -> dict:
     row = await db.fetchrow(
         f"SELECT {_BLOCO_COLS} FROM blocos WHERE id = $1", bloco_id
     )
@@ -103,7 +103,7 @@ async def _fetch_bloco_or_404(bloco_id: str) -> dict:
         "``last_review``, ``next_review``, and ``revisado=true`` back to the DB."
     ),
 )
-async def submit_review(bloco_id: str, body: ReviewRequest) -> ReviewResponse:
+async def submit_review(bloco_id: int, body: ReviewRequest) -> ReviewResponse:
     bloco  = await _fetch_bloco_or_404(bloco_id)
     result = fsrs_service.schedule_review(bloco, body.grade)  # type: ignore[arg-type]
 

@@ -83,7 +83,7 @@ async def create_bloco(payload: BlocoCreate) -> Bloco:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class BulkBlocoItem(BaseModel):
-    documento_id: str
+    documento_id: int
     conteudo: str = ""
     ordem: int = Field(0, ge=0)
     tipo: str = "texto_livre"
@@ -162,7 +162,7 @@ async def reorder_blocos(items: list[ReorderItem]) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class ShiftOrdemPayload(BaseModel):
-    documento_id: str
+    documento_id: int
     from_ordem: int  # inclusive – all blocos with ordem >= from_ordem get +1
 
 
@@ -237,7 +237,7 @@ async def search_blocos(q: str = "") -> list[dict]:
     response_model=Bloco,
     summary="Fetch a single bloco",
 )
-async def get_bloco(bloco_id: str) -> Bloco:
+async def get_bloco(bloco_id: int) -> Bloco:
     row = await db.fetchrow(
         f"SELECT {_BLOCO_COLS} FROM blocos WHERE id = $1",
         bloco_id,
@@ -267,7 +267,7 @@ async def get_bloco(bloco_id: str) -> Bloco:
         "- `{\"conteudo\": \"...\"}` — inline edit"
     ),
 )
-async def patch_bloco(bloco_id: str, payload: BlocoUpdate) -> Bloco:
+async def patch_bloco(bloco_id: int, payload: BlocoUpdate) -> Bloco:
     updates = payload.model_dump(exclude_none=True)
     if not updates:
         raise HTTPException(
@@ -305,7 +305,7 @@ async def patch_bloco(bloco_id: str, payload: BlocoUpdate) -> Bloco:
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a bloco (cascades to anotacoes and portais)",
 )
-async def delete_bloco(bloco_id: str) -> None:
+async def delete_bloco(bloco_id: int) -> None:
     status_str = await db.execute(
         "DELETE FROM blocos WHERE id = $1", bloco_id
     )

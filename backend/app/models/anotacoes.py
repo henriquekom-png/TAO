@@ -25,7 +25,7 @@ TipoAnotacaoType = Literal["texto", "tabela", "fluxograma", "portal"]
 
 
 class AnotacaoBase(BaseModel):
-    bloco_id: str = Field(..., description="FK → blocos.id")
+    bloco_id: int = Field(..., description="FK → blocos.id")
     tipo: TipoAnotacaoType = Field("texto", description="Tipo de anotação")
     conteudo: str = Field("", description="Conteúdo (markdown, JSON de tabela, etc.)")
     ordem: int = Field(0, ge=0)
@@ -36,7 +36,7 @@ class AnotacaoCreate(AnotacaoBase):
 
 
 class AnotacaoUpdate(BaseModel):
-    bloco_id: Optional[str] = None
+    bloco_id: Optional[int] = None
     tipo: Optional[TipoAnotacaoType] = None
     conteudo: Optional[str] = None
     ordem: Optional[int] = Field(None, ge=0)
@@ -45,6 +45,6 @@ class AnotacaoUpdate(BaseModel):
 class Anotacao(AnotacaoBase):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: int
     criado_em: Optional[datetime] = None
     atualizado_em: Optional[datetime] = None

@@ -19,9 +19,9 @@ class SearchResultItem(BaseModel):
     id: str
     title: str
     subtitle: Optional[str] = None
-    documento_id: str
+    documento_id: int
     bloco_id: Optional[str] = None
-    pasta_id: str
+    pasta_id: int
     pasta_path: List[str] = Field(default_factory=list)
 
 class SearchResponse(BaseModel):

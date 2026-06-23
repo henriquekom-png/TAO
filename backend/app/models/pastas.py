@@ -24,7 +24,7 @@ from pydantic import BaseModel, ConfigDict, Field
 # Base — shared fields that appear in both CREATE and DB-read payloads
 # ---------------------------------------------------------------------------
 class PastaBase(BaseModel):
-    parent_id: Optional[str] = Field(None, description="ID da pasta pai (NULL = raiz)")
+    parent_id: Optional[int] = Field(None, description="ID da pasta pai (NULL = raiz)")
     nome: str = Field(..., min_length=1, max_length=255, description="Nome da pasta")
     nivel: int = Field(0, ge=0, description="Profundidade na árvore (raiz = 0)")
     ordem: float = Field(0.0, description="Posição de exibição entre irmãos")
@@ -41,7 +41,7 @@ class PastaCreate(PastaBase):
 # Update — payload accepted by PATCH /pastas/{id}  (all fields optional)
 # ---------------------------------------------------------------------------
 class PastaUpdate(BaseModel):
-    parent_id: Optional[str] = None
+    parent_id: Optional[int] = None
     nome: Optional[str] = Field(None, min_length=1, max_length=255)
     nivel: Optional[int] = Field(None, ge=0)
     ordem: Optional[float] = None
@@ -53,5 +53,5 @@ class PastaUpdate(BaseModel):
 class Pasta(PastaBase):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: int
     criado_em: Optional[datetime] = None

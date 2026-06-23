@@ -119,7 +119,7 @@ async def get_quiz_session(
 # ─────────────────────────────────────────────────────────────────────────────
 
 class ResultPayload(BaseModel):
-    questao_id: str  = Field(..., description="FK → questoes.id")
+    questao_id: int  = Field(..., description="FK → questoes.id")
     acertou:    bool = Field(..., description="True if the user answered correctly")
 
 

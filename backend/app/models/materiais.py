@@ -46,5 +46,5 @@ class MaterialUpdate(BaseModel):
 class Material(MaterialBase):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: int
     criado_em: Optional[datetime] = None
