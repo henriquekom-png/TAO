@@ -27,7 +27,7 @@ class SearchResultItem(BaseModel):
 class SearchResponse(BaseModel):
     results: List[SearchResultItem]
 
-@router.get("/", response_model=SearchResponse, summary="Busca Global em Documentos, Blocos e Anotações")
+@router.get("", response_model=SearchResponse, summary="Busca Global em Documentos, Blocos e Anotações")
 async def global_search(q: str = Query(..., min_length=1, description="Termo de busca")):
     """
     Retorna até 15 resultados contendo o termo `q`, divididos entre Documentos, Blocos e Anotações.
