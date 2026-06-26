@@ -156,19 +156,7 @@ async def resolve_portals(payload: ResolvePortalsRequest) -> ResolvePortalsRespo
         )
         bloco_by_id = {r["id"]: r for r in bloco_rows}
 
-        if bloco_by_id:
-            anot_nested = await db.fetch(
-                """
-                SELECT id, bloco_id, tipo, conteudo, ordem
-                FROM anotacoes
-                WHERE bloco_id = ANY($1::uuid[])
-                ORDER BY ordem ASC, id ASC
-                """,
-                list(bloco_by_id.keys()),
-            )
-            anot_by_bloco: dict[str, list] = {}
-            for a in anot_nested:
-                anot_by_bloco.setdefault(a["bloco_id"], []).append(a)
+
 
         for bid in remaining:
             row = bloco_by_id.get(bid)
@@ -188,15 +176,6 @@ async def resolve_portals(payload: ResolvePortalsRequest) -> ResolvePortalsRespo
                 continue
 
             pasta_path = await _build_pasta_path(row["pasta_id"])
-            nested = [
-                PortalNestedAnotacao(
-                    id=a["id"],
-                    tipo=a["tipo"],
-                    conteudo=a["conteudo"] or "",
-                    ordem=a["ordem"],
-                )
-                for a in anot_by_bloco.get(bid, [])
-            ]
             resolved[str(bid)] = ResolvedPortal(
                 kind="bloco",
                 id=bid,
@@ -207,7 +186,7 @@ async def resolve_portals(payload: ResolvePortalsRequest) -> ResolvePortalsRespo
                 documento_titulo=row["documento_titulo"],
                 identificador=row["identificador"],
                 pasta_path=pasta_path,
-                anotacoes=nested,
+                anotacoes=[],
                 found=True,
             )
 

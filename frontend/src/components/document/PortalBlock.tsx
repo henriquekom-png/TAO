@@ -145,45 +145,6 @@ export const PortalInline: React.FC<PortalInlineProps> = ({ refId, resolved, onG
   );
 };
 
-interface NestedAnotacaoEditorProps {
-  anotId: number;
-  tipo: string;
-  conteudo: string;
-}
-
-const NestedAnotacaoEditor: React.FC<NestedAnotacaoEditorProps> = ({ anotId, tipo, conteudo }) => {
-  const { mutate: updateAnotacao } = useUpdateAnotacao();
-
-  if (tipo === 'portal') {
-    const match = conteudo.trim().match(/^\(\((\d+)\)\)$/);
-    const innerId = match ? match[1] : conteudo;
-    return (
-      <div className="text-xs text-indigo-500 italic py-1 flex items-center gap-1">
-        <Link2 size={10} /> Portal → bloco {innerId}
-      </div>
-    );
-  }
-
-  if (tipo === 'fluxograma') {
-    return (
-      <div className="text-xs text-zinc-500 italic py-1">
-        🔀 Fluxograma (abra o painel para visualizar)
-      </div>
-    );
-  }
-
-  return (
-    <div className="border-t border-indigo-100/80 pt-2 mt-2 first:border-t-0 first:pt-0 first:mt-0">
-      <div className="text-[10px] font-medium text-zinc-400 uppercase mb-1">{tipo}</div>
-      <EditableSourceField
-        value={conteudo}
-        onSave={(val) => updateAnotacao({ id: anotId, data: { conteudo: val } })}
-        minHeight="min-h-[40px]"
-      />
-    </div>
-  );
-};
-
 interface PortalTransclusionProps {
   refId: string;
   resolved?: ResolvedPortal;
@@ -256,18 +217,7 @@ export const PortalTransclusion: React.FC<PortalTransclusionProps> = ({ refId, r
         />
       </div>
 
-      {resolved.kind === 'bloco' && resolved.anotacoes.length > 0 && (
-        <div className="px-3 pb-3 space-y-0">
-          {resolved.anotacoes.map((anot) => (
-            <NestedAnotacaoEditor
-              key={anot.id}
-              anotId={anot.id}
-              tipo={anot.tipo}
-              conteudo={anot.conteudo}
-            />
-          ))}
-        </div>
-      )}
+
     </div>
   );
 };
