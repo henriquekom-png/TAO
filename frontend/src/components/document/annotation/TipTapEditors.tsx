@@ -9,6 +9,7 @@ import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { markdownToHtml, htmlToMarkdown } from '../../../lib/markdownHtmlConverter';
 import { EditorContextMenu } from '../EditorContextMenu';
+import { TableFixedToolbar } from './TableFixedToolbar';
 import { cn } from '../../../lib/utils';
 import { parsePortalSegments, rebuildContentFromSegments, PortalSegment } from '../../../lib/portalParser';
 import { PortalInline } from '../PortalBlock';
@@ -68,7 +69,8 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
   if (!editor) return null;
 
   return (
-    <div className="relative w-full group/editor">
+    <div className="relative w-full group/editor flex flex-col">
+      <TableFixedToolbar editor={editor} />
       <EditorContextMenu editor={editor} />
       <EditorContent editor={editor} />
     </div>

@@ -203,6 +203,8 @@ interface PastaTreeNodeProps {
   onRenameCancel: () => void;
   // DnD state
   dropTargetPastaId: number | null;
+  dropIndicatorPastaId: number | null;
+  dropIndicatorPastaPos: 'before' | 'after' | null;
   dropIndicatorDocId: number | null;
   dropIndicatorPos: 'before' | 'after' | null;
   // DnD callbacks
@@ -219,13 +221,15 @@ const PastaTreeNode: React.FC<PastaTreeNodeProps> = ({
   selectedDocId, expandPastaIds, onSelectDoc,
   onContextMenu,
   renamingPastaId, renamingDocId, onPastaRenameConfirm, onDocRenameConfirm, onRenameCancel,
-  dropTargetPastaId, dropIndicatorDocId, dropIndicatorPos,
+  dropTargetPastaId, dropIndicatorPastaId, dropIndicatorPastaPos, dropIndicatorDocId, dropIndicatorPos,
   onDragOverPasta, onDragLeavePasta, onDropOnPasta,
   onDragOverDoc, onDragLeaveDoc, onDropOnDoc,
 }) => {
   const [expanded, setExpanded] = useState(expandPastaIds.includes(pasta.id));
   const isRenaming = renamingPastaId === pasta.id;
   const isDropTarget = dropTargetPastaId === pasta.id;
+  const showPastaBefore = dropIndicatorPastaId === pasta.id && dropIndicatorPastaPos === 'before';
+  const showPastaAfter = dropIndicatorPastaId === pasta.id && dropIndicatorPastaPos === 'after';
 
   useEffect(() => {
     if (expandPastaIds.includes(pasta.id)) setExpanded(true);
@@ -244,13 +248,16 @@ const PastaTreeNode: React.FC<PastaTreeNodeProps> = ({
     selectedDocId, expandPastaIds, onSelectDoc,
     onContextMenu,
     renamingPastaId, renamingDocId, onPastaRenameConfirm, onDocRenameConfirm, onRenameCancel,
-    dropTargetPastaId, dropIndicatorDocId, dropIndicatorPos,
+    dropTargetPastaId, dropIndicatorPastaId, dropIndicatorPastaPos, dropIndicatorDocId, dropIndicatorPos,
     onDragOverPasta, onDragLeavePasta, onDropOnPasta,
     onDragOverDoc, onDragLeaveDoc, onDropOnDoc,
   };
 
   return (
     <div>
+      {showPastaBefore && (
+        <div className="h-0.5 rounded-full bg-slate-400 mx-1 mb-0.5" style={{ marginLeft: `${indentPx}px` }} />
+      )}
       {/* ── Pasta header row ─────────────────────────────────────────────── */}
       <div
         title={pasta.nome}
@@ -290,6 +297,9 @@ const PastaTreeNode: React.FC<PastaTreeNodeProps> = ({
           </>
         )}
       </div>
+      {showPastaAfter && (
+        <div className="h-0.5 rounded-full bg-slate-400 mx-1 mt-0.5" style={{ marginLeft: `${indentPx}px` }} />
+      )}
 
       {/* ── Children ─────────────────────────────────────────────────────── */}
       {expanded && (
@@ -411,6 +421,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   // DnD visual state — kept flat/simple to avoid re-render storms
   const [dropTargetPastaId,  setDropTargetPastaId]  = useState<number | null>(null);
+  const [dropIndicatorPastaId, setDropIndicatorPastaId] = useState<number | null>(null);
+  const [dropIndicatorPastaPos, setDropIndicatorPastaPos] = useState<'before' | 'after' | null>(null);
   const [dropIndicatorDocId, setDropIndicatorDocId] = useState<number | null>(null);
   const [dropIndicatorPos,   setDropIndicatorPos]   = useState<'before' | 'after' | null>(null);
 
@@ -419,6 +431,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const clearDrop = useCallback(() => {
     setDropTargetPastaId(null);
+    setDropIndicatorPastaId(null);
+    setDropIndicatorPastaPos(null);
     setDropIndicatorDocId(null);
     setDropIndicatorPos(null);
   }, []);
@@ -460,21 +474,50 @@ export const Sidebar: React.FC<SidebarProps> = ({
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
-    setDropTargetPastaId(pastaId);
     setDropIndicatorDocId(null);
     setDropIndicatorPos(null);
+
+    if (_dragging.kind === 'pasta') {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      if (y < rect.height * 0.25) {
+        setDropTargetPastaId(null);
+        setDropIndicatorPastaId(pastaId);
+        setDropIndicatorPastaPos('before');
+      } else if (y > rect.height * 0.75) {
+        setDropTargetPastaId(null);
+        setDropIndicatorPastaId(pastaId);
+        setDropIndicatorPastaPos('after');
+      } else {
+        setDropTargetPastaId(pastaId);
+        setDropIndicatorPastaId(null);
+        setDropIndicatorPastaPos(null);
+      }
+    } else {
+      setDropTargetPastaId(pastaId);
+      setDropIndicatorPastaId(null);
+      setDropIndicatorPastaPos(null);
+    }
   }, []);
 
   const handleDragLeavePasta = useCallback((e: React.DragEvent) => {
     e.stopPropagation();
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
       setDropTargetPastaId(null);
+      setDropIndicatorPastaId(null);
+      setDropIndicatorPastaPos(null);
     }
   }, []);
 
   const handleDropOnPasta = useCallback((e: React.DragEvent, targetPasta: Pasta) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Capture state before clearing
+    const isBefore = dropIndicatorPastaPos === 'before';
+    const isAfter = dropIndicatorPastaPos === 'after';
+    const isReorder = isBefore || isAfter;
+
     clearDrop();
     const payload = _dragging;
     _dragging = null;
@@ -484,10 +527,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
       if (payload.sourcePastaId === targetPasta.id) return;
       moveDocumento({ id: payload.docId, pasta_id: targetPasta.id, source_pasta_id: payload.sourcePastaId });
     } else if (payload.kind === 'pasta') {
-      if (payload.pastaId === targetPasta.id || payload.currentParentId === targetPasta.id) return;
-      movePasta({ id: payload.pastaId, parent_id: targetPasta.id, nivel: (targetPasta.nivel ?? 0) + 1 });
+      if (payload.pastaId === targetPasta.id) return;
+
+      if (isReorder) {
+        // Prevent moving a folder into its own children or parents invalidly
+        if (payload.currentParentId !== targetPasta.parent_id && payload.pastaId === targetPasta.parent_id) return;
+        const targetOrdem = targetPasta.ordem ?? 0;
+        const newOrdem = isBefore ? targetOrdem - 0.5 : targetOrdem + 0.5;
+        movePasta({ id: payload.pastaId, parent_id: targetPasta.parent_id ?? null, nivel: targetPasta.nivel ?? 0, ordem: newOrdem });
+      } else {
+        if (payload.currentParentId === targetPasta.id) return;
+        movePasta({ id: payload.pastaId, parent_id: targetPasta.id, nivel: (targetPasta.nivel ?? 0) + 1 });
+      }
     }
-  }, [clearDrop, moveDocumento, movePasta]);
+  }, [clearDrop, moveDocumento, movePasta, dropIndicatorPastaPos]);
 
   // ── DnD — document rows (position-aware) ───────────────────────────────────
   const handleDragOverDoc = useCallback((e: React.DragEvent, docId: number) => {
@@ -561,6 +614,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     onDocRenameConfirm: handleDocRenameConfirm,
     onRenameCancel: cancelRename,
     dropTargetPastaId,
+    dropIndicatorPastaId,
+    dropIndicatorPastaPos,
     dropIndicatorDocId,
     dropIndicatorPos,
     onDragOverPasta: handleDragOverPasta,
