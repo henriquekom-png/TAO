@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 import { FileQuestion, ClipboardList } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useDocumento } from '../../hooks/useDocumentos';
 import { useReorderBlocos } from '../../hooks/useBlocos';
 import { Bloco, Questao } from '../../types';
@@ -19,10 +20,12 @@ interface DocumentViewerProps {
   onScrollComplete?: () => void;
   onSelectBloco?: (id: number) => void;
   onGenerateSimulado?: (questions: Questao[]) => void;
+  onOpenNotes?: () => void;
+  onBackToMenu?: () => void;
 }
 
 export const DocumentViewer: React.FC<DocumentViewerProps> = ({
-  documentId, selectedBlocoId, scrollToBlocoId, onScrollComplete, onSelectBloco, onGenerateSimulado
+  documentId, selectedBlocoId, scrollToBlocoId, onScrollComplete, onSelectBloco, onGenerateSimulado, onOpenNotes, onBackToMenu
 }) => {
   const { data: doc, isLoading } = useDocumento(documentId);
   const { mutate: reorderBlocos } = useReorderBlocos();
@@ -91,7 +94,18 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
 
   return (
     <>
-      <div className="max-w-3xl mx-auto bg-card p-8 sm:px-12 rounded-xl shadow-soft border border-border min-h-full">
+      <motion.div 
+        className="max-w-3xl mx-auto bg-card p-8 sm:px-12 rounded-xl shadow-soft border border-border min-h-full touch-pan-y"
+        drag="x"
+        dragDirectionLock={true}
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.2}
+        onDragEnd={(_, { offset, velocity }) => {
+          if (offset.x > 100 || velocity.x > 500) {
+            onBackToMenu?.();
+          }
+        }}
+      >
         <div className="flex justify-between items-start mb-8 pb-4 border-b border-border">
           <div>
             <h1 className="text-[15px] font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">{doc.titulo}</h1>
@@ -142,6 +156,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
                       isSelected={selectedBlocoId === bloco.id}
                       autoFocusEditor={newBlocoId === bloco.id}
                       onClick={() => onSelectBloco?.(bloco.id)}
+                      onOpenNotes={onOpenNotes}
                       onEditorMounted={newBlocoId === bloco.id ? handleNewBlocoMounted : undefined}
                     />
                   </React.Fragment>
@@ -167,7 +182,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             onCreated={(id) => setNewBlocoId(id)}
           />
         )}
-      </div>
+      </motion.div>
 
       {showImportModal && (
         <BulkImportModal

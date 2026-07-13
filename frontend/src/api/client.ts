@@ -15,12 +15,12 @@ api.interceptors.response.use(
   (error) => {
     console.error('API Error:', error)
     
-    // Tratamento global de erro com feedback visual
-    if (!error.response) {
-      toast.error('Erro de Conexão', { 
-        description: 'Não foi possível conectar ao servidor. Verifique sua internet ou aguarde o servidor acordar.' 
-      })
-    } else {
+    // Network errors (offline / server unreachable) are silenced here because
+    // the Dexie/IndexedDB fallback in each hook will handle them gracefully.
+    // Only server-side errors (4xx/5xx with a response) show toasts.
+    const isNetworkError = !error.response || error.code === 'ERR_NETWORK'
+
+    if (!isNetworkError) {
       toast.error(`Erro ${error.response.status}`, { 
         description: error.response.data?.detail || 'Ocorreu um erro no servidor.' 
       })

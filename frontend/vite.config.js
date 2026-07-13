@@ -25,22 +25,8 @@ export default defineConfig({
             workbox: {
                 maximumFileSizeToCacheInBytes: 10485760, // 10 MB
                 globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-                runtimeCaching: [
-                    {
-                        urlPattern: /^https:\/\/tao-backend-900893471328\.us-central1\.run\.app\/api\/v1\/.*/i,
-                        handler: 'NetworkFirst',
-                        options: {
-                            cacheName: 'tao-api-cache',
-                            expiration: {
-                                maxEntries: 500,
-                                maxAgeSeconds: 60 * 60 * 24 * 7 // 1 week
-                            },
-                            cacheableResponse: {
-                                statuses: [0, 200]
-                            }
-                        }
-                    }
-                ]
+                // API data caching is handled by Dexie/IndexedDB in each hook (single source of truth).
+                // No runtimeCaching here to avoid redundant cache layers and stale-data conflicts.
             },
             devOptions: {
                 enabled: true,

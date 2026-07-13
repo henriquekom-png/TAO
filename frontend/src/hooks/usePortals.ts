@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/client';
+import { db } from '../lib/db';
 
 export interface PortalNestedAnotacao {
   id: number;
@@ -34,11 +35,28 @@ export const useResolvePortals = (ids: string[]) => {
   return useQuery({
     queryKey: ['portals', 'resolve', sortedKey],
     queryFn: async () => {
-      const response = await api.post<{ resolved: Record<string, ResolvedPortal> }>(
-        '/nodes/resolve-portals',
-        { ids }
-      );
-      return response.data.resolved;
+      try {
+        const response = await api.post<{ resolved: Record<string, ResolvedPortal> }>(
+          '/nodes/resolve-portals',
+          { ids }
+        );
+        const resolved = response.data.resolved;
+        // Save each resolved portal individually to IndexedDB
+        const entries = Object.entries(resolved).map(([id, data]) => ({ id, data }));
+        if (entries.length > 0) {
+          await db.portals.bulkPut(entries);
+        }
+        return resolved;
+      } catch (error) {
+        // Attempt recovery from IndexedDB
+        const result: Record<string, ResolvedPortal> = {};
+        for (const id of ids) {
+          const cached = await db.portals.get(id);
+          if (cached) result[id] = cached.data as ResolvedPortal;
+        }
+        if (Object.keys(result).length > 0) return result;
+        throw error;
+      }
     },
     enabled: ids.length > 0,
     staleTime: 30_000,

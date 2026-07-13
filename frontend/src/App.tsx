@@ -14,7 +14,7 @@ import { cn } from './lib/utils';
 import type { Questao } from './types';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => sessionStorage.getItem('tao_auth') === 'true');
+  const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('tao_auth') === 'true');
   const [isDarkMode, setIsDarkMode] = useState(() => sessionStorage.getItem('theme') === 'dark');
 
   useEffect(() => {
@@ -30,6 +30,8 @@ function App() {
   const [selectedDocId, setSelectedDocId] = useState<number | null>(null);
   const [selectedBlocoId, setSelectedBlocoId] = useState<number | null>(null);
 
+  const [activeMobileView, setActiveMobileView] = useState<'menu' | 'document' | 'notes' | 'search' | 'simulation'>('menu');
+
   const [isQuizSessionOpen, setIsQuizSessionOpen] = useState(false);
   const [isHubActive, setIsHubActive] = useState(false);
   const [expandPastaIds, setExpandPastaIds] = useState<number[]>([]);
@@ -40,12 +42,14 @@ function App() {
   const handleGenerateSimulado = useCallback((questions: Questao[]) => {
     setPreloadedQuestions(questions);
     setIsQuizSessionOpen(true);
+    setActiveMobileView('simulation');
   }, []);
 
   // Selecting a document exits hub mode
   const handleSelectDoc = useCallback((id: number) => {
     setSelectedDocId(id);
     setIsHubActive(false);
+    setActiveMobileView('document');
   }, []);
 
   // Toggle states for Sidebar
@@ -57,6 +61,7 @@ function App() {
     setSelectedBlocoId(target.blocoId);
     setScrollToBlocoId(target.blocoId);
     setIsHubActive(false);
+    setActiveMobileView('document');
   }, []);
 
   const documentContent = isHubActive ? (
@@ -73,6 +78,8 @@ function App() {
         onScrollComplete={() => setScrollToBlocoId(null)}
         onSelectBloco={setSelectedBlocoId}
         onGenerateSimulado={handleGenerateSimulado}
+        onOpenNotes={() => setActiveMobileView('notes')}
+        onBackToMenu={() => setActiveMobileView('menu')}
       />
     </div>
   );
@@ -81,7 +88,7 @@ function App() {
     return (
       <LoginGate
         onSuccess={() => {
-          sessionStorage.setItem('tao_auth', 'true');
+          localStorage.setItem('tao_auth', 'true');
           setIsAuthenticated(true);
         }}
       />
@@ -90,33 +97,48 @@ function App() {
 
   return (
     <div className="h-screen w-screen bg-zinc-50 dark:bg-background overflow-hidden font-sans text-zinc-900 dark:text-foreground flex flex-col transition-colors">
-      <Group orientation="horizontal" id="main-layout" key={`main-layout-${isSidebarOpen}`}>
+      <Group orientation="horizontal" id="main-layout" className="relative w-full h-full overflow-hidden">
         {/* Sidebar Panel */}
         {isSidebarOpen && (
-          <>
-            <Panel
-              id="sidebar-panel"
-              defaultSize="18%"
-              minSize="12%"
-              maxSize="25%"
-              className="h-full"
-            >
-              <Sidebar
-                onSelectDoc={handleSelectDoc}
-                selectedDocId={selectedDocId}
-                expandPastaIds={expandPastaIds}
-                onSelectHub={() => setIsHubActive(true)}
-                isHubActive={isHubActive}
-              />
-            </Panel>
-            <Separator className="w-2.5 flex items-center justify-center group cursor-col-resize select-none h-full z-20 bg-transparent relative">
-              <div className="absolute inset-y-0 w-px bg-border group-hover:bg-primary group-active:bg-primary transition-colors duration-200" />
-            </Separator>
-          </>
+          <Panel
+            id="sidebar-panel"
+            defaultSize="18%"
+            minSize="12%"
+            maxSize="25%"
+            className={cn(
+              "relative z-20 flex flex-col min-h-0 bg-background transition duration-300 ease-in-out",
+              "max-md:absolute max-md:inset-0 max-md:!w-full max-md:!h-full",
+              activeMobileView === 'menu' 
+                ? "max-md:translate-x-0 max-md:pointer-events-auto max-md:opacity-100" 
+                : "max-md:-translate-x-full max-md:pointer-events-none max-md:opacity-0"
+            )}
+          >
+            <Sidebar
+              onSelectDoc={handleSelectDoc}
+              selectedDocId={selectedDocId}
+              expandPastaIds={expandPastaIds}
+              onSelectHub={() => setIsHubActive(true)}
+              isHubActive={isHubActive}
+            />
+          </Panel>
+        )}
+        {isSidebarOpen && (
+          <Separator className="hidden md:flex w-2.5 items-center justify-center group cursor-col-resize select-none h-full z-20 bg-transparent relative pointer-events-none md:pointer-events-auto">
+            <div className="absolute inset-y-0 w-px bg-border group-hover:bg-primary group-active:bg-primary transition-colors duration-200" />
+          </Separator>
         )}
 
         {/* Central Workspace Panel */}
-        <Panel id="workspace-panel" className="h-full min-w-0 bg-white dark:bg-card flex flex-col transition-colors">
+        <Panel 
+          id="workspace-panel" 
+          className={cn(
+            "relative z-10 min-w-0 bg-white dark:bg-card flex flex-col transition duration-300 ease-in-out",
+            "max-md:absolute max-md:inset-0 max-md:!w-full max-md:!h-full",
+            (activeMobileView === 'document' || activeMobileView === 'notes' || activeMobileView === 'search' || activeMobileView === 'simulation')
+              ? "max-md:translate-x-0 max-md:pointer-events-auto max-md:opacity-100"
+              : "max-md:translate-x-full max-md:pointer-events-none max-md:opacity-0"
+          )}
+        >
           <header className="h-14 bg-background border-b border-border flex items-center justify-between px-6 shrink-0 shadow-soft-sm z-10 relative select-none transition-colors">
             <div className="flex items-center gap-3">
               <button
@@ -165,7 +187,7 @@ function App() {
             <Group 
               orientation="horizontal" 
               id="content-split"
-              key={`content-split-${selectedBlocoId ? 'with-annotations' : 'no-annotations'}`}
+              className="relative w-full h-full overflow-hidden"
             >
               {/* Document/Blocks Column */}
               <Panel
@@ -173,32 +195,48 @@ function App() {
                 minSize="30%"
                 maxSize="70%"
                 defaultSize={selectedBlocoId ? "58%" : "100%"}
-                className="h-full"
+                className={cn(
+                  "relative z-20 flex flex-col min-h-0 bg-background transition duration-300 ease-in-out",
+                  "max-md:absolute max-md:inset-0 max-md:!w-full max-md:!h-full",
+                  (activeMobileView === 'document' || activeMobileView === 'search' || activeMobileView === 'simulation')
+                    ? "max-md:translate-x-0 max-md:pointer-events-auto max-md:opacity-100"
+                    : "max-md:-translate-x-full max-md:pointer-events-none max-md:opacity-0"
+                )}
               >
                 {documentContent}
               </Panel>
 
               {selectedBlocoId && (
-                <>
-                  <Separator className="w-2.5 flex items-center justify-center group cursor-col-resize select-none h-full z-20 bg-transparent relative">
-                    <div className="absolute inset-y-0 w-px bg-border group-hover:bg-primary group-active:bg-primary transition-colors duration-200" />
-                  </Separator>
+                <Separator className="hidden md:flex w-2.5 items-center justify-center group cursor-col-resize select-none h-full z-20 bg-transparent relative pointer-events-none md:pointer-events-auto">
+                  <div className="absolute inset-y-0 w-px bg-border group-hover:bg-primary group-active:bg-primary transition-colors duration-200" />
+                </Separator>
+              )}
 
-                  {/* Annotation Panel */}
-                  <Panel
-                    id="annotation-panel"
-                    minSize="25%"
-                    maxSize="60%"
-                    defaultSize="42%"
-                    className="h-full"
-                  >
-                    <AnnotationPanel
-                      blocoId={selectedBlocoId}
-                      onClose={() => setSelectedBlocoId(null)}
-                      onGoToSource={handleGoToSource}
-                    />
-                  </Panel>
-                </>
+              {/* Annotation Panel */}
+              {selectedBlocoId && (
+                <Panel
+                  id="annotation-panel"
+                  minSize="25%"
+                  maxSize="60%"
+                  defaultSize="42%"
+                  className={cn(
+                    "relative z-30 flex flex-col min-h-0 bg-background border-none transition duration-300 ease-in-out",
+                    "max-md:absolute max-md:inset-0 max-md:!w-full max-md:!h-full max-md:border-l max-md:border-border",
+                    activeMobileView === 'notes'
+                      ? "max-md:translate-x-0 max-md:pointer-events-auto max-md:opacity-100"
+                      : "max-md:translate-x-full max-md:pointer-events-none max-md:opacity-0"
+                  )}
+                >
+                  <AnnotationPanel
+                    blocoId={selectedBlocoId}
+                    onClose={() => {
+                      setSelectedBlocoId(null);
+                      setActiveMobileView('document');
+                    }}
+                    onGoToSource={handleGoToSource}
+                    onBackToDocument={() => setActiveMobileView('document')}
+                  />
+                </Panel>
               )}
             </Group>
           </div>

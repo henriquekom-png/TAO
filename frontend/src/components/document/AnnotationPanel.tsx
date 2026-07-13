@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
 import { X, FileEdit, GripVertical } from 'lucide-react';
+import { motion } from 'framer-motion';
 import {
   useAnotacoesByBloco,
   useCreateAnotacao,
@@ -21,9 +22,10 @@ interface AnnotationPanelProps {
   blocoId: number | null;
   onClose: () => void;
   onGoToSource?: (target: PortalNavigationTarget) => void;
+  onBackToDocument?: () => void;
 }
 
-export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ blocoId, onClose, onGoToSource }) => {
+export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ blocoId, onClose, onGoToSource, onBackToDocument }) => {
   const { data: anotacoes, isLoading } = useAnotacoesByBloco(blocoId);
   const { mutate: createAnotacao } = useCreateAnotacao();
   const { mutate: reorderAnotacoes } = useReorderAnotacoes();
@@ -138,7 +140,18 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ blocoId, onClo
   if (!blocoId) return null;
 
   return (
-    <div className="w-full min-w-0 bg-zinc-50/50 dark:bg-zinc-950 border-l border-border flex flex-col h-full shadow-soft-sm animate-in slide-in-from-right-8 duration-300 transition-colors">
+    <motion.div 
+      className="w-full min-w-0 bg-zinc-50/50 dark:bg-zinc-950 border-l border-border flex flex-col h-full shadow-soft-sm animate-in slide-in-from-right-8 duration-300 transition-colors touch-pan-y"
+      drag="x"
+      dragDirectionLock={true}
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.2}
+      onDragEnd={(_, { offset, velocity }) => {
+        if (offset.x > 100 || velocity.x > 500) {
+          onBackToDocument?.();
+        }
+      }}
+    >
       <div className="h-14 px-4 border-b border-border flex items-center justify-between bg-card shrink-0 shadow-soft-sm transition-colors">
         <div className="flex items-center gap-2">
           <FileEdit size={18} className="text-amber-500" />
@@ -215,6 +228,6 @@ export const AnnotationPanel: React.FC<AnnotationPanelProps> = ({ blocoId, onClo
       </div>
 
       {openPortalSearch && <PortalSearchModal onClose={() => setOpenPortalSearch(false)} onSelect={(id) => { if (portalSearchCallback) portalSearchCallback(id); }} />}
-    </div>
+    </motion.div>
   );
 };

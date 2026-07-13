@@ -71,11 +71,12 @@ interface BlocoItemProps {
   isSelected?: boolean;
   autoFocusEditor?: boolean;
   onClick?: () => void;
+  onOpenNotes?: () => void;
   onEditorMounted?: () => void;
 }
 
 export const BlocoItem: React.FC<BlocoItemProps> = ({
-  bloco, index, isSelected, autoFocusEditor, onClick, onEditorMounted,
+  bloco, index, isSelected, autoFocusEditor, onClick, onOpenNotes, onEditorMounted,
 }) => {
   const { mutate: updateBloco } = useUpdateBloco();
   const { mutate: deleteBloco } = useDeleteBloco();
@@ -154,9 +155,9 @@ export const BlocoItem: React.FC<BlocoItemProps> = ({
           ref={provided.innerRef}
           {...provided.draggableProps}
           onClick={onClick}
-          onDoubleClick={() => setIsEditing(true)}
+          onDoubleClick={(e) => { e.stopPropagation(); onOpenNotes?.(); }}
           className={cn(
-            'group relative flex gap-3 p-3 -mx-3 rounded-xl transition-all duration-200 border cursor-pointer',
+            'group relative flex gap-3 p-3 -mx-3 rounded-xl transition-all duration-200 border cursor-pointer touch-manipulation',
             isSelected
               ? 'border-border bg-slate-50 dark:bg-zinc-800/50 shadow-sm'
               : 'border-transparent hover:bg-slate-50/50 dark:hover:bg-zinc-800/30 hover:border-border',

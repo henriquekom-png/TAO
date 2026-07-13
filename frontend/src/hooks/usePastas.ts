@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
 import { Pasta } from '../types'
+import { db } from '../lib/db'
 
 // ── Tree ────────────────────────────────────────────────────────────────────
 export const usePastasTree = () => {
@@ -9,11 +10,11 @@ export const usePastasTree = () => {
     queryFn: async () => {
       try {
         const response = await api.get<Pasta>('/pastas/tree')
-        localStorage.setItem('tao_pastas_tree', JSON.stringify(response.data))
+        await db.cache.put({ key: 'pastas_tree', data: response.data })
         return response.data
       } catch (error) {
-        const cache = localStorage.getItem('tao_pastas_tree')
-        if (cache) return JSON.parse(cache)
+        const cached = await db.cache.get('pastas_tree')
+        if (cached) return cached.data
         throw error
       }
     },
