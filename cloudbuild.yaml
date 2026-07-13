@@ -1,0 +1,47 @@
+# cloudbuild.yaml
+# Pipeline de CI/CD: build do backend e deploy automático no Cloud Run (us-central1)
+# Disparado por: push na branch main do repositório GitHub
+
+steps:
+  # Passo 1: Build da imagem Docker a partir do diretório backend/
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/tao-backend:$COMMIT_SHA'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/tao-backend:latest'
+      - './backend'
+
+  # Passo 2: Push da imagem para o Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/tao-backend'
+
+  # Passo 3: Deploy no Cloud Run (us-central1)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'tao-backend'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/tao-backend:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--quiet'
+
+# Imagens publicadas no Artifact Registry
+images:
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/tao-backend:$COMMIT_SHA'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/tao-backend:latest'
+
+# Timeout do build (10 minutos é suficiente)
+timeout: '600s'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
