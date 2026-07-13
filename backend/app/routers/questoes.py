@@ -761,15 +761,28 @@ Sua tarefa é extrair UMA OU MAIS questões do texto recebido e retornar um JSON
 
 Regras:
 - Extraia TODAS as questões presentes no texto.
-- Para questões de múltipla escolha, preencha alternativa_a até alternativa_e.
-- IMPORTANTE: Se o texto contiver um Texto Base (ex: "Julgue os itens a seguir:") seguido de múltiplos itens de julgamento, você DEVE agrupá-los em UMA ÚNICA questão do tipo "combinacao_itens". O Texto Base vai no campo "enunciado", e os itens vão no array "itens" (com numero, enunciado e correto). NUNCA divida o texto base e os itens em questões de "certo_errado" independentes.
+- Para questões de múltipla escolha simples (sem assertivas numeradas), preencha alternativa_a até alternativa_e.
+- IMPORTANTE — Questão com assertivas numeradas (I, II, III...) seguidas de alternativas (a, b, c...):
+  Este é o padrão mais comum de concursos (FCC, CESPE, VUNESP). Você DEVE classificar como "combinacao_itens".
+  - O enunciado base (o texto antes das assertivas) vai no campo "enunciado".
+  - Cada assertiva (I, II, III...) vira um objeto no array "itens" com:
+      "numero": a numeração da assertiva (ex: "I", "II", "III")
+      "enunciado": o texto completo da assertiva
+      "correto": true se a assertiva está correta, false se incorreta (use as justificativas do texto para determinar)
+  - NÃO preencha alternativa_a até alternativa_e (ignore as alternativas A-E da questão original).
+  - O campo "gabarito" deve ser uma string CURTA indicando quais assertivas são corretas, ex: "I, II e IV corretas".
+  - O campo "comentario" deve reunir TODAS as justificativas de todas as assertivas, explicando cada uma.
+- IMPORTANTE — Questão com Texto Base + itens de julgamento (ex: "Julgue os itens a seguir:"):
+  Também deve ser "combinacao_itens". O Texto Base vai no "enunciado", os itens vão no array "itens".
+  NUNCA divida o texto base e os itens em questões de "certo_errado" independentes.
 - Use "certo_errado" APENAS para questões isoladas que contenham seu próprio contexto e afirmação numa coisa só.
-- O campo "gabarito" deve conter a resposta (letra para múltipla escolha, "Certo"/"Errado" para certo_errado, resumo para combinacao_itens).
+- O campo "gabarito" deve conter: letra para multipla_escolha | "Certo"/"Errado" para certo_errado | resumo curto para combinacao_itens.
 - "dificuldade" padrão: "media". Infira se houver indicação no texto.
 - "materia" padrão: "" (string vazia) se não identificado.
 - Não invente informações que não estão no texto.
 - Retorne APENAS o JSON. Sem markdown, sem explicações.
 """.strip()
+
 
 
 @router.post(
@@ -822,14 +835,17 @@ async def ingest_questoes(body: IngestPayload):
 
     # 2. Validate each item via Pydantic and insert
     criadas: list[Questao] = []
+    erros: list[str] = []
 
-    for raw in raw_questoes:
+    for idx, raw in enumerate(raw_questoes):
         itens_raw = raw.pop("itens", [])  # separate before Pydantic validation
 
         try:
             q = QuestaoCreate(**raw)
         except Exception as exc:
+            msg = f"Questão {idx + 1}: validação falhou — {exc}"
             logger.warning("Questão inválida ignorada durante ingestão: %s — %s", raw, exc)
+            erros.append(msg)
             continue  # skip invalid entries rather than aborting the whole batch
 
         try:
@@ -858,13 +874,19 @@ async def ingest_questoes(body: IngestPayload):
             criadas.append(Questao(**dict(row)))
 
         except Exception as exc:
+            msg = f"Questão {idx + 1}: erro ao inserir no banco — {exc}"
             logger.error("Erro ao inserir questão no banco: %s", exc)
+            erros.append(msg)
             # continue with remaining questions
 
     if not criadas:
+        detail = "Nenhuma questão foi inserida."
+        if erros:
+            detail += " Erros encontrados: " + " | ".join(erros)
         raise HTTPException(
-            status_code=500,
-            detail="Nenhuma questão foi inserida. Verifique os campos obrigatórios.",
+            status_code=422,
+            detail=detail,
         )
 
     return IngestResult(criadas=len(criadas), questoes=criadas)
+

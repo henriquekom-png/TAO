@@ -63,7 +63,7 @@ class QuestaoBase(BaseModel):
     alternativa_c: Optional[str] = None
     alternativa_d: Optional[str] = None
     alternativa_e: Optional[str] = None
-    gabarito: str = Field(..., min_length=1, max_length=50)
+    gabarito: str = Field(..., min_length=1, max_length=500)
     comentario: Optional[str] = None
     dificuldade: DificuldadeType = Field("media")
     bloco_origem_id: Optional[str] = Field(None, description="FK → blocos.id (nullable)")
