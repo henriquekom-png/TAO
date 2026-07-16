@@ -208,6 +208,25 @@ async def create_questao(body: QuestaoUpdate):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# GET /materias  — distinct subject list
+# IMPORTANT: must be declared BEFORE /{questao_id} to avoid route shadowing.
+# ─────────────────────────────────────────────────────────────────────────────
+
+@router.get("/materias", response_model=list[str], summary="List distinct matérias")
+async def list_materias():
+    """Return a sorted list of distinct non-empty materia values in the bank."""
+    rows = await db.fetch(
+        """
+        SELECT DISTINCT materia
+        FROM questoes
+        WHERE materia IS NOT NULL AND materia <> ''
+        ORDER BY materia ASC
+        """
+    )
+    return [row["materia"] for row in rows]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # GET /{id}  — single questao
 # ─────────────────────────────────────────────────────────────────────────────
 

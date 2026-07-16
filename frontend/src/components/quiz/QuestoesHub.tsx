@@ -23,6 +23,7 @@ import {
   type QuestoesFiltros, type QuestaoUpdatePayload,
 } from '../../hooks/useQuestoes';
 import { useQuizSession } from '../../hooks/useQuizSession';
+import { MateriaCombobox } from './MateriaCombobox';
 import type {
   Questao, TipoQuestao, DificuldadeQuestao, QuizScore, QuestaoItem,
   QuizSessionParams,
@@ -228,8 +229,13 @@ const HubSetupForm: React.FC<{
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Matéria</label>
-            <input className={fieldCls} placeholder="Ex.: Direito do Trabalho"
-              value={form.materia} onChange={(e) => setForm(f => ({ ...f, materia: e.target.value }))} />
+            <MateriaCombobox
+              value={form.materia}
+              onChange={(v) => setForm(f => ({ ...f, materia: v }))}
+              placeholder="Todas as matérias"
+              className={fieldCls}
+              allowEmpty
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Banca</label>
@@ -865,7 +871,11 @@ const EditQuestaoModal: React.FC<{
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Matéria</label>
-            <input className={field} value={form.materia ?? ''} onChange={(e) => setForm(f => ({ ...f, materia: e.target.value }))} />
+            <MateriaCombobox
+              value={form.materia ?? ''}
+              onChange={(v) => setForm(f => ({ ...f, materia: v }))}
+              className={field}
+            />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Cargo</label>
@@ -1097,7 +1107,11 @@ const InsertQuestaoModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Matéria</label>
-            <input className={field} value={form.materia} onChange={(e) => setForm(f => ({ ...f, materia: e.target.value }))} />
+            <MateriaCombobox
+              value={form.materia}
+              onChange={(v) => setForm(f => ({ ...f, materia: v }))}
+              className={field}
+            />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Banca</label>

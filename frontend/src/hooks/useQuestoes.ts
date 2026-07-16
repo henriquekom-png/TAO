@@ -8,6 +8,7 @@
  *   usePatchQuestao       — PATCH /{id} mutation
  *   useIngestQuestoes     — POST /ingest mutation (AI bulk ingestion)
  *   useCreateQuestao      — POST / mutation (manual creation)
+ *   useMaterias           — distinct subject list from GET /questoes/materias
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -186,5 +187,23 @@ export function useGenerateFromDocument() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: questoesKeys.all });
     },
+  });
+}
+
+// ─── useMaterias ──────────────────────────────────────────────────────────────
+
+/**
+ * Returns the sorted list of distinct non-empty materia values stored in the
+ * question bank.  Used to power the <MateriaCombobox> component.
+ *
+ * - staleTime: 5 min  (matérias don't change frequently)
+ * - placeholderData: []  (never undefined — safe to spread/map immediately)
+ */
+export function useMaterias() {
+  return useQuery<string[]>({
+    queryKey: ['questoes', 'materias'],
+    queryFn: () => api.get<string[]>('/questoes/materias').then((r) => r.data),
+    staleTime: 5 * 60 * 1000,
+    placeholderData: [],
   });
 }

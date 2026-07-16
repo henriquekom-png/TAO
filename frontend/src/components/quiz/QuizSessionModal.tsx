@@ -41,6 +41,7 @@ import { cn } from '../../lib/utils';
 import { markdownToHtml } from '../../lib/markdownHtmlConverter';
 import { useQuizSession } from '../../hooks/useQuizSession';
 import { useCreateQuestao, usePatchQuestao, useDeleteQuestao, type QuestaoCreatePayload, type QuestaoUpdatePayload } from '../../hooks/useQuestoes';
+import { MateriaCombobox } from './MateriaCombobox';
 import type { Questao, QuestaoItem, DificuldadeQuestao, QuizScore } from '../../types';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -303,13 +304,13 @@ const QuizSetupScreen: React.FC<{
             <label htmlFor="quiz-materia" className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 uppercase tracking-wide">
               Matéria
             </label>
-            <input
+            <MateriaCombobox
               id="quiz-materia"
-              type="text"
-              placeholder="Ex.: Direito do Trabalho"
-              className={field}
               value={form.materia}
-              onChange={(e) => setForm((f) => ({ ...f, materia: e.target.value }))}
+              onChange={(v) => setForm((f) => ({ ...f, materia: v }))}
+              placeholder="Todas as matérias"
+              className={field}
+              allowEmpty
             />
           </div>
 
@@ -1026,7 +1027,11 @@ const ModalEditQuestao: React.FC<{
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Matéria</label>
-              <input className={field} value={form.materia ?? ''} onChange={(e) => setForm(f => ({ ...f, materia: e.target.value }))} />
+              <MateriaCombobox
+                value={form.materia ?? ''}
+                onChange={(v) => setForm(f => ({ ...f, materia: v }))}
+                className={field}
+              />
             </div>
             <div className="flex flex-col gap-1">
               <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Cargo</label>
