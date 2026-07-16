@@ -147,7 +147,7 @@ function App() {
               : "max-md:translate-x-full max-md:pointer-events-none max-md:opacity-0"
           )}
         >
-          <header className="h-14 bg-background border-b border-border flex items-center justify-between px-6 shrink-0 shadow-soft-sm z-10 relative select-none transition-colors">
+          <header className="h-14 bg-background border-b border-border flex items-center justify-between px-6 shrink-0 shadow-soft-sm z-40 relative select-none transition-colors">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
