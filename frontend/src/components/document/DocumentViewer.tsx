@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DragDropContext, Droppable, DropResult } from '@hello-pangea/dnd';
-import { FileQuestion, ClipboardList } from 'lucide-react';
+import { FileQuestion, ClipboardList, MoreVertical } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useDocumento } from '../../hooks/useDocumentos';
 import { useReorderBlocos } from '../../hooks/useBlocos';
@@ -34,6 +34,7 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
   const [newBlocoId, setNewBlocoId] = useState<number | null>(null);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [isDocMenuOpen, setIsDocMenuOpen] = useState(false);
 
   useEffect(() => {
     if (doc?.blocos) setOrderedBlocos(doc.blocos);
@@ -112,20 +113,55 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             {doc.descricao && <p className="text-zinc-500 mt-1">{doc.descricao}</p>}
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => setShowImportModal(true)}
-              className="flex items-center gap-2 bg-white dark:bg-zinc-800 border border-border text-zinc-700 dark:text-zinc-300 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors shadow-sm"
-            >
-              <ClipboardList size={15} />
-              Importar Texto
-            </button>
-            <button
-              onClick={handleGenerateQuestions}
-              className="flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-sm font-medium hover:bg-slate-700 transition-colors shadow-sm"
-            >
-              <FileQuestion size={15} />
-              Gerar Simulado
-            </button>
+            {/* Desktop Action Buttons */}
+            <div className="hidden md:flex items-center gap-2">
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="flex items-center gap-2 bg-white dark:bg-zinc-800 border border-border text-zinc-700 dark:text-zinc-300 px-3 py-1.5 rounded-md text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors shadow-sm"
+              >
+                <ClipboardList size={15} />
+                Importar Texto
+              </button>
+              <button
+                onClick={handleGenerateQuestions}
+                className="flex items-center gap-2 bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-sm font-medium hover:bg-slate-700 transition-colors shadow-sm"
+              >
+                <FileQuestion size={15} />
+                Gerar Simulado
+              </button>
+            </div>
+
+            {/* Mobile Actions Menu */}
+            <div className="md:hidden relative">
+              <button
+                onClick={() => setIsDocMenuOpen(!isDocMenuOpen)}
+                className="p-1.5 rounded-md bg-white dark:bg-zinc-800 border border-border text-slate-600 dark:text-zinc-300 shadow-sm"
+              >
+                <MoreVertical size={20} />
+              </button>
+              
+              {isDocMenuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setIsDocMenuOpen(false)}></div>
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-zinc-800 border border-border rounded-md shadow-lg z-50 p-2 flex flex-col gap-2">
+                    <button
+                      onClick={() => { setShowImportModal(true); setIsDocMenuOpen(false); }}
+                      className="flex items-center gap-2 w-full bg-slate-50 dark:bg-zinc-900/50 text-zinc-700 dark:text-zinc-300 px-3 py-2.5 rounded-md text-sm font-medium hover:bg-slate-100 transition-colors text-left"
+                    >
+                      <ClipboardList size={16} />
+                      Importar Texto
+                    </button>
+                    <button
+                      onClick={() => { handleGenerateQuestions(); setIsDocMenuOpen(false); }}
+                      className="flex items-center gap-2 w-full bg-primary text-primary-foreground px-3 py-2.5 rounded-md text-sm font-medium hover:bg-slate-700 transition-colors text-left"
+                    >
+                      <FileQuestion size={16} />
+                      Gerar Simulado
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 

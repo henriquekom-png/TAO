@@ -8,7 +8,7 @@ import { LoginGate } from './components/layout/LoginGate';
 
 import { QuizSessionModal } from './components/quiz/QuizSessionModal';
 import { QuestoesHub } from './components/quiz/QuestoesHub';
-import { PanelLeft, ClipboardList, Sun, Moon } from 'lucide-react';
+import { PanelLeft, ClipboardList, Sun, Moon, MoreVertical } from 'lucide-react';
 import { PortalNavigationTarget } from './hooks/usePortals';
 import { cn } from './lib/utils';
 import type { Questao } from './types';
@@ -38,6 +38,7 @@ function App() {
   const [selectedBlocoId, setSelectedBlocoId] = useState<number | null>(null);
 
   const [activeMobileView, setActiveMobileView] = useState<'menu' | 'document' | 'notes' | 'search' | 'simulation'>('menu');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [isQuizSessionOpen, setIsQuizSessionOpen] = useState(false);
   const [isHubActive, setIsHubActive] = useState(false);
@@ -160,66 +161,109 @@ function App() {
             <GlobalSearch onSelectResult={handleGoToSource} />
 
             <div className="flex items-center gap-3">
-              <div className="flex items-center bg-slate-200 dark:bg-zinc-800 rounded-full p-0.5 shadow-inner mr-1">
+              <div className="hidden md:flex items-center gap-3">
+                <div className="flex items-center bg-slate-200 dark:bg-zinc-800 rounded-full p-0.5 shadow-inner mr-1">
+                  <button
+                    onClick={() => setFontSize('sm')}
+                    className={cn(
+                      "px-2.5 py-1 text-xs font-semibold rounded-full transition-colors",
+                      fontSize === 'sm' ? "bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-300"
+                    )}
+                    title="Tamanho Padrão"
+                  >
+                    A-
+                  </button>
+                  <button
+                    onClick={() => setFontSize('md')}
+                    className={cn(
+                      "px-2.5 py-1 text-xs font-semibold rounded-full transition-colors",
+                      fontSize === 'md' ? "bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-300"
+                    )}
+                    title="Tamanho Médio"
+                  >
+                    A
+                  </button>
+                  <button
+                    onClick={() => setFontSize('lg')}
+                    className={cn(
+                      "px-2.5 py-1 text-xs font-semibold rounded-full transition-colors",
+                      fontSize === 'lg' ? "bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-300"
+                    )}
+                    title="Tamanho Grande"
+                  >
+                    A+
+                  </button>
+                </div>
+
                 <button
-                  onClick={() => setFontSize('sm')}
-                  className={cn(
-                    "px-2.5 py-1 text-xs font-semibold rounded-full transition-colors",
-                    fontSize === 'sm' ? "bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-300"
-                  )}
-                  title="Tamanho Padrão"
+                  onClick={() => setIsDarkMode(!isDarkMode)}
+                  className="relative inline-flex items-center h-[26px] w-[46px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-opacity-75 bg-slate-300 dark:bg-zinc-700 shadow-inner"
+                  title={isDarkMode ? "Mudar para Modo Claro" : "Mudar para Modo Escuro"}
                 >
-                  A-
+                  <span className="sr-only">Toggle Theme</span>
+                  <span
+                    className={cn(
+                      "pointer-events-none flex h-5 w-5 transform items-center justify-center rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                      isDarkMode ? "translate-x-5" : "translate-x-0"
+                    )}
+                  >
+                    {isDarkMode ? (
+                      <Moon size={12} className="text-zinc-700" />
+                    ) : (
+                      <Sun size={12} className="text-amber-500" />
+                    )}
+                  </span>
                 </button>
                 <button
-                  onClick={() => setFontSize('md')}
-                  className={cn(
-                    "px-2.5 py-1 text-xs font-semibold rounded-full transition-colors",
-                    fontSize === 'md' ? "bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-300"
-                  )}
-                  title="Tamanho Médio"
+                  id="quiz-session-open-btn"
+                  onClick={() => setIsQuizSessionOpen(true)}
+                  className="flex items-center gap-2 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors border border-slate-200 dark:border-zinc-700"
                 >
-                  A
-                </button>
-                <button
-                  onClick={() => setFontSize('lg')}
-                  className={cn(
-                    "px-2.5 py-1 text-xs font-semibold rounded-full transition-colors",
-                    fontSize === 'lg' ? "bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-300"
-                  )}
-                  title="Tamanho Grande"
-                >
-                  A+
+                  <ClipboardList size={16} />
+                  Simulado
                 </button>
               </div>
 
-              <button
-                onClick={() => setIsDarkMode(!isDarkMode)}
-                className="relative inline-flex items-center h-[26px] w-[46px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-opacity-75 bg-slate-300 dark:bg-zinc-700 shadow-inner"
-                title={isDarkMode ? "Mudar para Modo Claro" : "Mudar para Modo Escuro"}
-              >
-                <span className="sr-only">Toggle Theme</span>
-                <span
-                  className={cn(
-                    "pointer-events-none flex h-5 w-5 transform items-center justify-center rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                    isDarkMode ? "translate-x-5" : "translate-x-0"
-                  )}
+              {/* Mobile Actions Menu */}
+              <div className="md:hidden relative">
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300 transition-colors"
                 >
-                  {isDarkMode ? (
-                    <Moon size={12} className="text-zinc-700" />
-                  ) : (
-                    <Sun size={12} className="text-amber-500" />
-                  )}
-                </span>
-              </button>
-              <button
-                id="quiz-session-open-btn"
-                onClick={() => setIsQuizSessionOpen(true)}
-                className="flex items-center gap-2 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-full text-sm font-semibold hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors border border-slate-200 dark:border-zinc-700"
-              >
-                <ClipboardList size={16} />
-                Simulado
-              </button>
+                  <MoreVertical size={20} />
+                </button>
+
+                {isMobileMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsMobileMenuOpen(false)}></div>
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-zinc-800 border border-border rounded-md shadow-lg z-50 p-3 flex flex-col gap-4">
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-1">Fonte</span>
+                        <div className="flex items-center justify-between bg-slate-100 dark:bg-zinc-900 rounded-md p-1">
+                          <button onClick={() => { setFontSize('sm'); setIsMobileMenuOpen(false); }} className={cn("px-3 py-1.5 text-xs font-semibold rounded-md", fontSize === 'sm' ? "bg-white dark:bg-zinc-700 shadow-sm" : "text-slate-600 dark:text-slate-400")}>A-</button>
+                          <button onClick={() => { setFontSize('md'); setIsMobileMenuOpen(false); }} className={cn("px-3 py-1.5 text-xs font-semibold rounded-md", fontSize === 'md' ? "bg-white dark:bg-zinc-700 shadow-sm" : "text-slate-600 dark:text-slate-400")}>A</button>
+                          <button onClick={() => { setFontSize('lg'); setIsMobileMenuOpen(false); }} className={cn("px-3 py-1.5 text-xs font-semibold rounded-md", fontSize === 'lg' ? "bg-white dark:bg-zinc-700 shadow-sm" : "text-slate-600 dark:text-slate-400")}>A+</button>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col gap-1.5 border-t border-border pt-3">
+                        <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-1">Geral</span>
+                        <button onClick={() => { setIsDarkMode(!isDarkMode); setIsMobileMenuOpen(false); }} className="flex items-center justify-between text-sm px-1 py-1 font-medium text-slate-700 dark:text-slate-300">
+                          Modo Escuro
+                          <div className="relative inline-flex items-center h-[20px] w-[36px] shrink-0 cursor-pointer rounded-full bg-slate-300 dark:bg-zinc-600">
+                             <span className={cn("inline-block h-3 w-3 transform rounded-full bg-white transition", isDarkMode ? "translate-x-5" : "translate-x-1")} />
+                          </div>
+                        </button>
+
+                        <button onClick={() => { setIsQuizSessionOpen(true); setIsMobileMenuOpen(false); }} className="flex items-center gap-2 bg-primary text-primary-foreground mt-2 px-3 py-2 rounded-md text-sm font-semibold justify-center w-full shadow-sm">
+                          <ClipboardList size={15} />
+                          Abrir Simulado
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </header>
 
