@@ -60,6 +60,15 @@
     font-family: 'Ubuntu', sans-serif;
     @apply font-medium;
   }
+  html.font-sm {
+    font-size: 100%;
+  }
+  html.font-md {
+    font-size: 115%;
+  }
+  html.font-lg {
+    font-size: 130%;
+  }
 }
 
 /* Custom Scrollbar */

@@ -53,7 +53,7 @@ const EditableSourceField: React.FC<EditableSourceFieldProps> = ({
     editorProps: {
       attributes: {
         class: cn(
-          'w-full outline-none prose dark:prose-invert prose-sm max-w-none text-[13px] text-zinc-800 dark:text-zinc-200 leading-relaxed bg-transparent cursor-text',
+          'w-full outline-none prose dark:prose-invert prose-sm max-w-none text-[0.8125rem] text-zinc-800 dark:text-zinc-200 leading-relaxed bg-transparent cursor-text',
           minHeight,
           className
         ),

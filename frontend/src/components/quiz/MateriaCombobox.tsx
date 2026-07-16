@@ -104,7 +104,7 @@ export const MateriaCombobox: React.FC<MateriaComboboxProps> = ({
     }
   };
 
-  const showDropdown = isOpen && materias.length > 0;
+  const showDropdown = isOpen;
 
   return (
     <div ref={containerRef} className="relative w-full">

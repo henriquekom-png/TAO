@@ -102,7 +102,7 @@ export const BlocoItem: React.FC<BlocoItemProps> = ({
     content: markdownToHtml(bloco.conteudo),
     editorProps: {
       attributes: {
-        class: 'w-full min-h-[120px] text-[15px] p-3 outline-none bg-transparent text-zinc-900 dark:text-zinc-100 prose dark:prose-invert prose-sm max-w-none focus:outline-none',
+        class: 'w-full min-h-[120px] text-[0.9375rem] p-3 outline-none bg-transparent text-zinc-900 dark:text-zinc-100 prose dark:prose-invert prose-sm max-w-none focus:outline-none',
       },
     },
   });
@@ -255,7 +255,7 @@ export const BlocoItem: React.FC<BlocoItemProps> = ({
                 </div>
               </div>
             ) : (
-              <div className={cn('text-slate-800 dark:text-slate-300 text-[15px] leading-relaxed font-sans transition-colors',
+              <div className={cn('text-slate-800 dark:text-slate-300 text-[0.9375rem] leading-relaxed font-sans transition-colors',
                 bloco.importancia === 'vital' && 'p-2 rounded-md border border-red-300 dark:border-red-800 bg-red-50/20 dark:bg-transparent -mx-2',
                 bloco.importancia === 'importante' && 'p-2 rounded-md border border-amber-300 dark:border-amber-700 bg-amber-50/20 dark:bg-transparent -mx-2',
                 bloco.cor_fonte === 'destaque' && 'bg-yellow-100 px-1 rounded-sm text-yellow-900',

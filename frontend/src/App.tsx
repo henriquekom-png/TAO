@@ -16,6 +16,7 @@ import type { Questao } from './types';
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => localStorage.getItem('tao_auth') === 'true');
   const [isDarkMode, setIsDarkMode] = useState(() => sessionStorage.getItem('theme') === 'dark');
+  const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg'>(() => (localStorage.getItem('fontSize') as 'sm' | 'md' | 'lg') || 'sm');
 
   useEffect(() => {
     if (isDarkMode) {
@@ -26,6 +27,12 @@ function App() {
       sessionStorage.setItem('theme', 'light');
     }
   }, [isDarkMode]);
+
+  useEffect(() => {
+    document.documentElement.classList.remove('font-sm', 'font-md', 'font-lg');
+    document.documentElement.classList.add(`font-${fontSize}`);
+    localStorage.setItem('fontSize', fontSize);
+  }, [fontSize]);
 
   const [selectedDocId, setSelectedDocId] = useState<number | null>(null);
   const [selectedBlocoId, setSelectedBlocoId] = useState<number | null>(null);
@@ -153,6 +160,39 @@ function App() {
             <GlobalSearch onSelectResult={handleGoToSource} />
 
             <div className="flex items-center gap-3">
+              <div className="flex items-center bg-slate-200 dark:bg-zinc-800 rounded-full p-0.5 shadow-inner mr-1">
+                <button
+                  onClick={() => setFontSize('sm')}
+                  className={cn(
+                    "px-2.5 py-1 text-xs font-semibold rounded-full transition-colors",
+                    fontSize === 'sm' ? "bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-300"
+                  )}
+                  title="Tamanho Padrão"
+                >
+                  A-
+                </button>
+                <button
+                  onClick={() => setFontSize('md')}
+                  className={cn(
+                    "px-2.5 py-1 text-xs font-semibold rounded-full transition-colors",
+                    fontSize === 'md' ? "bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-300"
+                  )}
+                  title="Tamanho Médio"
+                >
+                  A
+                </button>
+                <button
+                  onClick={() => setFontSize('lg')}
+                  className={cn(
+                    "px-2.5 py-1 text-xs font-semibold rounded-full transition-colors",
+                    fontSize === 'lg' ? "bg-white dark:bg-zinc-600 text-slate-800 dark:text-zinc-100 shadow-sm" : "text-slate-500 dark:text-zinc-400 hover:text-slate-700 dark:hover:text-zinc-300"
+                  )}
+                  title="Tamanho Grande"
+                >
+                  A+
+                </button>
+              </div>
+
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="relative inline-flex items-center h-[26px] w-[46px] shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-opacity-75 bg-slate-300 dark:bg-zinc-700 shadow-inner"

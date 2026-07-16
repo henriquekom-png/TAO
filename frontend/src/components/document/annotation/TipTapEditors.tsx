@@ -45,7 +45,7 @@ export const TipTapEditor: React.FC<TipTapEditorProps> = ({
     editorProps: {
       attributes: {
         class: cn(
-          'w-full min-h-[60px] text-[14px] p-3 outline-none focus:outline-none bg-white dark:bg-transparent text-zinc-800 dark:text-slate-300 prose dark:prose-invert prose-sm max-w-none transition-colors',
+          'w-full min-h-[60px] text-[0.875rem] p-3 outline-none focus:outline-none bg-white dark:bg-transparent text-zinc-800 dark:text-slate-300 prose dark:prose-invert prose-sm max-w-none transition-colors',
           className
         ),
         'data-placeholder': placeholder || '',
