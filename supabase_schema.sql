@@ -262,3 +262,23 @@ ALTER TABLE documentos ADD COLUMN IF NOT EXISTS ordem INTEGER NOT NULL DEFAULT 0
 --   ON documentos USING GIN (to_tsvector('portuguese', titulo));
 -- CREATE INDEX IF NOT EXISTS idx_pastas_fts
 --   ON pastas USING GIN (to_tsvector('portuguese', nome));
+
+-- -------------------------------------------------------------
+-- 9. SEGURANÇA — Row-Level Security (RLS)
+-- -------------------------------------------------------------
+-- Bloqueia acesso via API pública REST do Supabase (PostgREST).
+-- O backend Python usa psycopg2 com conexão direta autenticada
+-- e NÃO é afetado por RLS — todo o app continua funcionando.
+--
+-- Intencionalmente não criamos policies para o role 'anon':
+-- qualquer requisição anônima à API pública recebe HTTP 403.
+-- -------------------------------------------------------------
+ALTER TABLE pastas          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE documentos      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blocos          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE anotacoes       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE portais         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE materiais       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE questoes        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE questao_itens   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quiz_resultados ENABLE ROW LEVEL SECURITY;
