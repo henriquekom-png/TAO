@@ -72,6 +72,7 @@ interface QuizSessionActions {
   resetSession: () => void;
   markQuestionAsSaved: (oldId: number | string, savedQuestion: Questao) => void;
   updateQuestionInSession: (updatedQuestion: Questao) => void;
+  removeQuestionFromSession: (deletedId: number | string) => void;
 }
 
 export type UseQuizSessionReturn = QuizSessionState & QuizSessionActions;
@@ -358,6 +359,38 @@ export function useQuizSession(): UseQuizSessionReturn {
     });
   }, []);
 
+  // ── removeQuestionFromSession ─────────────────────────────────────────────
+  // Removes a deleted question from the array and keeps the session consistent.
+  // If the deleted question was the current one, advances to the next (or finishes).
+  const removeQuestionFromSession = useCallback((deletedId: number | string) => {
+    setState((prev) => {
+      const newArray = prev.questionsArray.filter((q) => String(q.id) !== String(deletedId));
+
+      if (newArray.length === 0) {
+        // No questions left — finish session
+        return { ...prev, questionsArray: [], isFinished: true };
+      }
+
+      // Clamp currentIndex so it never goes out of bounds
+      const newIndex = Math.min(prev.currentIndex, newArray.length - 1);
+      const nextState = prev.answeredQuestions[newIndex] ?? {
+        selectedAnswer: null,
+        itemAnswers: {},
+        isSubmitted: false,
+      };
+
+      return {
+        ...prev,
+        questionsArray: newArray,
+        currentIndex: newIndex,
+        visitedHistory: prev.visitedHistory.filter((i) => i < newArray.length),
+        selectedAnswer: nextState.selectedAnswer,
+        itemAnswers: nextState.itemAnswers,
+        isSubmitted: nextState.isSubmitted,
+      };
+    });
+  }, []);
+
   return {
     ...state,
     startSession,
@@ -371,5 +404,6 @@ export function useQuizSession(): UseQuizSessionReturn {
     resetSession,
     markQuestionAsSaved,
     updateQuestionInSession,
+    removeQuestionFromSession,
   };
 }

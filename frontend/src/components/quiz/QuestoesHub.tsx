@@ -116,6 +116,7 @@ const SimuladoTab: React.FC = () => {
   const quiz = useQuizSession();
   const [editingQuestao, setEditingQuestao] = useState<Questao | null>(null);
   const { mutate: patchQuestao, isPending: patching } = usePatchQuestao();
+  const { mutate: deleteQuestao, isPending: deleting } = useDeleteQuestao();
 
   const currentQuestion = quiz.questionsArray[quiz.currentIndex] ?? null;
   const showSetup       = quiz.questionsArray.length === 0 && !quiz.isLoading;
@@ -168,11 +169,19 @@ const SimuladoTab: React.FC = () => {
       {editingQuestao && (
         <EditQuestaoModal
           questao={editingQuestao}
-          isSaving={patching}
+          isSaving={patching || deleting}
           onSave={(payload) => {
             patchQuestao({ id: editingQuestao.id, payload }, {
               onSuccess: (updated) => {
                 quiz.updateQuestionInSession(updated);
+                setEditingQuestao(null);
+              },
+            });
+          }}
+          onDelete={() => {
+            deleteQuestao(editingQuestao.id, {
+              onSuccess: () => {
+                quiz.removeQuestionFromSession(editingQuestao.id);
                 setEditingQuestao(null);
               },
             });
@@ -747,9 +756,14 @@ const GerenciarTab: React.FC<{
       {editingQuestao && (
         <EditQuestaoModal
           questao={editingQuestao}
-          isSaving={patching}
+          isSaving={patching || deleting}
           onSave={(payload) => {
             patchQuestao({ id: editingQuestao.id, payload }, {
+              onSuccess: () => setEditingQuestao(null),
+            });
+          }}
+          onDelete={() => {
+            deleteQuestao(editingQuestao.id, {
               onSuccess: () => setEditingQuestao(null),
             });
           }}
@@ -792,9 +806,11 @@ const EditQuestaoModal: React.FC<{
   questao: Questao;
   isSaving: boolean;
   onSave: (payload: QuestaoUpdatePayload) => void;
+  onDelete?: () => void;
   onClose: () => void;
-}> = ({ questao, isSaving, onSave, onClose }) => {
+}> = ({ questao, isSaving, onSave, onDelete, onClose }) => {
   const { data: fullQuestao, isLoading } = useQuestaoDetail(questao.id);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const [form, setForm] = useState<QuestaoUpdatePayload>({
     banca:         questao.banca       ?? '',
@@ -964,15 +980,50 @@ const EditQuestaoModal: React.FC<{
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-4 border-t border-zinc-100 dark:border-zinc-800/50 mt-4">
-        <button onClick={onClose} disabled={isSaving} className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-          Cancelar
-        </button>
-        <button onClick={() => onSave(form)} disabled={isSaving || !form.enunciado || !form.gabarito}
-          className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 rounded-lg transition-colors disabled:opacity-50 shadow-sm">
-          {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-          Salvar Alterações
-        </button>
+      <div className="flex items-center justify-between pt-4 border-t border-zinc-100 dark:border-zinc-800/50 mt-4">
+        {/* Left: delete zone */}
+        {onDelete && (
+          <div className="flex items-center gap-2">
+            {!confirmDelete ? (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                disabled={isSaving}
+                className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors disabled:opacity-40"
+              >
+                <Trash2 size={13} /> Excluir questão
+              </button>
+            ) : (
+              <>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">Tem certeza?</span>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="px-3 py-1.5 text-xs font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={onDelete}
+                  disabled={isSaving}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
+                >
+                  <Trash2 size={13} /> Sim, excluir
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Right: cancel + save */}
+        <div className="flex items-center gap-3 ml-auto">
+          <button onClick={onClose} disabled={isSaving} className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            Cancelar
+          </button>
+          <button onClick={() => onSave(form)} disabled={isSaving || !form.enunciado || !form.gabarito}
+            className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 rounded-lg transition-colors disabled:opacity-50 shadow-sm">
+            {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
+            Salvar Alterações
+          </button>
+        </div>
       </div>
     </ModalShell>
   );
