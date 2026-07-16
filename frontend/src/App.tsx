@@ -252,12 +252,6 @@ function App() {
             setIsQuizSessionOpen(false);
             setPreloadedQuestions(undefined);
           }}
-          onEditQuestion={(q) => {
-            setIsQuizSessionOpen(false);
-            setPreloadedQuestions(undefined);
-            setHubEditingQuestao(q);
-            setIsHubActive(true);
-          }}
           onGoToSource={(blocoId) => {
             setIsQuizSessionOpen(false);
             setPreloadedQuestions(undefined);

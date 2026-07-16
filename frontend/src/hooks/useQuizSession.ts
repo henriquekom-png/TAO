@@ -4,23 +4,30 @@
  * Custom hook that manages the complete state machine for a quiz session.
  *
  * State:
- *   questionsArray   – questions fetched from GET /api/v1/quiz/session
- *   currentIndex     – index of the question currently being displayed
- *   selectedAnswer   – the answer chosen by the user (string | null)
- *   itemAnswers      – Record<itemId, boolean> for combinacao_itens judgment
- *   isSubmitted      – true after the user has confirmed their answer
- *   score            – { acertos, total } accumulated over the session
- *   isLoading        – true while fetching session questions
- *   isFinished       – true when the user has answered all questions
- *   error            – error message if the fetch failed
+ *   questionsArray    – questions fetched from GET /api/v1/quiz/session
+ *   currentIndex      – index of the question currently being displayed
+ *   visitedHistory    – stack of previously-visited indices (enables "go back")
+ *   answeredQuestions – per-question answer state (preserved when navigating back)
+ *   selectedAnswer    – the answer chosen by the user (string | null)
+ *   itemAnswers       – Record<itemId, boolean> for combinacao_itens judgment
+ *   isSubmitted       – true after the user has confirmed their answer
+ *   score             – { acertos, total } accumulated over the session
+ *   isLoading         – true while fetching session questions
+ *   isFinished        – true when the user has answered all questions
+ *   error             – error message if the fetch failed
  *
  * Actions:
  *   startSession(params)          – fetch questions and reset state
+ *   initSessionWithQuestions(qs)  – initialize from a pre-loaded list
  *   selectAnswer(answer)          – set selectedAnswer (blocked after isSubmitted)
  *   toggleItemAnswer(id, value)   – set a V/F verdict for a combinacao_itens item
  *   submitAnswer()                – validate, update score, fire-and-forget POST /results
- *   nextQuestion()                – advance index or set isFinished
+ *   nextQuestion()                – advance index or set isFinished (saves history)
+ *   skipQuestion()                – skip current (unanswered) question (saves history)
+ *   goToPrevious()                – go back to the last visited question
  *   resetSession()                – wipe all state (go back to setup screen)
+ *   markQuestionAsSaved(oldId, q) – replace an unsaved question with its saved version
+ *   updateQuestionInSession(q)    – replace a question after editing (keeps same ID)
  */
 
 import { useCallback, useState } from 'react';
@@ -29,9 +36,20 @@ import type { Questao, QuizScore, QuizSessionParams } from '../types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
+/** Snapshot of the answer state for a single question. */
+interface PerQuestionState {
+  selectedAnswer: string | null;
+  itemAnswers: Record<number, boolean>;
+  isSubmitted: boolean;
+}
+
 interface QuizSessionState {
   questionsArray: Questao[];
   currentIndex: number;
+  /** Stack of previously-visited indices — enables "go back". */
+  visitedHistory: number[];
+  /** Saved answer state per question index, so navigation back restores it. */
+  answeredQuestions: Record<number, PerQuestionState>;
   selectedAnswer: string | null;
   /** For combinacao_itens: maps item.id → user's boolean verdict */
   itemAnswers: Record<number, boolean>;
@@ -50,8 +68,10 @@ interface QuizSessionActions {
   submitAnswer: () => void;
   nextQuestion: () => void;
   skipQuestion: () => void;
+  goToPrevious: () => void;
   resetSession: () => void;
   markQuestionAsSaved: (oldId: number | string, savedQuestion: Questao) => void;
+  updateQuestionInSession: (updatedQuestion: Questao) => void;
 }
 
 export type UseQuizSessionReturn = QuizSessionState & QuizSessionActions;
@@ -61,6 +81,8 @@ export type UseQuizSessionReturn = QuizSessionState & QuizSessionActions;
 const INITIAL_STATE: QuizSessionState = {
   questionsArray: [],
   currentIndex: 0,
+  visitedHistory: [],
+  answeredQuestions: {},
   selectedAnswer: null,
   itemAnswers: {},
   isSubmitted: false,
@@ -96,6 +118,16 @@ function evaluateAnswer(
   // multipla_escolha | certo_errado
   if (!selectedAnswer) return false;
   return selectedAnswer.trim().toUpperCase() === question.gabarito.trim().toUpperCase();
+}
+
+// ─── Helper: capture current answer state ────────────────────────────────────
+
+function captureCurrentState(prev: QuizSessionState): PerQuestionState {
+  return {
+    selectedAnswer: prev.selectedAnswer,
+    itemAnswers: prev.itemAnswers,
+    isSubmitted: prev.isSubmitted,
+  };
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
@@ -198,40 +230,104 @@ export function useQuizSession(): UseQuizSessionReturn {
   const nextQuestion = useCallback(() => {
     setState((prev) => {
       const nextIndex = prev.currentIndex + 1;
-      if (nextIndex >= prev.questionsArray.length) {
-        return { ...prev, isFinished: true };
+      const isFinished = nextIndex >= prev.questionsArray.length;
+
+      // Save the current question's answer state before moving away
+      const answeredQuestions: Record<number, PerQuestionState> = {
+        ...prev.answeredQuestions,
+        [prev.currentIndex]: captureCurrentState(prev),
+      };
+
+      if (isFinished) {
+        return { ...prev, answeredQuestions, isFinished: true };
       }
-      return {
-        ...prev,
-        currentIndex: nextIndex,
+
+      // Load the next question's saved state (if it was previously visited)
+      const nextState = prev.answeredQuestions[nextIndex] ?? {
         selectedAnswer: null,
         itemAnswers: {},
         isSubmitted: false,
+      };
+
+      return {
+        ...prev,
+        visitedHistory: [...prev.visitedHistory, prev.currentIndex],
+        answeredQuestions,
+        currentIndex: nextIndex,
+        selectedAnswer: nextState.selectedAnswer,
+        itemAnswers: nextState.itemAnswers,
+        isSubmitted: nextState.isSubmitted,
       };
     });
   }, []);
 
   // ── skipQuestion ────────────────────────────────────────────────────────────
+  // No longer removes the question from the array. Instead, simply advances
+  // the index and records the history so the user can come back.
   const skipQuestion = useCallback(() => {
     setState((prev) => {
+      // Can only skip unanswered questions
       if (prev.isSubmitted) return prev;
 
-      const newQuestionsArray = prev.questionsArray.filter((_, idx) => idx !== prev.currentIndex);
-      
-      if (prev.currentIndex >= newQuestionsArray.length) {
+      const nextIndex = prev.currentIndex + 1;
+      const isFinished = nextIndex >= prev.questionsArray.length;
+
+      if (isFinished) {
         return {
-           ...prev,
-           questionsArray: newQuestionsArray,
-           isFinished: true,
+          ...prev,
+          visitedHistory: [...prev.visitedHistory, prev.currentIndex],
+          isFinished: true,
         };
       }
 
-      return {
-        ...prev,
-        questionsArray: newQuestionsArray,
+      // Load the next question's saved state (if it was previously visited)
+      const nextState = prev.answeredQuestions[nextIndex] ?? {
         selectedAnswer: null,
         itemAnswers: {},
         isSubmitted: false,
+      };
+
+      return {
+        ...prev,
+        visitedHistory: [...prev.visitedHistory, prev.currentIndex],
+        currentIndex: nextIndex,
+        selectedAnswer: nextState.selectedAnswer,
+        itemAnswers: nextState.itemAnswers,
+        isSubmitted: nextState.isSubmitted,
+      };
+    });
+  }, []);
+
+  // ── goToPrevious ─────────────────────────────────────────────────────────
+  const goToPrevious = useCallback(() => {
+    setState((prev) => {
+      if (prev.visitedHistory.length === 0) return prev;
+
+      const history = [...prev.visitedHistory];
+      const prevIndex = history.pop()!;
+
+      // Save current question's state before leaving
+      const answeredQuestions: Record<number, PerQuestionState> = {
+        ...prev.answeredQuestions,
+        [prev.currentIndex]: captureCurrentState(prev),
+      };
+
+      // Restore the previous question's saved state
+      const restoredState = answeredQuestions[prevIndex] ?? {
+        selectedAnswer: null,
+        itemAnswers: {},
+        isSubmitted: false,
+      };
+
+      return {
+        ...prev,
+        visitedHistory: history,
+        answeredQuestions,
+        currentIndex: prevIndex,
+        isFinished: false,
+        selectedAnswer: restoredState.selectedAnswer,
+        itemAnswers: restoredState.itemAnswers,
+        isSubmitted: restoredState.isSubmitted,
       };
     });
   }, []);
@@ -251,6 +347,17 @@ export function useQuizSession(): UseQuizSessionReturn {
     });
   }, []);
 
+  // ── updateQuestionInSession ───────────────────────────────────────────────
+  // Replaces a question in the session after it has been edited (keeps same ID).
+  const updateQuestionInSession = useCallback((updatedQuestion: Questao) => {
+    setState((prev) => {
+      const newQuestionsArray = prev.questionsArray.map((q) =>
+        String(q.id) === String(updatedQuestion.id) ? updatedQuestion : q
+      );
+      return { ...prev, questionsArray: newQuestionsArray };
+    });
+  }, []);
+
   return {
     ...state,
     startSession,
@@ -260,7 +367,9 @@ export function useQuizSession(): UseQuizSessionReturn {
     submitAnswer,
     nextQuestion,
     skipQuestion,
+    goToPrevious,
     resetSession,
     markQuestionAsSaved,
+    updateQuestionInSession,
   };
 }

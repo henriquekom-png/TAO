@@ -49,10 +49,6 @@ export const QuestoesHub: React.FC<{
     }
   }, [initialEditQuestao, onClearInitialEditQuestao]);
 
-  const handleEditQuestionFromSimulado = (q: Questao) => {
-    setEditingQuestao(q);
-    setActiveTab('gerenciar');
-  };
 
   const tabs: { id: TabId; label: string; icon: React.ReactNode }[] = [
     { id: 'simulado',  label: 'Realizar Simulados',   icon: <ClipboardList size={16} /> },
@@ -100,7 +96,7 @@ export const QuestoesHub: React.FC<{
 
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto min-h-0">
-        {activeTab === 'simulado'  && <SimuladoTab onEditQuestion={handleEditQuestionFromSimulado} />}
+        {activeTab === 'simulado'  && <SimuladoTab />}
         {activeTab === 'gerenciar' && (
           <GerenciarTab 
             externalEditingQuestao={editingQuestao} 
@@ -116,15 +112,16 @@ export const QuestoesHub: React.FC<{
 // Tab 1 — Simulado
 // ─────────────────────────────────────────────────────────────────────────────
 
-const SimuladoTab: React.FC<{
-  onEditQuestion: (q: Questao) => void;
-}> = ({ onEditQuestion }) => {
+const SimuladoTab: React.FC = () => {
   const quiz = useQuizSession();
+  const [editingQuestao, setEditingQuestao] = useState<Questao | null>(null);
+  const { mutate: patchQuestao, isPending: patching } = usePatchQuestao();
 
   const currentQuestion = quiz.questionsArray[quiz.currentIndex] ?? null;
   const showSetup       = quiz.questionsArray.length === 0 && !quiz.isLoading;
   const showQuestion    = quiz.questionsArray.length > 0 && !quiz.isFinished;
   const showResults     = quiz.isFinished;
+  const hasPrevious     = quiz.visitedHistory.length > 0;
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-8">
@@ -147,13 +144,15 @@ const SimuladoTab: React.FC<{
           itemAnswers={quiz.itemAnswers}
           isSubmitted={quiz.isSubmitted}
           score={quiz.score}
+          hasPrevious={hasPrevious}
           onSelectAnswer={quiz.selectAnswer}
           onToggleItem={quiz.toggleItemAnswer}
           onSubmit={quiz.submitAnswer}
           onNext={quiz.nextQuestion}
           onSkip={quiz.skipQuestion}
+          onPrevious={quiz.goToPrevious}
           onQuit={quiz.resetSession}
-          onEditQuestion={onEditQuestion}
+          onEditQuestion={(q) => setEditingQuestao(q)}
           onGoToSource={() => {/* no-op inside hub — no external navigation needed */}}
         />
       )}
@@ -162,6 +161,23 @@ const SimuladoTab: React.FC<{
         <HubResultsView
           score={quiz.score}
           onRestart={quiz.resetSession}
+        />
+      )}
+
+      {/* Inline edit modal — opens over the simulado without leaving the tab */}
+      {editingQuestao && (
+        <EditQuestaoModal
+          questao={editingQuestao}
+          isSaving={patching}
+          onSave={(payload) => {
+            patchQuestao({ id: editingQuestao.id, payload }, {
+              onSuccess: (updated) => {
+                quiz.updateQuestionInSession(updated);
+                setEditingQuestao(null);
+              },
+            });
+          }}
+          onClose={() => setEditingQuestao(null)}
         />
       )}
     </div>
@@ -246,11 +262,13 @@ interface HubQuestionViewProps {
   itemAnswers:    Record<number, boolean>;
   isSubmitted:    boolean;
   score:          QuizScore;
+  hasPrevious:    boolean;
   onSelectAnswer: (a: string) => void;
   onToggleItem:   (id: number, v: boolean) => void;
   onSubmit:       () => void;
   onNext:         () => void;
   onSkip:         () => void;
+  onPrevious:     () => void;
   onQuit:         () => void;
   onEditQuestion: (q: Questao) => void;
   onGoToSource:   (blocoId: number) => void;
@@ -258,7 +276,8 @@ interface HubQuestionViewProps {
 
 const HubQuestionView: React.FC<HubQuestionViewProps> = ({
   question, currentIndex, total, selectedAnswer, itemAnswers,
-  isSubmitted, score, onSelectAnswer, onToggleItem, onSubmit, onNext, onSkip, onQuit, onEditQuestion,
+  isSubmitted, score, hasPrevious, onSelectAnswer, onToggleItem, onSubmit, onNext, onSkip,
+  onPrevious, onQuit, onEditQuestion,
 }) => {
   const pct = Math.round((currentIndex / total) * 100);
   const isLastQuestion = currentIndex + 1 >= total;
@@ -363,10 +382,19 @@ const HubQuestionView: React.FC<HubQuestionViewProps> = ({
 
       {/* Action row */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 flex-wrap">
           <button onClick={onQuit} className="text-xs text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 underline transition-colors">
             Encerrar sessão
           </button>
+          {hasPrevious && (
+            <button
+              onClick={onPrevious}
+              className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-3 py-1.5 rounded-lg"
+              title="Voltar para a questão anterior"
+            >
+              <ChevronLeft size={14} /> Anterior
+            </button>
+          )}
           {!isSubmitted && (
             <button
               onClick={onSkip}
@@ -379,9 +407,9 @@ const HubQuestionView: React.FC<HubQuestionViewProps> = ({
           <button
             onClick={() => onEditQuestion(question)}
             className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-violet-700 transition-colors bg-zinc-100 dark:bg-zinc-800 hover:bg-violet-50 dark:hover:bg-violet-500/20 px-3 py-1.5 rounded-lg"
-            title="Corrigir no banco de questões"
+            title="Editar esta questão no banco"
           >
-            <Pencil size={14} /> Corrigir
+            <Pencil size={14} /> Editar questão
           </button>
         </div>
         
@@ -928,6 +956,11 @@ const EditQuestaoModal: React.FC<{
         <div className="flex flex-col gap-1">
           <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Comentário / Justificativa</label>
           <textarea rows={3} className={ta} value={form.comentario ?? ''} onChange={(e) => setForm(f => ({ ...f, comentario: e.target.value }))} />
+          <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+            Formatação: <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-[10px]">**negrito**</code>{' '}
+            <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-[10px]">*itálico*</code>{' '}
+            · Enter = nova linha · Enter×2 = novo parágrafo
+          </p>
         </div>
       </div>
 

@@ -23,6 +23,7 @@ import React, { useState } from 'react';
 import {
   X,
   ClipboardList,
+  ChevronLeft,
   ChevronRight,
   CheckCircle2,
   XCircle,
@@ -38,7 +39,7 @@ import {
 import { cn } from '../../lib/utils';
 import { markdownToHtml } from '../../lib/markdownHtmlConverter';
 import { useQuizSession } from '../../hooks/useQuizSession';
-import { useCreateQuestao, type QuestaoCreatePayload } from '../../hooks/useQuestoes';
+import { useCreateQuestao, usePatchQuestao, type QuestaoCreatePayload, type QuestaoUpdatePayload } from '../../hooks/useQuestoes';
 import type { Questao, QuestaoItem, DificuldadeQuestao, QuizScore } from '../../types';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -47,6 +48,7 @@ interface QuizSessionModalProps {
   onClose: () => void;
   /** Called when user clicks "Revisar material de origem"; closes modal & navigates. */
   onGoToSource: (blocoId: number) => void;
+  /** @deprecated kept for API compatibility; edit is now handled inline */
   onEditQuestion?: (question: Questao) => void;
   preloadedQuestions?: Questao[];
 }
@@ -56,10 +58,11 @@ interface QuizSessionModalProps {
 export const QuizSessionModal: React.FC<QuizSessionModalProps> = ({
   onClose,
   onGoToSource,
-  onEditQuestion,
   preloadedQuestions,
 }) => {
   const quiz = useQuizSession();
+  const [inlineEditingQ, setInlineEditingQ] = useState<Questao | null>(null);
+  const { mutate: patchQuestao, isPending: patching } = usePatchQuestao();
 
   React.useEffect(() => {
     if (preloadedQuestions && preloadedQuestions.length > 0) {
@@ -71,6 +74,7 @@ export const QuizSessionModal: React.FC<QuizSessionModalProps> = ({
   const showSetup = quiz.questionsArray.length === 0 && !quiz.isLoading && !preloadedQuestions;
   const showQuestion = quiz.questionsArray.length > 0 && !quiz.isFinished;
   const showResults = quiz.isFinished;
+  const hasPrevious = quiz.visitedHistory.length > 0;
 
   const { mutate: saveQuestao, isPending: isSaving } = useCreateQuestao();
 
@@ -107,6 +111,16 @@ export const QuizSessionModal: React.FC<QuizSessionModalProps> = ({
       onError: (err: any) => {
         alert('Erro ao salvar questão: ' + (err.response?.data?.detail || err.message));
       }
+    });
+  };
+
+  const handleInlineSave = (payload: QuestaoUpdatePayload) => {
+    if (!inlineEditingQ) return;
+    patchQuestao({ id: inlineEditingQ.id, payload }, {
+      onSuccess: (updated) => {
+        quiz.updateQuestionInSession(updated);
+        setInlineEditingQ(null);
+      },
     });
   };
 
@@ -153,7 +167,7 @@ export const QuizSessionModal: React.FC<QuizSessionModalProps> = ({
             />
           )}
 
-          {!quiz.isLoading && !quiz.error && showQuestion && currentQuestion && (
+        {!quiz.isLoading && !quiz.error && showQuestion && currentQuestion && (
             <QuizQuestionScreen
               question={currentQuestion}
               currentIndex={quiz.currentIndex}
@@ -162,13 +176,15 @@ export const QuizSessionModal: React.FC<QuizSessionModalProps> = ({
               itemAnswers={quiz.itemAnswers}
               isSubmitted={quiz.isSubmitted}
               score={quiz.score}
+              hasPrevious={hasPrevious}
               onSelectAnswer={quiz.selectAnswer}
               onToggleItem={quiz.toggleItemAnswer}
               onSubmit={quiz.submitAnswer}
               onNext={quiz.nextQuestion}
               onSkip={quiz.skipQuestion}
+              onPrevious={quiz.goToPrevious}
               onGoToSource={onGoToSource}
-              onEditQuestion={onEditQuestion}
+              onEditQuestion={() => setInlineEditingQ(currentQuestion)}
               onQuit={() => quiz.resetSession()}
               onSaveQuestion={handleSaveQuestion}
               isSaving={isSaving}
@@ -184,6 +200,16 @@ export const QuizSessionModal: React.FC<QuizSessionModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* Inline edit modal — opens as a nested overlay inside the quiz modal */}
+      {inlineEditingQ && (
+        <ModalEditQuestao
+          questao={inlineEditingQ}
+          isSaving={patching}
+          onSave={handleInlineSave}
+          onClose={() => setInlineEditingQ(null)}
+        />
+      )}
     </div>
   );
 };
@@ -680,11 +706,13 @@ interface QuizQuestionScreenProps {
   itemAnswers: Record<number, boolean>;
   isSubmitted: boolean;
   score: QuizScore;
+  hasPrevious: boolean;
   onSelectAnswer: (a: string) => void;
   onToggleItem: (id: number, value: boolean) => void;
   onSubmit: () => void;
   onNext: () => void;
   onSkip: () => void;
+  onPrevious: () => void;
   onGoToSource: (blocoId: number) => void;
   onEditQuestion?: (question: Questao) => void;
   onQuit: () => void;
@@ -700,11 +728,13 @@ const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
   itemAnswers,
   isSubmitted,
   score,
+  hasPrevious,
   onSelectAnswer,
   onToggleItem,
   onSubmit,
   onNext,
   onSkip,
+  onPrevious,
   onGoToSource,
   onEditQuestion,
   onQuit,
@@ -779,7 +809,7 @@ const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
 
       {/* Action buttons */}
       <div className="flex items-center justify-between px-8 mt-4 gap-3">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             id="quiz-quit-btn"
             onClick={onQuit}
@@ -787,6 +817,16 @@ const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
           >
             Encerrar sessão
           </button>
+
+          {hasPrevious && (
+            <button
+              onClick={onPrevious}
+              className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 transition-colors bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 px-3 py-1.5 rounded-lg"
+              title="Voltar para a questão anterior"
+            >
+              <ChevronLeft size={14} /> Anterior
+            </button>
+          )}
           
           {!isSubmitted && (
             <button
@@ -802,9 +842,9 @@ const QuizQuestionScreen: React.FC<QuizQuestionScreenProps> = ({
             <button
               onClick={() => onEditQuestion(question)}
               className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 dark:text-zinc-400 hover:text-violet-700 dark:hover:text-violet-300 transition-colors bg-zinc-100 dark:bg-zinc-800 hover:bg-violet-50 dark:hover:bg-violet-900/30 px-3 py-1.5 rounded-lg"
-              title="Corrigir no banco de questões"
+              title="Editar esta questão no banco"
             >
-              <Pencil size={14} /> Corrigir
+              <Pencil size={14} /> Editar questão
             </button>
           )}
         </div>
@@ -891,6 +931,144 @@ const QuizResultsScreen: React.FC<{
         >
           Concluir
         </button>
+      </div>
+    </div>
+  );
+};
+
+// ─── Inline Edit Modal (inside quiz modal) ────────────────────────────────────
+
+const ModalEditQuestao: React.FC<{
+  questao: Questao;
+  isSaving: boolean;
+  onSave: (payload: QuestaoUpdatePayload) => void;
+  onClose: () => void;
+}> = ({ questao, isSaving, onSave, onClose }) => {
+  const [form, setForm] = React.useState<QuestaoUpdatePayload>({
+    banca:         questao.banca       ?? '',
+    ano:           questao.ano         ?? undefined,
+    cargo:         questao.cargo       ?? '',
+    materia:       questao.materia,
+    tipo:          questao.tipo,
+    enunciado:     questao.enunciado,
+    alternativa_a: questao.alternativa_a ?? '',
+    alternativa_b: questao.alternativa_b ?? '',
+    alternativa_c: questao.alternativa_c ?? '',
+    alternativa_d: questao.alternativa_d ?? '',
+    alternativa_e: questao.alternativa_e ?? '',
+    gabarito:      questao.gabarito,
+    comentario:    questao.comentario  ?? '',
+    dificuldade:   questao.dificuldade,
+    itens:         questao.itens?.map(i => ({ numero: i.numero, enunciado: i.enunciado, correto: i.correto })) || [],
+  });
+
+  const field = 'w-full border border-zinc-200 dark:border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-800 dark:text-zinc-200 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition';
+  const ta    = `${field} resize-y`;
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Editar Questão"
+    >
+      <div className="bg-white dark:bg-zinc-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        {/* Header */}
+        <div className="h-14 px-5 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between shrink-0">
+          <span className="text-zinc-800 dark:text-zinc-100 font-semibold text-sm">
+            ✏️ Editar Questão #{questao.id}
+          </span>
+          <button
+            onClick={onClose}
+            className="p-1.5 text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            aria-label="Fechar"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Banca</label>
+              <input className={field} value={form.banca ?? ''} onChange={(e) => setForm(f => ({ ...f, banca: e.target.value }))} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Ano</label>
+              <input type="number" className={field} value={form.ano ?? ''} onChange={(e) => setForm(f => ({ ...f, ano: e.target.value ? Number(e.target.value) : undefined }))} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Dificuldade</label>
+              <select className={field} value={form.dificuldade} onChange={(e) => setForm(f => ({ ...f, dificuldade: e.target.value as DificuldadeQuestao }))}>
+                <option value="facil">Fácil</option>
+                <option value="media">Média</option>
+                <option value="dificil">Difícil</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Matéria</label>
+              <input className={field} value={form.materia ?? ''} onChange={(e) => setForm(f => ({ ...f, materia: e.target.value }))} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Cargo</label>
+              <input className={field} value={form.cargo ?? ''} onChange={(e) => setForm(f => ({ ...f, cargo: e.target.value }))} />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Enunciado *</label>
+            <textarea rows={4} className={ta} value={form.enunciado} onChange={(e) => setForm(f => ({ ...f, enunciado: e.target.value }))} />
+          </div>
+
+          {form.tipo === 'multipla_escolha' && (
+            <div className="space-y-2">
+              {(['a','b','c','d','e'] as const).map((l) => {
+                const key = `alternativa_${l}` as keyof QuestaoUpdatePayload;
+                return (
+                  <div key={l} className="flex items-start gap-2">
+                    <span className="mt-2 w-6 h-6 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs font-bold flex items-center justify-center shrink-0">{l.toUpperCase()}</span>
+                    <input className={`${field} flex-1`} placeholder={`Alternativa ${l.toUpperCase()}`}
+                      value={(form[key] as string) ?? ''}
+                      onChange={(e) => setForm(f => ({ ...f, [key]: e.target.value }))} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Gabarito *</label>
+            <input className={field} value={form.gabarito} onChange={(e) => setForm(f => ({ ...f, gabarito: e.target.value }))}
+              placeholder={form.tipo === 'multipla_escolha' ? 'A, B, C, D ou E' : 'Certo ou Errado'} />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide">Comentário / Justificativa</label>
+            <textarea rows={3} className={ta} value={form.comentario ?? ''} onChange={(e) => setForm(f => ({ ...f, comentario: e.target.value }))} />
+            <p className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+              Formatação: <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-[10px]">**negrito**</code>{' '}
+              <code className="bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-[10px]">*itálico*</code>{' '}
+              · Enter = nova linha · Enter×2 = novo parágrafo
+            </p>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-zinc-100 dark:border-zinc-800 shrink-0">
+          <button onClick={onClose} disabled={isSaving}
+            className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
+            Cancelar
+          </button>
+          <button onClick={() => onSave(form)} disabled={isSaving || !form.enunciado || !form.gabarito}
+            className="flex items-center gap-2 px-5 py-2 text-sm font-semibold text-white bg-violet-600 hover:bg-violet-700 rounded-lg transition-colors disabled:opacity-50 shadow-sm">
+            {isSaving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+            Salvar Alterações
+          </button>
+        </div>
       </div>
     </div>
   );
