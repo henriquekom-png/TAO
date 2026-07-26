@@ -153,4 +153,15 @@
   color: #f5f5f5 !important;
 }
 
+/* Cor de texto explícita para células de tabela no modo noturno */
+.dark .ProseMirror td,
+.dark .ProseMirror td p,
+.dark .ProseMirror td li,
+.dark .ProseMirror td span {
+  color: hsl(var(--foreground));
+}
 
+.dark .ProseMirror th,
+.dark .ProseMirror th p {
+  color: hsl(var(--foreground));
+}
