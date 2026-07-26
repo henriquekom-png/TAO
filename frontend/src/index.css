@@ -154,14 +154,15 @@
 }
 
 /* Cor de texto explícita para células de tabela no modo noturno */
+/* !important necessário para vencer inline style="color:..." injetado pelo TipTap/markdownToHtml */
 .dark .ProseMirror td,
 .dark .ProseMirror td p,
 .dark .ProseMirror td li,
 .dark .ProseMirror td span {
-  color: hsl(var(--foreground));
+  color: hsl(var(--foreground)) !important;
 }
 
 .dark .ProseMirror th,
 .dark .ProseMirror th p {
-  color: hsl(var(--foreground));
+  color: hsl(var(--foreground)) !important;
 }
